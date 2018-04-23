@@ -4,30 +4,12 @@
 library(bPeaks)
 data(dataPDR1)
 
-meanIPcov = baseLineCalc(dataPDR1$IPdata[,3])
-print(meanIPcov)
-
-bPeaksAnalysis(IPdata = dataPDR1$IPdata[40000:50000,],
-               controlData = dataPDR1$controlData[40000:50000,],
-               windowSize = 150, windowOverlap = 50,
-               IPcoeff = 6, controlCoeff = 2, log2FC = 3,
-               averageQuantiles = 0.9,
-               resultName = "bPeaks_example",
-               peakDrawing = TRUE, promSize = 800)
-
-load("peakStats.Robject")
-
-data(yeastCDS)
-
-pdr1Data = dataReading(IPdata, controlData, yeastSpecies = yeastCDS$Saccharomyces.
-                       cerevisiae)
-
-PBC= function(chrmx){
-  print(length(chrmx))
-  for(i in dataPDR1[["IPdata"]][["V3"]])
-    if (i ==1){
-      n1= n1+1
-    }else if ( i>=1){
-      nd=nd+1
-    }print("le PBC du chromosome" ,chrmx, "est de :" ,n1/nd,)
+PBC=function(chrx,fichier){
+  subtab=subset(fichier,V1 == chrx)
+n1= length(which(subtab[,3]==1))
+nd= length(which(subtab[,3]>=1))
+print(paste("le PBC de",chrx,"vaut",n1/nd))
+return(n1/nd)
 }
+
+PBC(chrx = "chrIV", fichier = dataPDR1[["IPdata"]])
