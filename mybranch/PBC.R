@@ -17,7 +17,7 @@ PBC(chrx = "chrIV", fichier = dataPDR1[["IPdata"]])
 
 # PBC deuxiemes essai
 
-rePBC=function(chrx,fichier){
+PBC=function(chrx,fichier){
   ni=0
   np=0
   Fi=0
