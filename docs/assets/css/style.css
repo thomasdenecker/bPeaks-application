@@ -1,0 +1,182 @@
+/* /////////////////////////////////////////////////////////////////////////////
+Bpeaks-application style
+///////////////////////////////////////////////////////////////////////////// */
+
+
+/*html, body{
+ margin: 0px;
+ padding: 0px;
+ outline: 0px;
+ height: 100%;
+ min-height: 675px;
+}
+*/
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  text-align: justify;
+  margin-bottom: 410px;
+}
+
+
+#map {
+  height: 100%;
+}
+
+.marge{
+  height: 100%
+  margin-bottom: 400px;
+}
+
+/* -----------------------------------------------------------------------------
+General
+----------------------------------------------------------------------------- */
+
+.nav-color{
+  background-color: #F8DEDE;
+}
+
+.space-container{
+  padding: 20px 0px;
+}
+
+.center{
+  text-align: center;
+}
+
+.marginauto{
+  margin: auto;
+}
+
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 400px;
+  background-color: #F8DEDE;
+}
+
+
+
+@media (max-width: 767px) {
+  .footer {
+  height: 1100px;
+  }
+
+  .contain{
+    margin-bottom: 1100px;
+  }
+}
+
+
+/* -----------------------------------------------------------------------------
+Header
+----------------------------------------------------------------------------- */
+
+img.DL{
+  height: 15px;
+}
+
+
+/* -----------------------------------------------------------------------------
+Home logo
+----------------------------------------------------------------------------- */
+
+img.logo_home {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  height: 200px;
+}
+
+img.logo{
+  height: 50px
+}
+
+
+/* -----------------------------------------------------------------------------
+Home button
+----------------------------------------------------------------------------- */
+
+.button {
+  border-radius: 4px;
+  background-color: rgb(204,0,0);
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 24px;
+  padding: 20px;
+  width: 300px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+/* -----------------------------------------------------------------------------
+Team
+----------------------------------------------------------------------------- */
+img.team{
+  height: 200px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border: solid 2px white;
+}
+
+p.name{
+  font-variant: small-caps;
+  font-weight: bold;
+  margin-top: 8px;
+  margin-bottom: 0px;
+}
+
+p.summary{
+  text-align: justify;
+  color : #BDBDBD;
+}
+
+img.socials_team{
+  height: 30px;
+}
+
+img.center{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* -----------------------------------------------------------------------------
+Footer
+----------------------------------------------------------------------------- */
+
+.color_red{
+  color: rgb(204,0,0);
+}

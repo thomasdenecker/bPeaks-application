@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>bPeaks application</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+
+  <link href="./assets/css/style.css" rel="stylesheet">
+  <link href="./assets/img/icon.ico" rel="shortcut icon">
+
+</head>
+
+<body>
+
+  <!-- ========================================================================
+    Navbar
+  ========================================================================= -->
+  <nav class="navbar navbar-expand-lg navbar-light P100px nav-color">
+    <a class="navbar-brand" href="./index.html">
+      <img src="./assets/img/logo/bPeaks_logo_mini.svg" class="d-inline-block align-top logo" alt="">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="./index.html">Home <span class="sr-only">(current)</span></a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="./why.html">Why?</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tools
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="Installation.html">Installation</a>
+            <a class="dropdown-item" href="#">Documentations</a>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="./team.html">Our team</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="./contact.html">Contact</a>
+        </li>
+
+      </ul>
+      <style media="screen">
+        .right_dec {
+          margin-right: 90px
+        }
+      </style>
+
+      <ul class="navbar-nav navbar-right">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <img src="./assets/img/header/Github-color.svg" alt="Github" class="git_head">
+         </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application">Visit us on Github</a>
+            <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application/archive/master.zip">Download zip   <img src="./assets/img/header/download.svg" alt="DL" class="DL"></a>
+            <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application/archive/master.tar.gz">Download tar.gz  <img src="./assets/img/header/download.svg" alt="DL" class="DL"></a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+    CONTAIN
+  ========================================================================= -->
+
+  <section class="content-section">
+    <div class="container space-container">
+
+      <h1>bPeaks application installation </h1>
+      <hr>
+      <h2>Requirements</h2>
+      <p>
+        We use Docker to develop and run START-R and START-R viewer. We invite you to ensure you have installed the following
+        requirements before trying to bootstrap the application: <a href="https://docs.docker.com/install/">Docker 1.12.6+</a><br><br>
+
+        <b>Note 1</b> : We recommend you to follow Docker's official documentations to install required docker tools (see links above). <br>
+
+        <b>Note 2</b> : Docker must be on for the duration of START-R use.
+      </p>
+
+      <h2>Installation</h2>
+      <h3>Step 1 : Download the compressed file </h3>
+      <ul>
+        <li><a href="https://github.com/thomasdenecker/bPeaks-application/archive/master.zip">ZIP file</a></li>
+        <li><a href="https://github.com/thomasdenecker/bPeaks-application/archive/master.zip">tar file</a></li>
+      </ul>
+
+      <h3>Step 2 : Extract this file </h3>
+      <ul>
+        <li>Mac & linux : We advise you to use the default extractor</li>
+        <li>Windows : We advise you to use <a href="https://www.7-zip.org/">7-zip</a></li>
+      </ul>
+
+      <p><b>Importante</b> :  If you move the folder, the installation procedure will have to be redone.</p>
+
+      <h3>Step 3 : Run installation </h3>
+      <p>In this folder, you will find a file called INSTALLATION_MAC_LINUX.sh (for MAC and Linux users) and INSTALLATION_WINDOWS.bat (for Windows users).
+        By double clicking on it, the installation will begin. This may take a little time depending on your internet connection.
+        When the installation was completed, a new file will appear. They allow to launch bPeaks application.
+      </p>
+      <p>
+      <b>NOTE (MAC users)</b><br>
+
+      If you want doucle click in INSTALLATION_MAC_LINUX.sh, you must do a small manipulation (1 time only). In Finder, right-click INSTALLATION_MAC_LINUX.sh and select "Open with" and then "Other...".
+
+      Here you select the application you want the file to execute into, in this case it would be Terminal. To be able to select terminal you need to switch from "Recommended Applications" to "All Applications". (The Terminal.app application can be found in the Utilities folder)
+
+      Check "Always Open With" and after clicking OK you should be able to execute you script by simply double-clicking it.
+    </p>
+    </div>
+  </section>
+
+<!-- ========================================================================
+  Footer
+========================================================================= -->
+
+  <footer class="page-footer font-small pt-4 mt-4 footer">
+
+    <div class="container text-center text-md-left">
+
+      <div class="row text-center text-md-left mt-3 pb-3">
+
+        <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">bPeaks application</h6>
+          <p>An intuitive peak-calling strategy to detect and visualize protein binding sites from ChIP-seq data in small eukaryotic genomes</p>
+        </div>
+
+        <hr class="w-100 clearfix d-md-none">
+
+        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Partenaires</h6>
+          <p><a class="color_red" href="http://www.cnrs.fr/fr/page-daccueil">CNRS</a></p>
+          <p><a class="color_red" href="https://www.i2bc.paris-saclay.fr/?lang=en">I2BC</a></p>
+          <p><a class="color_red" href="http://www.cnrs.fr/index.html">Paris Sud</a></p>
+        </div>
+
+        <hr class="w-100 clearfix d-md-none">
+
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Project</h6>
+          <p><a class="color_red" href="https://github.com/thomasdenecker/bPeaks-application">Github</a></p>
+          <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/index.html">CRAN</a></p>
+          <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/bPeaks.pdf">Package documentation</a></p>
+        </div>
+
+        <hr class="w-100 clearfix d-md-none">
+
+        <div class="mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Contact</h6>
+          <div class="row">
+            <div class="col-lg-2 center">
+              <img src="./assets/img/footer/home.svg" alt="mail" height="20px">
+            </div>
+            <div class="col-md-10">
+              <p>I2BC - CNRS UMR 9198<br> Bâtiment 400 <br> Université Paris-Sud<br> 91405 Orsay cedex - France</p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-2">
+              <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+            </div>
+            <div class="col-sm-10">
+              <p><a class="color_red" href="mailto:gaelle.lelandais@u-psud.fr">gaelle.lelandais@u-psud.fr</a> </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-2">
+              <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+            </div>
+            <div class="col-lg-10">
+              <p><a class="color_red" href="mailto:thomas.denecker@u-psud.fr">thomas.denecker@u-psud.fr</a> </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <hr>
+      <!--/.Copyright-->
+      <p class="center">© 2018 Copyright: <a href="./index.html" class="color_red"><strong>bPeaks application</strong></a></p>
+      <!--/.Copyright-->
+
+    </div>
+  </footer>
+
+
+</body>
+
+</html>
