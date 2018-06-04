@@ -1,8 +1,13 @@
 ################################################################################
-# PBC - Lorenz curve
+# bPeaks application 
 # Eléonore PILLOT-LUCAS & Thomas DENECKER
 # 05/2018
+# 
+# bPeaks Package : 
 # https://cran.r-project.org/web/packages/bPeaks/index.html
+#
+# GitHub : 
+# https://github.com/thomasdenecker/bPeaks-application
 ################################################################################
 
 ################################################################################
@@ -21,33 +26,36 @@ library(ape)
 ################################################################################
 
 ui <- fluidPage(useShinyjs(),
-                ##############################################################################
+                ################################################################
                 # Head
-                ##############################################################################
+                ################################################################
                 
                 # Add a application title
                 tags$head(tags$title("bPeaks application")),
                 
                 # Add nav icon
-                tags$head(tags$link(href = "Images/bPeaks_logo_mini.png", rel ="icon", 
-                                    type="image/png")),
+                tags$head(tags$link(href = "Images/bPeaks_logo_mini.png", 
+                                    rel ="icon", type="image/png")),
                 
                 # Add css style
-                tags$head(HTML('<link rel="stylesheet" type="text/css" href="style.css" />')),
+                tags$head(HTML('<link rel="stylesheet" type="text/css" 
+                               href="style.css" />')),
                 
+                # Add JS script
                 tags$head(tags$script(src="script.js")),
                 
-                ##############################################################################
+                ################################################################
                 # BODY
-                ##############################################################################
+                ################################################################
                 
-                #-----------------------------------------------------------------------------
+                #---------------------------------------------------------------
                 # Home page
-                #-----------------------------------------------------------------------------
+                #---------------------------------------------------------------
                 tabsetPanel(id = "application",
                             
                             tabPanel(title = "Home page", value = "Homepage", 
-                                     img(src = "Images/bPeaks_logo.svg", class= "logo center"),
+                                     img(src = "Images/bPeaks_logo.svg", 
+                                         class= "logo center"),
                                      
                                      HTML("<div class ='container'>"),
                                      
@@ -83,9 +91,10 @@ ui <- fluidPage(useShinyjs(),
                                      HTML("</div>")
                             ),
                             
-                            #-------------------------------------------------------------------------------------------------------------
-                            #Analyzer page
-                            #-------------------------------------------------------------------------------------------------------------
+                            #---------------------------------------------------
+                            # Analyzer page
+                            #---------------------------------------------------
+                            
                             tabPanel(title = "bPeaks analyzer", value = "bPeaks_analyzer", 
                                      img(src = "Images/Analyzer_bPeaks_logo.svg", class= "logo center"),
                                      
@@ -100,7 +109,16 @@ ui <- fluidPage(useShinyjs(),
                                        promoter sequences. These peaks are good candidates as transcription factor 
                                        binding sites.',alin="center"),
                                      
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # FILE SELECTION 
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     
                                      fluidRow(class="div_TITLE", column(12,tags$h3(strong("File selection"),align = "center"))),
+                                     
+                                     #..........................................
+                                     # IP file
+                                     #..........................................
+                                     
                                      fluidRow(column(4,HTML('<h3>IPdata <a href="#" data-toggle="tooltip" 
                                                             data-placement="bottom" title="A dataframe with sequencing results of the IP sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
@@ -134,6 +152,11 @@ ui <- fluidPage(useShinyjs(),
                                                      
                                                      
                                      ),
+                                     
+                                     #..........................................
+                                     # CO file
+                                     #..........................................
+                                     
                                      column(4,HTML('<h3>Control data <a href="#" data-toggle="tooltip" 
                                                    data-placement="bottom" title="A dataframe with sequencing results of the control sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
@@ -166,6 +189,11 @@ ui <- fluidPage(useShinyjs(),
                                             h3("Preview"),
                                             dataTableOutput(outputId = "contents_CO")
                                      ),
+                                     
+                                     #..........................................
+                                     # CDS file
+                                     #..........................................
+                                     
                                      column(4,HTML('<h3>CDS position <a href="#" data-toggle="tooltip" 
                                                    data-placement="bottom" title="Not mandatory. A table (matrix) with positions of CDS (genes). Four columns are required (chromosome, starting position, ending position, strand (W or C), description). CDS positions for several yeast species are stored in bPeaks package (see the dataset yeastCDS and also peakLocation function)">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
@@ -198,6 +226,10 @@ ui <- fluidPage(useShinyjs(),
                                             h3("Preview"),
                                             dataTableOutput(outputId = "contents_CDS")
                                      )),
+                                     
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # BPeaks parameters
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      
                                      fluidRow(class="div_TITLE",column(12,tags$h3(strong("bPeaks parameters"),align = "center"))),
                                      
@@ -250,6 +282,10 @@ ui <- fluidPage(useShinyjs(),
                                                                   value = 0.9,  width = "100%"), 
                                                      class = "center")),
                                      
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # Advanced parameters 
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     
                                      a(id = "toggleAdvanced", "Show/hide advanced info", href = "#"),
                                      shinyjs::hidden(
                                        div(id = "advanced", 
@@ -298,6 +334,11 @@ ui <- fluidPage(useShinyjs(),
                                            )
                                        )
                                      ),
+                                     
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # Outputs parameters
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     
                                      fluidRow(class="div_TITLE",column(12,tags$h3(strong("Output parameters"),align = "center"))),
                                      
                                      fluidRow(
@@ -327,6 +368,9 @@ ui <- fluidPage(useShinyjs(),
                                               class = "center")
                                      ),
                                      
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # RUN 
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      
                                      fluidRow(
                                        HTML("<div id='Hidebox'>"),
@@ -334,12 +378,14 @@ ui <- fluidPage(useShinyjs(),
                                        HTML("</div>")
                                      ),
                                      
-                                     
                                      HTML("</div>")
                             ),
-                            #--------------------------------------------------------------------------------------------------------------------
+                            
+                            
+                            #===================================================
                             # Viewer page
-                            #--------------------------------------------------------------------------------------------------------------------
+                            #===================================================
+                            
                             tabPanel(title = "bPeaks viewer", value = "bPeaks_viewer", 
                                      HTML("<div class='cont'>"),
                                      img(src = "Images/Viewer_bPeaks_logo.svg", class= "logo center"),
@@ -348,8 +394,8 @@ ui <- fluidPage(useShinyjs(),
                                         Lorenz curve and read distribution.", class ="title_principal center"),
                                      br(),
                                      fluidRow(
-                                       
-                                       # Sidebar with a slider input
+
+                                  
                                        column(2, class="SidePanel",
                                               h3("Select folder"),
                                               p("Select an output bPeaks analyzer folder"),
@@ -372,7 +418,7 @@ ui <- fluidPage(useShinyjs(),
                                               plotlyOutput("peaks_barplot", height = "450px")
                                        ),
                                        
-                                       # Show a plot of the generated distribution
+                                       
                                        column(10, class="MainPanel", 
                                               
                                               div(class="StyleChrom", 
@@ -383,17 +429,18 @@ ui <- fluidPage(useShinyjs(),
                                                   downloadButton("DL_DRAW", "Drawing")
                                               ),
                                               
-                                              #/////////////////////////////////////////////////////////////////////////////
+                                              #/////////////////////////////////
                                               # Area with general plot
-                                              #/////////////////////////////////////////////////////////////////////////////
+                                              #/////////////////////////////////
                                               
                                               fluidRow(
-                                                plotlyOutput("GenomeBrowser", height = "528px")
+                                                plotlyOutput("GenomeBrowser", 
+                                                             height = "528px")
                                               ),
                                               
-                                              #/////////////////////////////////////////////////////////////////////////////
+                                              #/////////////////////////////////
                                               # Area to change the view window
-                                              #/////////////////////////////////////////////////////////////////////////////
+                                              #/////////////////////////////////
                                               
                                               fluidRow(
                                                 p("(Peaks are highlighted by gray rectangles)", class= 'center'),
@@ -428,7 +475,6 @@ ui <- fluidPage(useShinyjs(),
                                      ),
                                      HTML("</div>")
                                      
-                                     
                             )
                 )
 )
@@ -439,17 +485,24 @@ ui <- fluidPage(useShinyjs(),
 
 server <- function(input, output, session) {
   
-  #*****************************************************************************
+  #=============================================================================
   # General
-  #*****************************************************************************
+  #=============================================================================
   
+  # Creation reactive values to update plots
   rv <- reactiveValues()
   
   #Increase the size of files allowed by shiny
   options(shiny.maxRequestSize=500*1024^2)
   
+  # Show or hide advanced parameter
   shinyjs::onclick("toggleAdvanced",
                    shinyjs::toggle(id = "advanced", anim = TRUE)) 
+  
+  
+  #=============================================================================
+  # Home page
+  #=============================================================================
   
   #Link action buttons to their respective pages    
   observeEvent(input$goToAnalyzer, {
@@ -460,6 +513,7 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "application",
                       selected = "bPeaks_analyzer")
   })
+  
   observeEvent(input$goToViewer, {
     # Show bPeaks Analy
     showTab(inputId = "application", target = "bPeaks_viewer")
@@ -469,6 +523,11 @@ server <- function(input, output, session) {
                       selected = "bPeaks_viewer")
     library(plotly)
   })
+  
+  
+  #=============================================================================
+  # bPeaks Analyzer 
+  #=============================================================================
   
   #*****************************************************************************
   # GFF
@@ -486,7 +545,7 @@ server <- function(input, output, session) {
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
     }
-
+    
     
   })
   
@@ -605,7 +664,7 @@ server <- function(input, output, session) {
         rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                             & rv$GFF$type == "gene")
         
-  
+        
       }
     }
   })
@@ -670,7 +729,7 @@ server <- function(input, output, session) {
                  x0 = rv$SubTableAll[i,2], x1 = rv$SubTableAll[i,3], xref = "x", name = paste("peak", i),
                  y0 = 0, y1 = (max(c(rv$SIGNAL_IP[,3], rv$SIGNAL_CO[,3])) * 1.1 ), yref = "y")
         }
-
+        
         
         p <- plot_ly(x = rv$SIGNAL_IP[,2]) %>%
           add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'red')) %>%
@@ -732,7 +791,6 @@ server <- function(input, output, session) {
   #*****************************************************************************
   # Plot
   #*****************************************************************************
-  
   
   output$peaks_barplot <- renderPlotly({
     if(!is.null(rv$allGenome)){
@@ -859,10 +917,18 @@ server <- function(input, output, session) {
     }
   })
   
+  #=============================================================================
+  # bPeaks Analyzer 
+  #=============================================================================
   
   #*****************************************************************************
   # Data Preview
   #*****************************************************************************
+  
+  #-----------------------------------------------------------------------------
+  # IP preview
+  #-----------------------------------------------------------------------------
+  
   output$contents_IP <-  renderDataTable({
     
     req(input$fileIP)
@@ -875,6 +941,10 @@ server <- function(input, output, session) {
     )
     
   },  options = list(scrollX = TRUE , dom = 't'))
+  
+  #-----------------------------------------------------------------------------
+  # CO preview
+  #-----------------------------------------------------------------------------
   
   output$contents_CO <-  renderDataTable({
     
@@ -889,6 +959,10 @@ server <- function(input, output, session) {
     )
     
   },  options = list(scrollX = TRUE, dom = 't'))
+  
+  #-----------------------------------------------------------------------------
+  # CDS preview
+  #-----------------------------------------------------------------------------
   
   output$contents_CDS <-  renderDataTable({
     
@@ -929,6 +1003,10 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  #*****************************************************************************
+  # Analyze 
+  #*****************************************************************************
   
   #Create a button that launches the bPeaks analysis taking into account the entered parameters
   observeEvent(input$RUN,{
@@ -1071,7 +1149,7 @@ server <- function(input, output, session) {
       write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
       
       #-------------------------------------------------------------------------
-      # Figure
+      # Figures
       #-------------------------------------------------------------------------
       
       if(as.factor(input$graphicalTF) == TRUE ){
@@ -1270,6 +1348,7 @@ server <- function(input, output, session) {
       setwd("../..")
       
     })
+    
     shinyjs::show(id = "Hidebox")
     
   })
