@@ -38,6 +38,13 @@ Double click on bPeaks-application file and open your favorite browser with the 
 
 **NOTE** (MAC users) : You may need to repeat the same manipulation as for the installation file (only once).
 
+## Citation
+If you use bPeaks application, please cite this tool as:
+
+Merhej J., Frigo A., Le Crom S. Camadro J.‐M. Devaux F. and Lelandais G. (2014),
+bPeaks: a bioinformatics tool to detect transcription factor binding sites from ChIPseq data in yeasts and other organisms with small genomes, 
+Yeast, 31, pages 375–391, doi: 10.1002/yea.3031
+
 ## Contributing
 
 Please, see the [CONTRIBUTING](CONTRIBUTING.md) file.
