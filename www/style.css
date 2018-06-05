@@ -71,6 +71,7 @@ div.textFolder{
   border: 1px solid gray;
   border-radius:10px;
   min-width: 360px;
+  max-width: 360px;
   padding: 10px 10px;
 }
 

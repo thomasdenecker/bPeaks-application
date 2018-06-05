@@ -1,12 +1,12 @@
 ################################################################################
-# bPeaks application 
+# bPeaks application
 # Eléonore PILLOT-LUCAS & Thomas DENECKER
 # 05/2018
-# 
-# bPeaks Package : 
+#
+# bPeaks Package :
 # https://cran.r-project.org/web/packages/bPeaks/index.html
 #
-# GitHub : 
+# GitHub :
 # https://github.com/thomasdenecker/bPeaks-application
 ################################################################################
 
@@ -29,37 +29,37 @@ ui <- fluidPage(useShinyjs(),
                 ################################################################
                 # Head
                 ################################################################
-                
+
                 # Add a application title
                 tags$head(tags$title("bPeaks application")),
-                
+
                 # Add nav icon
-                tags$head(tags$link(href = "Images/bPeaks_logo_mini.png", 
+                tags$head(tags$link(href = "Images/bPeaks_logo_mini.png",
                                     rel ="icon", type="image/png")),
-                
+
                 # Add css style
-                tags$head(HTML('<link rel="stylesheet" type="text/css" 
+                tags$head(HTML('<link rel="stylesheet" type="text/css"
                                href="style.css" />')),
-                
+
                 # Add JS script
                 tags$head(tags$script(src="script.js")),
-                
+
                 ################################################################
                 # BODY
                 ################################################################
-                
+
                 #---------------------------------------------------------------
                 # Home page
                 #---------------------------------------------------------------
                 tabsetPanel(id = "application",
-                            
-                            tabPanel(title = "Home page", value = "Homepage", 
-                                     img(src = "Images/bPeaks_logo.svg", 
+
+                            tabPanel(title = "Home page", value = "Homepage",
+                                     img(src = "Images/bPeaks_logo.svg",
                                          class= "logo center"),
-                                     
+
                                      HTML("<div class ='container'>"),
-                                     
-                                     h1("A bioinformatics tool to detect and visualize transcription factor binding sites from 
+
+                                     h1("A bioinformatics tool to detect and visualize transcription factor binding sites from
                                         ChIPseq data in yeasts and other organisms with small genomes", class ="title_principal center"),
                                      br(),
                                      fluidRow( class="row-flex",
@@ -67,13 +67,13 @@ ui <- fluidPage(useShinyjs(),
                                                       div( class="div_area",
                                                            h1("bPeaks Analyzer", class ="center"),
                                                            div(class="pad",actionButton(inputId = "goToAnalyzer", label = "Let's go!", class ="center", class= "myBtn" )),
-                                                           p('bPeaks analyzer is a simple approach to identify transcription factor binding sites 
-                                                             from ChIP-seq data. Our general philosophy is to provide an easy-to-use tool, 
-                                                             well-adapted for small eukaryotic genomes (< 20 Mb). bPeaks uses a combination 
-                                                             of 4 cutoffs (T1, T2, T3 and T4) to mimic "good peak" properties as described 
-                                                             by biologists who visually inspect the ChIP-seq data on a genome browser. 
-                                                             For yeast genomes, bPeaks calculates the proportion of peaks that fall in 
-                                                             promoter sequences. These peaks are good candidates as transcription factor 
+                                                           p('bPeaks analyzer is a simple approach to identify transcription factor binding sites
+                                                             from ChIP-seq data. Our general philosophy is to provide an easy-to-use tool,
+                                                             well-adapted for small eukaryotic genomes (< 20 Mb). bPeaks uses a combination
+                                                             of 4 cutoffs (T1, T2, T3 and T4) to mimic "good peak" properties as described
+                                                             by biologists who visually inspect the ChIP-seq data on a genome browser.
+                                                             For yeast genomes, bPeaks calculates the proportion of peaks that fall in
+                                                             promoter sequences. These peaks are good candidates as transcription factor
                                                              binding sites.')
                                                       )
                                                ),
@@ -81,321 +81,321 @@ ui <- fluidPage(useShinyjs(),
                                                       div( class="div_area",
                                                            h1("bPeaks Viewer", class= "center"),
                                                            div(class="pad",actionButton(inputId = "goToViewer", class= "myBtn", label = "Let's go!", class ="center")),
-                                                           p("bPeaks viewer is a graphical tool to quickly analyze data generated by bPeaks analyzer. 
+                                                           p("bPeaks viewer is a graphical tool to quickly analyze data generated by bPeaks analyzer.
                                                              The tool provides dynamic plotly visualizations of detected peaks, PBC,
                                                              Lorenz curve and read distribution.")
                                                       )
-                                               ) 
+                                               )
                                      ),
-                                     
+
                                      HTML("</div>")
                             ),
-                            
+
                             #---------------------------------------------------
                             # Analyzer page
                             #---------------------------------------------------
-                            
-                            tabPanel(title = "bPeaks analyzer", value = "bPeaks_analyzer", 
+
+                            tabPanel(title = "bPeaks analyzer", value = "bPeaks_analyzer",
                                      img(src = "Images/Analyzer_bPeaks_logo.svg", class= "logo center"),
-                                     
+
                                      HTML("<div class ='container'>"),
                                      br(),
-                                     p('bPeaks is a simple approach to identify transcription factor binding sites 
-                                       from ChIP-seq data. Our general philosophy is to provide an easy-to-use tool, 
-                                       well-adapted for small eukaryotic genomes (< 20 Mb). bPeaks uses a combination 
-                                       of 4 cutoffs (T1, T2, T3 and T4) to mimic "good peak" properties as described 
-                                       by biologists who visually inspect the ChIP-seq data on a genome browser. 
-                                       For yeast genomes, bPeaks calculates the proportion of peaks that fall in 
-                                       promoter sequences. These peaks are good candidates as transcription factor 
+                                     p('bPeaks is a simple approach to identify transcription factor binding sites
+                                       from ChIP-seq data. Our general philosophy is to provide an easy-to-use tool,
+                                       well-adapted for small eukaryotic genomes (< 20 Mb). bPeaks uses a combination
+                                       of 4 cutoffs (T1, T2, T3 and T4) to mimic "good peak" properties as described
+                                       by biologists who visually inspect the ChIP-seq data on a genome browser.
+                                       For yeast genomes, bPeaks calculates the proportion of peaks that fall in
+                                       promoter sequences. These peaks are good candidates as transcription factor
                                        binding sites.',alin="center"),
-                                     
+
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     # FILE SELECTION 
+                                     # FILE SELECTION
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     
+
                                      fluidRow(class="div_TITLE", column(12,tags$h3(strong("File selection"),align = "center"))),
-                                     
+
                                      #..........................................
                                      # IP file
                                      #..........................................
-                                     
-                                     fluidRow(column(4,HTML('<h3>IPdata <a href="#" data-toggle="tooltip" 
+
+                                     fluidRow(column(4,HTML('<h3>IPdata <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="A dataframe with sequencing results of the IP sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                      fileInput("fileIP",label = NULL,
-                                                               buttonLabel = "Browse...", 
+                                                               buttonLabel = "Browse...",
                                                                placeholder = "No file selected"),align = "center",
                                                      tags$hr(),
-                                                     
+
                                                      # Input: Checkbox if file has header
                                                      radioButtons("header_IP", "Header",
                                                                   choices = c("Yes" = TRUE,
                                                                               "No" = FALSE),
                                                                   selected = TRUE, inline=T),
-                                                     
+
                                                      # Input: Select separator ----
                                                      radioButtons("sep_IP", "Separator",
                                                                   choices = c(Comma = ",",
                                                                               Semicolon = ";",
                                                                               Tab = "\t"),
                                                                   selected = "\t", inline=T),
-                                                     
+
                                                      # Input: Select quotes ----
                                                      radioButtons("quote_IP", "Quote",
                                                                   choices = c(None = "",
                                                                               "Double Quote" = '"',
                                                                               "Single Quote" = "'"),
                                                                   selected = "", inline=T),
-                                                     
+
                                                      h3("Preview"),
                                                      dataTableOutput(outputId = "contents_IP")
-                                                     
-                                                     
+
+
                                      ),
-                                     
+
                                      #..........................................
                                      # CO file
                                      #..........................................
-                                     
-                                     column(4,HTML('<h3>Control data <a href="#" data-toggle="tooltip" 
+
+                                     column(4,HTML('<h3>Control data <a href="#" data-toggle="tooltip"
                                                    data-placement="bottom" title="A dataframe with sequencing results of the control sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                            fileInput("fileCO", 
+                                            fileInput("fileCO",
                                                       NULL,
-                                                      buttonLabel = "Browse...", 
+                                                      buttonLabel = "Browse...",
                                                       placeholder = "No file selected"),align = "center",
                                             tags$hr(),
-                                            
-                                            # Input: Checkbox if file has header 
+
+                                            # Input: Checkbox if file has header
                                             radioButtons("header_CO", "Header",
                                                          choices = c("Yes" = TRUE,
                                                                      "No" = FALSE),
                                                          selected = TRUE, inline=T),
-                                            
+
                                             # Input: Select separator ----
                                             radioButtons("sep_CO", "Separator",
                                                          choices = c(Comma = ",",
                                                                      Semicolon = ";",
                                                                      Tab = "\t"),
                                                          selected = "\t", inline=T),
-                                            
+
                                             # Input: Select quotes ----
                                             radioButtons("quote_CO", "Quote",
                                                          choices = c(None = "",
                                                                      "Double Quote" = '"',
                                                                      "Single Quote" = "'"),
                                                          selected = "", inline=T),
-                                            
+
                                             h3("Preview"),
                                             dataTableOutput(outputId = "contents_CO")
                                      ),
-                                     
+
                                      #..........................................
                                      # CDS file
                                      #..........................................
-                                     
-                                     column(4,HTML('<h3>CDS position <a href="#" data-toggle="tooltip" 
+
+                                     column(4,HTML('<h3>CDS position <a href="#" data-toggle="tooltip"
                                                    data-placement="bottom" title="Not mandatory. A table (matrix) with positions of CDS (genes). Four columns are required (chromosome, starting position, ending position, strand (W or C), description). CDS positions for several yeast species are stored in bPeaks package (see the dataset yeastCDS and also peakLocation function)">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                            fileInput("fileCDS", 
+                                            fileInput("fileCDS",
                                                       NULL,
-                                                      buttonLabel = "Browse...", 
+                                                      buttonLabel = "Browse...",
                                                       placeholder = "No file selected"),align = "center",
                                             tags$hr(),
-                                            
-                                            # Input: Checkbox if file has header 
+
+                                            # Input: Checkbox if file has header
                                             radioButtons("header_CDS", "Header",
                                                          choices = c("Yes" = TRUE,
                                                                      "No" = FALSE),
                                                          selected = TRUE, inline=T),
-                                            
+
                                             # Input: Select separator ----
                                             radioButtons("sep_CDS", "Separator",
                                                          choices = c(Comma = ",",
                                                                      Semicolon = ";",
                                                                      Tab = "\t"),
                                                          selected = "\t", inline=T),
-                                            
+
                                             # Input: Select quotes ----
                                             radioButtons("quote_CDS", "Quote",
                                                          choices = c(None = "",
                                                                      "Double Quote" = '"',
                                                                      "Single Quote" = "'"),
                                                          selected = "", inline=T),
-                                            
+
                                             h3("Preview"),
                                             dataTableOutput(outputId = "contents_CDS")
                                      )),
-                                     
+
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      # BPeaks parameters
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     
+
                                      fluidRow(class="div_TITLE",column(12,tags$h3(strong("bPeaks parameters"),align = "center"))),
-                                     
-                                     fluidRow(column(4,HTML('<h3>Windows size <a href="#" data-toggle="tooltip" 
+
+                                     fluidRow(column(4,HTML('<h3>Windows size <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Size of the sliding windows to scan chromosomes">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numWs", NULL, 
+                                                     numericInput("numWs", NULL,
                                                                   value = 150,  width = "100%"),
                                                      class = "center"),
-                                              
-                                              
-                                              column(4,HTML('<h3>IP coeff <a href="#" data-toggle="tooltip" 
+
+
+                                              column(4,HTML('<h3>IP coeff <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Size of the overlap between two successive windows">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numIPcoeff", 
-                                                                  NULL, 
+                                                     numericInput("numIPcoeff",
+                                                                  NULL,
                                                                   value = 2,  width = "100%"),
                                                      class = "center"),
-                                              
-                                              column(4,HTML('<h3>Log2FC <a href="#" data-toggle="tooltip" 
+
+                                              column(4,HTML('<h3>Log2FC <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Threshold T3. Threshold to consider log2(IP/control) values as sufficiently important to be interesting. Note that a vector with different values can be specified, the bPeaks analysis will be therefore repeated using successively each value for peak detection">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numLog2FC", 
-                                                                  NULL, 
-                                                                  value = 2,width = "100%"), 
+                                                     numericInput("numLog2FC",
+                                                                  NULL,
+                                                                  value = 2,width = "100%"),
                                                      class = "center")
                                      ),
-                                     
-                                     fluidRow(column(4,HTML('<h3>Windows overlap <a href="#" data-toggle="tooltip" 
+
+                                     fluidRow(column(4,HTML('<h3>Windows overlap <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Size of the overlap between two successive windows">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numWo", 
-                                                                  NULL, 
-                                                                  value = 50,  width = "100%"), 
+                                                     numericInput("numWo",
+                                                                  NULL,
+                                                                  value = 50,  width = "100%"),
                                                      class = "center"),
-                                              
-                                              column(4,HTML('<h3>Control coeff <a href="#" data-toggle="tooltip" 
+
+                                              column(4,HTML('<h3>Control coeff <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Threshold T2. Value for the multiplicative parameter that will be combined with the value of the mean genome-wide read depth (see baseLineCalc). As an illustration, if the controlCoeff = 2, it means that to be selected, the control signal should be LOWER than 2 * (the mean genome-wide read depth). Note that a vector with different values can be specified, the bPeaks analysis will be therefore repeated using successively each value for peak detection">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numCOcoeff", 
-                                                                  NULL, 
-                                                                  value = 2,  width = "100%"), 
+                                                     numericInput("numCOcoeff",
+                                                                  NULL,
+                                                                  value = 2,  width = "100%"),
                                                      class = "center"),
-                                              
-                                              column(4,HTML('<h3>Average quantiles <a href="#" data-toggle="tooltip" 
+
+                                              column(4,HTML('<h3>Average quantiles <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="Threshold T4. Threshold to consider (log2(IP) + log2(control)) / 2 as sufficiently important to be interesting. This parameter ensures that the analyzed genomic region has enough sequencing coverage to be reliable. These threshold should be between [0, 1] and refers to the quantile value of the global distribution observed with the analyzed chromosome">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                     numericInput("numAq", 
-                                                                  NULL, 
-                                                                  value = 0.9,  width = "100%"), 
+                                                     numericInput("numAq",
+                                                                  NULL,
+                                                                  value = 0.9,  width = "100%"),
                                                      class = "center")),
-                                     
+
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     # Advanced parameters 
+                                     # Advanced parameters
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     
+
                                      a(id = "toggleAdvanced", "Show/hide advanced info", href = "#"),
                                      shinyjs::hidden(
-                                       div(id = "advanced", 
+                                       div(id = "advanced",
                                            fluidRow(class="div_TITLE",column(12,tags$h3(strong("Advanced parameters"),align = "center"))),
                                            fluidRow(
-                                             column(4,HTML('<h3>Result name <a href="#" data-toggle="tooltip" 
+                                             column(4,HTML('<h3>Result name <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="Name for output files created during bPeaks procedure">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    textInput("resultName", 
-                                                              NULL, 
-                                                              value = "bPeaks",  width = "100%"), 
+                                                    textInput("resultName",
+                                                              NULL,
+                                                              value = "bPeaks",  width = "100%"),
                                                     class = "center"),
-                                             
-                                             column(4,HTML('<h3>Peak drawing <a href="#" data-toggle="tooltip" 
+
+                                             column(4,HTML('<h3>Peak drawing <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="TRUE or FLASE. If TRUE, the function peakDrawing is called and PDF files with graphical representations of detected peaks are created.">
-                                                           <img src="Images/IntP.png" alt="" height="15px"></a></h3>'), 
+                                                           <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                     radioButtons("peakDrawing", NULL,
                                                                  c("TRUE" = "TRUE",
-                                                                   "FALSE" = "FALSE"), width = "100%"), 
+                                                                   "FALSE" = "FALSE"), width = "100%"),
                                                     class = "center"),
-                                             
-                                             column(4,HTML('<h3>Prom Size <a href="#" data-toggle="tooltip" 
+
+                                             column(4,HTML('<h3>Prom Size <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="Size of the genomic regions to be considered as "upstream" to the annotated genomic features (see documentation of the function peakLocation for more information).">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    numericInput("promSize", 
-                                                                 NULL, 
-                                                                 value = 800,  width = "100%"), 
+                                                    numericInput("promSize",
+                                                                 NULL,
+                                                                 value = 800,  width = "100%"),
                                                     class = "center")
                                            ),
                                            fluidRow(
-                                             column(4,HTML('<h3>Without overlap <a href="#" data-toggle="tooltip" 
+                                             column(4,HTML('<h3>Without overlap <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="If TRUE, this option allows to filter peak that are located in a promoter AND a CDS.">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                     radioButtons("withoutOverlap", NULL,
                                                                  c("TRUE" = "TRUE",
-                                                                   "FALSE" = "FALSE"), width = "100%"), 
+                                                                   "FALSE" = "FALSE"), width = "100%"),
                                                     class = "center"),
-                                             
-                                             column(4,HTML('<h3>Smoothing value <a href="#" data-toggle="tooltip" 
+
+                                             column(4,HTML('<h3>Smoothing value <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="The number (n/2) of surrounding positions to use for mean calculation in the dataSmoothing function">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    numericInput("smoothingValue", 
-                                                                 NULL, 
-                                                                 value = 20,  width = "100%"), 
+                                                    numericInput("smoothingValue",
+                                                                 NULL,
+                                                                 value = 20,  width = "100%"),
                                                     class = "center")
                                            )
                                        )
                                      ),
-                                     
+
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      # Outputs parameters
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     
+
                                      fluidRow(class="div_TITLE",column(12,tags$h3(strong("Output parameters"),align = "center"))),
-                                     
+
                                      fluidRow(
-                                       column(4,HTML('<h3>Folder name <a href="#" data-toggle="tooltip" 
+                                       column(4,HTML('<h3>Folder name <a href="#" data-toggle="tooltip"
                                                      data-placement="bottom" title="Folder name where results will be saved">
                                                      <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                              textInput("folderName", 
-                                                        NULL, 
-                                                        value = "bPeaks_Results",  width = "100%"), 
+                                              textInput("folderName",
+                                                        NULL,
+                                                        value = "bPeaks_Results",  width = "100%"),
                                               class = "center"),
-                                       
-                                       column(4,HTML('<h3>Graphical outputs <a href="#" data-toggle="tooltip" 
+
+                                       column(4,HTML('<h3>Graphical outputs <a href="#" data-toggle="tooltip"
                                                      data-placement="bottom" title="TRUE or FLASE. If TRUE, PBC, Lorenz curve and read repartition will be ploted.">
-                                                     <img src="Images/IntP.png" alt="" height="15px"></a></h3>'), 
+                                                     <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                               radioButtons("graphicalTF", NULL,
                                                            c("TRUE" = "TRUE",
-                                                             "FALSE" = "FALSE"), width = "100%", inline=T), 
+                                                             "FALSE" = "FALSE"), width = "100%", inline=T),
                                               class = "center"),
-                                       
-                                       column(4,HTML('<h3>Graphical extention <a href="#" data-toggle="tooltip" 
+
+                                       column(4,HTML('<h3>Graphical extention <a href="#" data-toggle="tooltip"
                                                      data-placement="bottom" title="Graphical extention">
                                                      <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                               radioButtons("graphicalType", NULL,
                                                            c("pdf" = "pdf",
                                                              "png" = "png",
-                                                             "jpg" = "jpg"), width = "100%", inline=T), 
+                                                             "jpg" = "jpg"), width = "100%", inline=T),
                                               class = "center")
                                      ),
-                                     
+
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     # RUN 
+                                     # RUN
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     
+
                                      fluidRow(
                                        HTML("<div id='Hidebox'>"),
                                        actionButton(inputId = "RUN", label = "RUN", class ="center", class= "myBtn" ),
                                        HTML("</div>")
                                      ),
-                                     
+
                                      HTML("</div>")
                             ),
-                            
-                            
+
+
                             #===================================================
                             # Viewer page
                             #===================================================
-                            
-                            tabPanel(title = "bPeaks viewer", value = "bPeaks_viewer", 
+
+                            tabPanel(title = "bPeaks viewer", value = "bPeaks_viewer",
                                      HTML("<div class='cont'>"),
                                      img(src = "Images/Viewer_bPeaks_logo.svg", class= "logo center"),
-                                     h1("bPeaks viewer is a graphical tool to quickly analyze data generated by bPeaks analyzer. 
+                                     h1("bPeaks viewer is a graphical tool to quickly analyze data generated by bPeaks analyzer.
                                        The tool provides dynamic plotly visualizations of detected peaks, PBC,
                                         Lorenz curve and read distribution.", class ="title_principal center"),
                                      br(),
                                      fluidRow(
 
-                                  
+
                                        column(2, class="SidePanel",
                                               h3("Select folder"),
                                               p("Select an output bPeaks analyzer folder"),
@@ -408,7 +408,7 @@ ui <- fluidPage(useShinyjs(),
                                               h3("GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
                                               fileInput("GFF",label = NULL,
-                                                        buttonLabel = "Browse...", 
+                                                        buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
                                               h3("Summary"),
                                               tableOutput("Summary"),
@@ -417,31 +417,31 @@ ui <- fluidPage(useShinyjs(),
                                               h3("Detected peaks"),
                                               plotlyOutput("peaks_barplot", height = "450px")
                                        ),
-                                       
-                                       
-                                       column(10, class="MainPanel", 
-                                              
-                                              div(class="StyleChrom", 
+
+
+                                       column(10, class="MainPanel",
+
+                                              div(class="StyleChrom",
                                                   h5("Chromosome selection"),
                                                   radioButtons("ChromRadio",NULL, c("None"),inline=T),
                                                   h5("Supplementary data (by chromosome)"),
                                                   downloadButton("DL_SUM", "Summary"),
                                                   downloadButton("DL_DRAW", "Drawing")
                                               ),
-                                              
+
                                               #/////////////////////////////////
                                               # Area with general plot
                                               #/////////////////////////////////
-                                              
+
                                               fluidRow(
-                                                plotlyOutput("GenomeBrowser", 
+                                                plotlyOutput("GenomeBrowser",
                                                              height = "528px")
                                               ),
-                                              
+
                                               #/////////////////////////////////
                                               # Area to change the view window
                                               #/////////////////////////////////
-                                              
+
                                               fluidRow(
                                                 p("(Peaks are highlighted by gray rectangles)", class= 'center'),
                                                 column(1),
@@ -452,7 +452,7 @@ ui <- fluidPage(useShinyjs(),
                                                 column(2,actionButton("action2", label = "Change")),
                                                 column(1)
                                               ),
-                                              
+
                                               fluidRow(
                                                 column(4,
                                                        div(class="figure",plotlyOutput("IPCO_boxplot"))),
@@ -460,21 +460,21 @@ ui <- fluidPage(useShinyjs(),
                                                        div(class="figure",plotlyOutput("LOGFC_boxplot"))),
                                                 column(4,
                                                        div(class="figure",plotlyOutput("QUANTILE_boxplot")))
-                                                
+
                                               ),
                                               fluidRow(
                                                 column(6,
                                                        div(class="figure",plotlyOutput("LORENZ_plot"))),
                                                 column(6,
                                                        div(class="figure",plotlyOutput("REPARTITION_barplot")))
-                                                
-                                                
+
+
                                               )
-                                              
+
                                        )
                                      ),
                                      HTML("</div>")
-                                     
+
                             )
                 )
 )
@@ -484,55 +484,55 @@ ui <- fluidPage(useShinyjs(),
 ################################################################################
 
 server <- function(input, output, session) {
-  
+
   #=============================================================================
   # General
   #=============================================================================
-  
+
   # Creation reactive values to update plots
   rv <- reactiveValues()
-  
+
   #Increase the size of files allowed by shiny
   options(shiny.maxRequestSize=500*1024^2)
-  
+
   # Show or hide advanced parameter
   shinyjs::onclick("toggleAdvanced",
-                   shinyjs::toggle(id = "advanced", anim = TRUE)) 
-  
-  
+                   shinyjs::toggle(id = "advanced", anim = TRUE))
+
+
   #=============================================================================
   # Home page
   #=============================================================================
-  
-  #Link action buttons to their respective pages    
+
+  #Link action buttons to their respective pages
   observeEvent(input$goToAnalyzer, {
     # Show bPeaks Analy
     showTab(inputId = "application", target = "bPeaks_analyzer")
-    
+
     # Move in this next page
     updateTabsetPanel(session, "application",
                       selected = "bPeaks_analyzer")
   })
-  
+
   observeEvent(input$goToViewer, {
     # Show bPeaks Analy
     showTab(inputId = "application", target = "bPeaks_viewer")
-    
+
     # Move in this next page
     updateTabsetPanel(session, "application",
                       selected = "bPeaks_viewer")
     library(plotly)
   })
-  
-  
+
+
   #=============================================================================
-  # bPeaks Analyzer 
+  # bPeaks Analyzer
   #=============================================================================
-  
+
   #*****************************************************************************
   # GFF
   #*****************************************************************************
-  
+
   observeEvent(input$GFF,{
     rv$GFF = read.gff(input$GFF$datapath)
     rv$Region = subset(rv$GFF, type == "region", select = c("seqid", "attributes"))
@@ -540,136 +540,136 @@ server <- function(input, output, session) {
       inter = unlist(strsplit(rv$Region[i,2], ";"))
       rv$Region[i,2] = paste0("chr",unlist(strsplit(inter[grep('Name=', inter)], "="))[2])
     }
-    
+
     if(input$ChromRadio != "none"){
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
     }
-    
-    
+
+
   })
-  
+
   #*****************************************************************************
   # Folder choose
   #*****************************************************************************
-  
+
   shinyDirChoose(input, 'folder', roots=c(wd='./Outputs'))
-  
+
   output$pathFolder <- renderText({
     parseDirPath(c(wd='./Outputs'), input$folder)
   })
-  
+
   observeEvent(input$folder,{
-    
+
     # Get complet path to folder
     rv$PATH = parseDirPath(c(wd='./Outputs'), input$folder)
-    
-    # Get output name of bPeaks package 
+
+    # Get output name of bPeaks package
     filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
     rv$FILENAME = unlist(strsplit(filelist[grep(pattern = "*_bPeaks_allGenome.bed",filelist)], "_bPeaks_allGenome.bed"))
-    
-    
+
+
     #...........................................................................
-    # bPeaks package results 
+    # bPeaks package results
     #...........................................................................
-    
+
     # Peak informations
     rv$allGenome = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_allGenome.bed"), sep = "\t", header = F)
-    
+
     # Parameter informations
     interSum = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_parameterSummary.txt"), sep = "\t", header = F)
     interSum = t(interSum)
     colnames(interSum) = c('Parameters', "Values")
     rv$SUMMARY = interSum
-    
+
     # Get chromosome names to generate radio button
     rv$CHROMOSOME = sort(unique(rv$allGenome[,1]))
-    
+
     updateRadioButtons(session, "ChromRadio",
                        choices = rv$CHROMOSOME ,
                        selected = rv$CHROMOSOME[1], inline = T
     )
-    
+
     rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == rv$CHROMOSOME[1] )
-    
-    
+
+
     #...........................................................................
-    # Signal data 
+    # Signal data
     #...........................................................................
-    
+
     rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
-    
+
     rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
-    
+
     # add in reactive variable plot limits
     rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
     rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
-    
+
     # Change plot limits in inputs
     updateNumericInput(session, "min", value = rv$min)
     updateNumericInput(session, "max", value = rv$max)
-    
-    
+
+
     #...........................................................................
-    # Quality results 
+    # Quality results
     #...........................................................................
-    
-    # Repartition 
+
+    # Repartition
     rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
-    
+
     # Lorenz curve
     rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
-    
-    # PBC 
+
+    # PBC
     rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
     rv$PBC_all_IP = subset(rv$PBC, rv$PBC[,3] == "ALL")[1]
     rv$PBC_all_CO = subset(rv$PBC, rv$PBC[,3] == "ALL")[2]
-    
+
     rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[1]
     rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[2]
-    
+
     if(!is.null(rv$Region)){
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
-      
+
     }
-    
+
   })
-  
+
   observeEvent(input$ChromRadio,{
     if(!is.null(rv$REPARTITION)){
-      
+
       rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == input$ChromRadio )
-      
+
       rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",input$ChromRadio,".txt"), sep = "\t", header = T)
       rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",input$ChromRadio,".txt"), sep = "\t", header = T)
-      
+
       rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[1]
       rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[2]
-      
-      
+
+
       rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",input$ChromRadio,".txt"), sep = "\t", header = F)
       rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",input$ChromRadio,".txt"), sep = "\t", header = F)
-      
+
       # add in reactive variable plot limits
       rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
       rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
-      
+
       # Change plot limits in inputs
       updateNumericInput(session, "min", value = rv$min)
       updateNumericInput(session, "max", value = rv$max)
-      
+
       if(!is.null(rv$GFF)){
         SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
         rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                             & rv$GFF$type == "gene")
-        
-        
+
+
       }
     }
   })
-  
-  
+
+
   output$Summary <- renderTable(
     if(!is.null(rv$SUMMARY)){
       rv$SUMMARY
@@ -677,7 +677,7 @@ server <- function(input, output, session) {
       return()
     }
   )
-  
+
   output$PBC <- renderTable(
     if(!is.null(rv$SUMMARY)){
       table_PBC = rbind(c("PBC IP ALL", rv$PBC_all_IP),
@@ -689,61 +689,61 @@ server <- function(input, output, session) {
     }else{
       return()
     }
-  ) 
-  
+  )
+
   #*****************************************************************************
   # Download buttons
   #*****************************************************************************
-  
+
   output$DL_SUM <- downloadHandler(
     filename = function(){paste0(rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf")},
     content = function(file) {
       file.copy(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf"), file)}
   )
-  
+
   output$DL_DRAW <- downloadHandler(
     filename = function(){paste0(rv$FILENAME,"-",input$ChromRadio,"_bPeaksDrawing.pdf")},
     content = function(file) {
       file.copy(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"-",input$ChromRadio,"_bPeaksDrawing.pdf"), file)}
   )
-  
-  
+
+
   #*****************************************************************************
   # General plot
   #*****************************************************************************
-  
+
   output$GenomeBrowser<- renderPlotly({
     if(!is.null(rv$SIGNAL_IP)){
-      
+
       if(length(nrow(rv$SubTableAll)) != 0){
-        
+
         MAX = max(c(rv$SIGNAL_IP[,3], rv$SIGNAL_CO[,3]))
         rect_list <- list()
-        
+
         compt = 0
-        for(i in 1:nrow(rv$SubTableAll)){ 
+        for(i in 1:nrow(rv$SubTableAll)){
           compt = compt + 1
-          rect_list[[i]] <- 
+          rect_list[[i]] <-
             list(type = "rect",layer = "bellow",
                  fillcolor = "gray", line = list(color = "gray"), opacity = 0.3,
                  x0 = rv$SubTableAll[i,2], x1 = rv$SubTableAll[i,3], xref = "x", name = paste("peak", i),
                  y0 = 0, y1 = (max(c(rv$SIGNAL_IP[,3], rv$SIGNAL_CO[,3])) * 1.1 ), yref = "y")
         }
-        
-        
+
+
         p <- plot_ly(x = rv$SIGNAL_IP[,2]) %>%
           add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'red')) %>%
           add_trace(y = rv$SIGNAL_IP[,3], name = 'IP',mode = 'lines', line = list(color = 'royalblue'))%>%
           layout(shapes = rect_list, 
-                 yaxis = list(title = 'Number of reads'),
-                 xaxis = list(title = 'Position' , range = c(rv$min, rv$max)))
-        
+                 yaxis = list(title = 'Number of reads', showgrid = F),
+                 xaxis = list(title = 'Position' , range = c(rv$min, rv$max), showgrid = F))
+
         if(!is.null(rv$GFF_CHR)){
           for(i in 1:nrow(rv$GFF_CHR)){
             position_inter = as.numeric(as.character(rv$GFF_CHR$start[i])):as.numeric(as.character(rv$GFF_CHR$end[i]))
             if(rv$GFF_CHR$strand[i] == "+"){
               p <- add_trace(p,
-                             x = position_inter, 
+                             x = position_inter,
                              y = rep(-100,length(position_inter)) ,mode = 'lines',line = list(color = 'pink'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
@@ -751,20 +751,20 @@ server <- function(input, output, session) {
               )
             } else {
               p <- add_trace(p,
-                             x = position_inter, 
+                             x = position_inter,
                              y = rep(-200,length(position_inter)) ,mode = 'lines',line = list(color = 'purple'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
               )
             }
-            
+
           }
         }
         p
-        
-        
-        
+
+
+
       } else {
         plot_ly(x = rv$SIGNAL_IP[,2]) %>%
           add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'red')) %>%
@@ -772,26 +772,26 @@ server <- function(input, output, session) {
           layout(yaxis = list(title = 'Number of reads'),
                  xaxis = list(title = 'Position' , range = c(rv$min, rv$max)))
       }
-      
+
     } else {
       return()
     }
-    
+
   })
-  
+
   #*****************************************************************************
   # Plot limit
   #*****************************************************************************
-  
+
   observeEvent(input$action2, {
     rv$min <- input$min
     rv$max <- input$max
   })
-  
+
   #*****************************************************************************
   # Plot
   #*****************************************************************************
-  
+
   output$peaks_barplot <- renderPlotly({
     if(!is.null(rv$allGenome)){
       t = table(rv$allGenome[,1])
@@ -799,189 +799,189 @@ server <- function(input, output, session) {
               marker = list(color = 'firebrick'),
               line = list(color = 'firebrick') ) %>%
         layout(paper_bgcolor='rgba(0,0,0,0)',margin = list(b = 50),
-               plot_bgcolor='rgba(0,0,0,0)', yaxis = list(title = 'Number of detected peaks')) 
+               plot_bgcolor='rgba(0,0,0,0)', yaxis = list(title = 'Number of detected peaks'))
     } else {
       return()
     }
-    
+
   })
   # Boxplot
   output$IPCO_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll)){
-      
+
       inter_final = cbind(c(rv$SubTableAll[,5], rv$SubTableAll[,6],rv$allGenome[,5], rv$allGenome[,6]),
-                          
+
                           c(rep(input$ChromRadio, (length(rv$SubTableAll[,5])+ length(rv$SubTableAll[,6]))),
                             rep("Total", (length(rv$allGenome[,5]) + length(rv$allGenome[,6])))),
                           c(rep("IP", length(rv$SubTableAll[,5])),
                             rep("CO", length(rv$SubTableAll[,6])),
                             rep("IP", length(rv$allGenome[,5])),
                             rep("CO", length(rv$allGenome[,6]))))
-      
+
       colnames(inter_final) = c("Value", "Focus", "Signal")
       inter_final = as.data.frame(inter_final)
       inter_final[,1] = as.numeric(as.character(inter_final[,1]))
-      
+
       plot_ly(inter_final, x = ~Signal, y = ~Value, color = ~Focus, type = "box",colors = c('red',"royalblue")) %>%
         layout(boxmode = "group") %>%
         layout(title = "Mean values of peaks")
-      
+
     }else {
       return()
     }
   })
-  
-  
+
+
   output$LOGFC_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &&  !is.null(rv$allGenome)){
-      
+
       plot_ly(type = 'box') %>%
         add_boxplot(y = rv$SubTableAll[,7],
                     marker = list(color = 'red'),
                     line = list(color = 'red'),
                     name = input$ChromRadio) %>%
-        add_boxplot(y = rv$allGenome[,7], name = "All", 
+        add_boxplot(y = rv$allGenome[,7], name = "All",
                     marker = list(color = 'royalblue'),
                     line = list(color = 'royalblue'))%>%
         layout(yaxis = list(title = "Average LogFC"), title = "Mean logFC of peaks")
-      
+
     }else {
       return()
     }
   })
-  
+
   output$QUANTILE_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &&  !is.null(rv$allGenome)){
-      
+
       plot_ly(type = 'box') %>%
         add_boxplot(y = rv$SubTableAll[,8],
                     marker = list(color = 'red'),
                     line = list(color = 'red'),
                     name = input$ChromRadio) %>%
-        add_boxplot(y = rv$allGenome[,8], name = "All", 
+        add_boxplot(y = rv$allGenome[,8], name = "All",
                     marker = list(color = 'royalblue'),
                     line = list(color = 'royalblue'))%>%
         layout(yaxis = list(title = "Average quantile"), title = "Mean quantile of peaks")
-      
+
     }else {
       return()
     }
   })
-  
-  
+
+
   output$REPARTITION_barplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &  !is.null(rv$allGenome)){
-      
-      loessMod <- loess(rv$REPARTITION[,1] ~ rv$REPARTITION[,2], 
+
+      loessMod <- loess(rv$REPARTITION[,1] ~ rv$REPARTITION[,2],
                         data = rv$REPARTITION, span=0.1)
-      smoothed <- predict(loessMod) 
-      
+      smoothed <- predict(loessMod)
+
       plot_ly(
         x = rv$REPARTITION[,2],
         y = smoothed,
         name = "Loess",
         type = 'scatter', mode = 'lines',
         line = list(color = 'red')
-      )%>% 
+      )%>%
         add_bars(x=rv$REPARTITION[,2] , y = rv$REPARTITION[,1], name = 'Loess',
                  marker = list(color = 'royalblue'),
                  line = list(color = 'royalblue')) %>%
-        layout(yaxis = list(title = "log(number of position)"), 
+        layout(yaxis = list(title = "log(number of position)"),
                xaxis = list(title = "Number of reads"),
                title = "Repartition of reads quantity")
-      
+
     }else {
       return()
     }
   })
-  
+
   output$LORENZ_plot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &  !is.null(rv$allGenome)){
-      
-      EM=which.max(abs(rv$LORENZ[,1]-rv$LORENZ[,2])) 
-      
+
+      EM=which.max(abs(rv$LORENZ[,1]-rv$LORENZ[,2]))
+
       plot_ly(x=rv$LORENZ[,3],y=rv$LORENZ[,1], name='IP',type = 'scatter',mode= 'lines') %>%
         add_trace(y= rv$LORENZ[,2],name='Control', mode='lines') %>%
-        add_trace(x=c(0,100),y= c(0,100),name='Equality', 
-                  line = list(color = 'rgb(205, 12, 24)', width = 4, dash = 'dash'))%>% 
-        add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.', 
+        add_trace(x=c(0,100),y= c(0,100),name='Equality',
+                  line = list(color = 'rgb(205, 12, 24)', width = 4, dash = 'dash'))%>%
+        add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.',
                   line = list(color = 'black', width = 4), mode = 'lines')%>%
-        layout(yaxis = list(title = "Sum of window averages in %"), 
+        layout(yaxis = list(title = "Sum of window averages in %"),
                xaxis = list(title = "Average reads per window in %"),
                title = "Lorenz curves")
-      
-      
-      
+
+
+
     }else {
       return()
     }
   })
-  
+
   #=============================================================================
-  # bPeaks Analyzer 
+  # bPeaks Analyzer
   #=============================================================================
-  
+
   #*****************************************************************************
   # Data Preview
   #*****************************************************************************
-  
+
   #-----------------------------------------------------------------------------
   # IP preview
   #-----------------------------------------------------------------------------
-  
+
   output$contents_IP <-  renderDataTable({
-    
+
     req(input$fileIP)
-    
+
     df <- read.csv(input$fileIP$datapath,
                    header = as.logical(input$header_IP),
                    sep = input$sep_IP,
                    quote = input$quote_IP,
                    nrows=10
     )
-    
+
   },  options = list(scrollX = TRUE , dom = 't'))
-  
+
   #-----------------------------------------------------------------------------
   # CO preview
   #-----------------------------------------------------------------------------
-  
+
   output$contents_CO <-  renderDataTable({
-    
+
     req(input$fileCO)
-    
-    
+
+
     df <- read.csv(input$fileCO$datapath,
                    header = as.logical(input$header_CO),
                    sep = input$sep_CO,
                    quote = input$quote_CO,
                    nrows=10
     )
-    
+
   },  options = list(scrollX = TRUE, dom = 't'))
-  
+
   #-----------------------------------------------------------------------------
   # CDS preview
   #-----------------------------------------------------------------------------
-  
+
   output$contents_CDS <-  renderDataTable({
-    
+
     req(input$fileCDS)
-    
-    
+
+
     df <- read.csv(input$fileCDS$datapath,
                    header = as.logical(input$header_CDS),
                    sep = input$sep_CDS,
                    quote = input$quote_CDS,
                    nrows=10
     )
-    
+
   },  options = list(scrollX = TRUE, dom = 't'))
-  
+
   #*****************************************************************************
   # Output
   #*****************************************************************************
-  
+
   observe({
     if(input$graphicalTF == FALSE){
       disable("graphicalType")
@@ -989,12 +989,12 @@ server <- function(input, output, session) {
       enable("graphicalType")
     }
   })
-  
-  
+
+
   #*****************************************************************************
   # RUN
   #*****************************************************************************
-  
+
   observe({
     if(is.null(input$fileIP) || is.null(input$fileCO)){
       disable("RUN")
@@ -1002,19 +1002,19 @@ server <- function(input, output, session) {
       enable("RUN")
     }
   })
-  
-  
+
+
   #*****************************************************************************
-  # Analyze 
+  # Analyze
   #*****************************************************************************
-  
+
   #Create a button that launches the bPeaks analysis taking into account the entered parameters
   observeEvent(input$RUN,{
-    
-    
+
+
     shinyjs::hide(id = "Hidebox")
     withProgress(message = 'bPeaks analysis', value = 0, {
-      
+
       n = 10
       #=========================================================================
       # Folder creation
@@ -1023,8 +1023,8 @@ server <- function(input, output, session) {
       incProgress(1/n, detail = "Create folder")
       CREATED = FALSE
       inc = 1
-      folder_name = gsub(" ","_",input$folderName) 
-      
+      folder_name = gsub(" ","_",input$folderName)
+
       while(CREATED == FALSE){
         if( dir.exists(paste0(folder_name,"_V", inc)) == FALSE ){
           dir.create(paste0(folder_name,"_V", inc))
@@ -1034,22 +1034,22 @@ server <- function(input, output, session) {
           inc = inc +1
         }
       }
-      
+
       setwd(folder_name_final)
       dir.create("bPeaks")
       dir.create("LorenzCurve")
       dir.create("PBC")
       dir.create("Repartition")
-      
+
       #=========================================================================
       # Read data
       #=========================================================================
       incProgress(2/n, detail = "Read data")
-      
+
       inFileIP= input$fileIP
       inFileCO=input$fileCO
       inFileCDS=input$fileCDS
-      
+
       #Condition to run the application without informing the CDSdata
       if (!is.null(input$fileCDS$datapath)){
         CDS=read.csv2(input$fileCDS$datapath,
@@ -1059,99 +1059,99 @@ server <- function(input, output, session) {
       }else {
         CDS=NULL
       }
-      
+
       IP=read.csv2(input$fileIP$datapath,
                    header = as.logical(input$header_IP),
                    sep = input$sep_IP,
                    quote = input$quote_IP)
-      
+
       CO=read.csv2(input$fileCO$datapath,
                    header = as.logical(input$header_CO),
                    sep = input$sep_CO,
                    quote = input$quote_CO)
-      
+
       #=========================================================================
       # Analysis
       #=========================================================================
       setwd("bPeaks")
-      
+
       # Increment the progress bar, and update the detail text.
       incProgress(4/n, detail = "Analysis")
-      
+
       if(length(which(search() == "package:plotly")) != 0){
         detach("package:plotly", unload=TRUE)
       }
-      
+
       bPeaks::bPeaksAnalysis(IPdata = IP,
                              controlData = CO,
                              cdsPositions = CDS,
-                             smoothingValue = input$smoothingValue, 
-                             windowSize = input$numWs, 
-                             windowOverlap = input$numWo, 
-                             IPcoeff = input$numIPcoeff, 
+                             smoothingValue = input$smoothingValue,
+                             windowSize = input$numWs,
+                             windowOverlap = input$numWo,
+                             IPcoeff = input$numIPcoeff,
                              controlCoeff = input$numCOcoeff,
-                             log2FC = input$numLog2FC, 
+                             log2FC = input$numLog2FC,
                              averageQuantiles = input$numAq,
                              resultName = input$resultName,
-                             peakDrawing = as.logical(input$peakDrawing), 
-                             promSize = input$promSize, 
+                             peakDrawing = as.logical(input$peakDrawing),
+                             promSize = input$promSize,
                              withoutOverlap = as.logical(input$withoutOverlap))
-      
+
       dir.create("Subdata")
       for(chromosome in unique(IP[,1])){
         write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
         write.table(subset(CO, CO[,1] == chromosome), paste0("Subdata/SubCO_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
       }
-      
+
       library(plotly)
       setwd("..")
-      
+
       #=========================================================================
       # PBC
       #=========================================================================
-      
-      
+
+
       incProgress(1/n, detail = "PBC")
-      
+
       setwd("PBC")
-      
+
       PBC=function(chr = "ALL", signal_data, c_chr , c_reads ){
-        
+
         # If ALL, complet table are analyzed else a subset are realized with chr
         if(chr != "ALL"){
           signal_data = subset(signal_data,signal_data[,c_chr] == chr)
         }
-        
+
         pbc = length(which(signal_data[,c_reads]==1)) / length(which(signal_data[,c_reads]>=1))
-        
+
         return(pbc)
       }
-      
+
       chr=as.character(unique(IP[,1]))
-      
+
       # Add NA for total table : see function
       chr = c(chr, "ALL")
-      
+
       # Init PBC vector
-      PBC_IP = NULL 
+      PBC_IP = NULL
       PBC_CO = NULL
-      
+
       for (c in chr){
         PBC_IP = c(PBC_IP,PBC(chr = c, signal_data = IP, c_chr = 1, c_reads = 3))
         PBC_CO = c(PBC_CO,PBC(chr = c, signal_data = CO, c_chr = 1, c_reads = 3))
       }
-      
+
       # rename PBC_IP & PBC_CO
       names(PBC_IP) = gsub("chr=chrmt", "chrM", chr)
       names(PBC_CO) = gsub("chr=chrmt", "chrM", chr)
       # sorti txt de nos données
-      
+
       write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
-      
+
       #-------------------------------------------------------------------------
       # Figures
       #-------------------------------------------------------------------------
-      
+
       if(as.factor(input$graphicalTF) == TRUE ){
         if(input$graphicalType == "pdf"){
           pdf("pbc_final.pdf")
@@ -1159,77 +1159,77 @@ server <- function(input, output, session) {
           png("pbc_final.png")
         } else if(input$graphicalType == "jpg"){
           jpeg("pbc_final.jpg")
-        } 
-        
+        }
+
         layout(matrix(c(1,2), 1, 2, byrow = TRUE),
                widths = c(5,1))
-        
+
         par(mar = c(5, 4, 0, 0) + 0.1)
         plot(PBC_IP, pch = 19, col = "forestgreen",
              ylim = c(0,max(PBC_IP)),
              ylab = "PBC", xlab = "Chromosomes",las = 1, axes =FALSE)
         lines(PBC_IP[-length(PBC_IP)], col = "forestgreen" )
-        
+
         points(PBC_CO, col = "cornflowerblue", pch = 19)
         lines(PBC_CO[-length(PBC_CO)], col = "cornflowerblue")
-        
-        
-        text(1:length(chr), -0.014 , 
+
+
+        text(1:length(chr), -0.014 ,
              srt = 45, adj= 1, xpd = TRUE,
              labels = gsub("chr=chrmt", "chrM", chr), cex=1)
-        
+
         axis(1,at = 1:length(chr), labels = rep("", length(chr)) )
         axis(2, at = seq(0, max(PBC_IP), 0.03), labels = seq(0,max(PBC_IP), 0.03), las = 1)
-        
+
         # Legend
         par(mar =  c(5, 0, 0, 0) + 0.1)
         plot(1, type="n", axes = F, xlab ="", ylab = "")
-        legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1, 
+        legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1,
                col = c("forestgreen", "cornflowerblue"))
         dev.off()
       }
-      
-      
+
+
       setwd("..")
-      
+
       #=========================================================================
       # Lorenz curve
       #=========================================================================
-      
+
       incProgress(1/n, detail = "Lorenz curve")
-      
+
       setwd("LorenzCurve")
-      
+
       #fonction lorenz
       Lorenz=function(chr, fileIP, fileC,c_chr, c_reads,
                       window, step){
-        
+
         if(chr != "ALL"){
           fileIP = subset(fileIP,fileIP[,c_chr]== chr)
           fileC = subset(fileC,fileC[,c_chr] == chr)
         }
-        
-        IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads], 
+
+        IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads],
                             window=window, step=step)
         IPLor=sort(IPLor, decreasing = FALSE)
-        
-        ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads], 
+
+        ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads],
                               window=window, step=step)
         ContLor=sort(ContLor, decreasing = FALSE)
-        
+
         # Percent calculs
         perlen=(1:length(IPLor))*100/length(IPLor)
         perIP=cumsum(IPLor)*100/max(cumsum(IPLor))
         perC=cumsum(ContLor)*100/max(cumsum(ContLor))
-        
+
         EM=which.max(abs(perIP-perC))
-        
+
         # sorti txt de nos données
-        
+
         cbind(perIP,perC,perlen)
         write.table(cbind(perIP,perC,perlen),file=paste0("LorenzCurve_data_",chr,".txt"),
                     quote= FALSE,sep="\t",row.names = FALSE)
-        
+
         if(as.factor(input$graphicalTF) == TRUE ){
           if(input$graphicalType == "pdf"){
             pdf(paste0("LorenzCurve_",chr,".pdf"))
@@ -1237,42 +1237,42 @@ server <- function(input, output, session) {
             png(paste0("LorenzCurve_",chr,".png"))
           } else if(input$graphicalType == "jpg"){
             jpeg(paste0("LorenzCurve_",chr,".jpg"))
-          } 
-          
+          }
+
           #curve
           plot(x=perlen,y=perC, type="l", lwd = 2,
-               xlab= "average reads per window in %" ,ylab = "Cumulative 
+               xlab= "average reads per window in %" ,ylab = "Cumulative
              sum of window averages in %",
                main = paste("Lorenz curve obtained for the PDR1 protein on ",chr),
                col="blue")
-          
+
           lines(x=perlen,y=perIP,col="green", lwd = 2)
-          
+
           lines(0:100,0:100,col="black", lwd = 2)
-          arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3, 
+          arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3,
                  length = 0.1, col = "firebrick", lwd = 3)
-          text(perlen[EM], mean(c(perIP[EM],perC[EM])), 
+          text(perlen[EM], mean(c(perIP[EM],perC[EM])),
                labels = paste(floor(abs(perIP[EM] - perC[EM])), "%"), cex = 0.7,
                pos = 4)
-          
+
           legend("topleft", legend=c("line of equality",
-                                     "Control Lorenz curve", 
+                                     "Control Lorenz curve",
                                      "IP Lorenz curve",
                                      "EM=ecart maximal"), inset = 0.01,
-                 col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA), 
+                 col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA),
                  bty="n") #added a legend of different curves
-          
+
           par(font = 5) #change font to get arrows
-          legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01, 
+          legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01,
                  lty = c(rep(1,3),NA),col=c("black","blue", "green", "firebrick"),
-                 bty="n") 
-          
+                 bty="n")
+
           par(font = 1) #back to default
-          
+
           dev.off()
         }
       }
-      
+
       # Loop for all chromosomes
       chr=as.character(unique(IP[,1]))
       chr = c(chr, "ALL")
@@ -1280,33 +1280,33 @@ server <- function(input, output, session) {
         Lorenz(chr = c,fileIP = IP, fileC = CO,c_chr = 1,c_reads = 3,
                window = input$numWs, step = input$numWo)
       }
-      
+
       setwd("..")
-      
+
       #=========================================================================
       # Read repartitions
       #=========================================================================
-      
+
       incProgress(1/n, detail = "Read repartitions")
-      
+
       setwd("Repartition")
-      
+
       Barpo=function(chr,fileIP,fileCO,c_chr,c_read){
-        
+
         if(chr != "ALL"){
-          
-          fileIP= subset(fileIP,fileIP[,c_chr]==chr) 
-        }  
+
+          fileIP= subset(fileIP,fileIP[,c_chr]==chr)
+        }
         testIP=table(fileIP[,c_read])
-        
+
         x=testIP[-1]
-        
+
         tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
         # sorti txt de nos données
         write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
         #
-        
-        
+
+
         if(as.factor(input$graphicalTF) == TRUE ){
           if(input$graphicalType == "pdf"){
             pdf(paste0("ReadRepartition_",chr,".pdf"))
@@ -1314,43 +1314,43 @@ server <- function(input, output, session) {
             png(paste0("ReadRepartition_",chr,".png"))
           } else if(input$graphicalType == "jpg"){
             jpeg(paste0("ReadRepartition_",chr,".jpg"))
-          } 
-          
+          }
+
           plot(tab_inter$POS, tab_inter$LOG,ylim=c(0,12), type = "h",
                xlim = c(1, 16000),
                xlab = "Number of reads",
-               ylab = "log(number of positions)", 
+               ylab = "log(number of positions)",
                main = paste0("Repartition of reads quantity for ",chr))
-          
+
           # Loess curve
-          loessMod <- loess(LOG ~ POS, 
+          loessMod <- loess(LOG ~ POS,
                             data = tab_inter, span=0.1)
-          smoothed <- predict(loessMod) 
+          smoothed <- predict(loessMod)
           lines( tab_inter$POS,smoothed, col= "red", lwd=2)
-          
+
           # Legende
           legend('topright', "Loess curve", lty = 1, col = "red", lwd = 3,
                  inset = 0.01, box.lty = 0)
-          
+
           dev.off()
         }
-        
+
       }
-      
+
       chr=as.character(unique(IP[,1]))
       chr = c(chr, "ALL")
       for (c in chr){
         Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
       }
-      
+
       setwd("..")
-      
+
       setwd("../..")
-      
+
     })
-    
+
     shinyjs::show(id = "Hidebox")
-    
+
   })
 }
 
