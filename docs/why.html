@@ -83,98 +83,173 @@
     CONTAIN
   ========================================================================= -->
 
-      <div class="container contain marge space-container">
-        <h1>Why bPeaks application?</h1>
-        <hr>
-        <h2>bPeaks</h2>
+  <div class="container contain marge space-container center">
+    <h1>Why bPeaks application?</h1>
+    <hr>
+    <h2>Detect protein binding sites from ChIP-seq data in small eukaryotic genomes </h2>
+    <div class="why-div">
+          <img src="./assets/img/Why/why_Header.svg" alt="lorenz" width="80%">
+          <br>
+          <p>Peak calling is a critical step in ChIPseq data analysis. Choosing the correct algorithm as well as optimized parameters for a specific biological system is an essential task.
+             bPeaks (<a href="https://doi.org/10.1002/yea.3031">Merhej J. et al.</a>) uses simple parameters to compare the sequences (reads) obtained
+          from the immunoprecipitation (IP) with those from the control DNA (input). Because yeasts have small genomes ( <50 Mb), our program has the advantage of using ChIPseq information
+          at the single nucleotide level and can explore, in a reasonable computational time, results obtained with different sets of parameter values.</p>
+    </div>
 
-          <p>Peak calling is a critical step in ChIPseq data analysis. Choosing the correct algorithm as well as optimized parameters for a specific biological system is an essential task. In this article, we present an original peak-calling method (bPeaks) specifically designed to detect transcription factor (TF) binding sites in small eukaryotic genomes, such as in yeasts. As TF interactions with DNA are strong and generate high binding signals, bPeaks uses simple parameters to compare the sequences (reads) obtained from the immunoprecipitation (IP) with those from the control DNA (input). Because yeasts have small genomes (<20 Mb), our program has the advantage of using ChIPseq information at the single nucleotide level and can explore, in a reasonable computational time, results obtained with different sets of parameter values. Graphical outputs and text files are provided to rapidly assess the relevance of the detected peaks. Taking advantage of the simple promoter structure in yeasts, additional functions were implemented in bPeaks to automatically assign the peaks to promoter regions and retrieve peak coordinates on the DNA sequence for further predictions of regulatory motifs, enriched in the list of peaks. Applications of the bPeaks program to three different ChIPseq datasets from Saccharomyces cerevisiae, Candida albicans and Candida glabrata are presented. Each time, bPeaks allowed us to correctly predict the DNA binding sequence of the studied TF and provided relevant lists of peaks. The bioinformatics tool bPeaks is freely distributed to academic users. </p>
-          <footer class="blockquote-footer text-right">Merhej J. et al. <cite title="Yeast">Yeast</cite></footer><br>
+        <h2 class="why">Running a peak caller has never been easier</h2>
+        <div class="why-div">
+          <div class="row">
+            <div class="col-md-6">
+              <img src="./assets/img/Why/ImportData.svg" alt="ID" height="150px">
+              <br>
+              <h4>Simplified file import</h4>
+              <p>With a browser to select your files, a parameterization to read files and a pre-visualization of your data, importing data has become child's play. </p>
+            </div>
+            <div class="col-md-6">
+              <img src="./assets/img/Why/help.png" alt="HELP" height="150px">
+              <br>
+              <h4>Assisted parameter setting</h4>
+              <p>Each bPeaks parameter has a helper and a default value. </p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="why">Data quality control</h2>
+
+        <div class="why-div">
+          <div class="row">
+            <div class="col-md-6">
+              <img src="./assets/img/Why/lorenzCurve.png" alt="lorenz" height="150px">
+              <br>
+              <h4>Lorenz curves</h4>
+              <p>Analyze reads among the genome windows by computing cumulative sum. A bad ChIp have a straight line and a good ChIP a lorenz curve </p>
+            </div>
+            <div class="col-md-6">
+              <img src="./assets/img/Why/PBC.svg" alt="PBC" height="150px">
+              <br>
+              <h4>PBC</h4>
+              <p>An approximate measure of library complexity</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="why">Genome browser to explore results</h2>
+        <div class="why-div">
+              <img src="./assets/img/Why/GenomeBrowser.png" alt="lorenz" width="100%">
+              <br>
+              <p>With our genome browser, the exploration of bPeaks results is very fast. It is possible to import a GFF file to obtain the annotations of the species studied.   </p>
+        </div>
 
 
-        <p>Publication : <a href="https://doi.org/10.1002/yea.3031">paper link</a></p>
+        <h2 class="why">Open source project</h2>
+        <div class="why-div">
+          <div class="row">
+            <div class="col-md-6">
+              <img src="./assets/img/Why/github.png" alt="GitHub" height="150px">
+              <br>
+              <h4>GitHub</h4>
+              <p>bPeaks application was created by users for users and hopes to progress with new users.To find us, it is <a href="https://github.com/thomasdenecker/bPeaks-application">here</a></p>
+            </div>
+            <div class="col-md-6">
+              <img src="./assets/img/Why/docker.jpg" alt="Docker" height="150px">
+              <br>
+              <h4>Docker</h4>
+              <p>No time to waste in installation and with compatibility problems between OS? No problem, bPeaks application has its docker! To find us, it is <a href="https://hub.docker.com/r/tdenecker/bpeaks_docker/">here</a></p>
+            </div>
+          </div>
+        </div>
 
-        <h2>bPeaks analyzer</h2>
+        <h2 class="why">So, convinced?</h2>
+        <div class="why-div">
+          <div class="row">
+            <div class="col-md-6">
+              <img src="./assets/img/logo/bPeaks_logo.svg" alt="bPeaks application" width="100%">
+            </div>
+          <div class="col-md-6">
+            <h2>Download it now!</h2>
+            <p>bPeaks application : An intuitive peak-calling strategy to detect and visualize protein binding sites from ChIP-seq data in small eukaryotic genomes.</p>
+            <a class="btn btn-danger" href="https://github.com/thomasdenecker/bPeaks-application/archive/master.zip" role="button">Download</a>
+          </div>
+        </div>
+  </div>
 
-        <h2>bPeaks explorer</h2>
-
-      </div>
+  </div>
 
 
-      <!-- ========================================================================
+  <!-- ========================================================================
         Footer
       ========================================================================= -->
 
-        <footer class="page-footer font-small pt-4 mt-4 footer">
+  <footer class="page-footer font-small pt-4 mt-4 footer">
 
-          <div class="container text-center text-md-left">
+    <div class="container text-center text-md-left">
 
-            <div class="row text-center text-md-left mt-3 pb-3">
+      <div class="row text-center text-md-left mt-3 pb-3">
 
-              <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
-                <h6 class="text-uppercase mb-4 font-weight-bold">bPeaks application</h6>
-                <p>An intuitive peak-calling strategy to detect and visualize protein binding sites from ChIP-seq data in small eukaryotic genomes</p>
-              </div>
+        <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">bPeaks application</h6>
+          <p>An intuitive peak-calling strategy to detect and visualize protein binding sites from ChIP-seq data in small eukaryotic genomes</p>
+        </div>
 
-              <hr class="w-100 clearfix d-md-none">
+        <hr class="w-100 clearfix d-md-none">
 
-              <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
-                <h6 class="text-uppercase mb-4 font-weight-bold">Partenaires</h6>
-                <p><a class="color_red" href="http://www.cnrs.fr/fr/page-daccueil">CNRS</a></p>
-                <p><a class="color_red" href="https://www.i2bc.paris-saclay.fr/?lang=en">I2BC</a></p>
-                <p><a class="color_red" href="http://www.cnrs.fr/index.html">Paris Sud</a></p>
-              </div>
+        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Partenaires</h6>
+          <p><a class="color_red" href="http://www.cnrs.fr/fr/page-daccueil">CNRS</a></p>
+          <p><a class="color_red" href="https://www.i2bc.paris-saclay.fr/?lang=en">I2BC</a></p>
+          <p><a class="color_red" href="http://www.cnrs.fr/index.html">Paris Sud</a></p>
+        </div>
 
-              <hr class="w-100 clearfix d-md-none">
+        <hr class="w-100 clearfix d-md-none">
 
-              <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
-                <h6 class="text-uppercase mb-4 font-weight-bold">Project</h6>
-                <p><a class="color_red" href="https://github.com/thomasdenecker/bPeaks-application">Github</a></p>
-                <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/index.html">CRAN</a></p>
-                <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/bPeaks.pdf">Package documentation</a></p>
-              </div>
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Project</h6>
+          <p><a class="color_red" href="https://github.com/thomasdenecker/bPeaks-application">Github</a></p>
+          <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/index.html">CRAN</a></p>
+          <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/bPeaks.pdf">Package documentation</a></p>
+        </div>
 
-              <hr class="w-100 clearfix d-md-none">
+        <hr class="w-100 clearfix d-md-none">
 
-              <div class="mx-auto mt-3">
-                <h6 class="text-uppercase mb-4 font-weight-bold">Contact</h6>
-                <div class="row">
-                  <div class="col-lg-2 center">
-                    <img src="./assets/img/footer/home.svg" alt="mail" height="20px">
-                  </div>
-                  <div class="col-md-10">
-                    <p>I2BC - CNRS UMR 9198<br> Bâtiment 400 <br> Université Paris-Sud<br> 91405 Orsay cedex - France</p>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-sm-2">
-                    <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
-                  </div>
-                  <div class="col-sm-10">
-                    <p><a class="color_red" href="mailto:gaelle.lelandais@u-psud.fr">gaelle.lelandais@u-psud.fr</a> </p>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-2">
-                    <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
-                  </div>
-                  <div class="col-lg-10">
-                    <p><a class="color_red" href="mailto:thomas.denecker@u-psud.fr">thomas.denecker@u-psud.fr</a> </p>
-                  </div>
-                </div>
-
-              </div>
-
+        <div class="mx-auto mt-3">
+          <h6 class="text-uppercase mb-4 font-weight-bold">Contact</h6>
+          <div class="row">
+            <div class="col-lg-2 center">
+              <img src="./assets/img/footer/home.svg" alt="mail" height="20px">
             </div>
-            <hr>
-            <!--/.Copyright-->
-            <p class="center">© 2018 Copyright: <a href="./index.html" class="color_red"><strong>bPeaks application</strong></a></p>
-            <!--/.Copyright-->
-
+            <div class="col-md-10">
+              <p>I2BC - CNRS UMR 9198<br> Bâtiment 400 <br> Université Paris-Sud<br> 91405 Orsay cedex - France</p>
+            </div>
           </div>
-        </footer>
+
+          <div class="row">
+            <div class="col-sm-2">
+              <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+            </div>
+            <div class="col-sm-10">
+              <p><a class="color_red" href="mailto:gaelle.lelandais@u-psud.fr">gaelle.lelandais@u-psud.fr</a> </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-2">
+              <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+            </div>
+            <div class="col-lg-10">
+              <p><a class="color_red" href="mailto:thomas.denecker@u-psud.fr">thomas.denecker@u-psud.fr</a> </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <hr>
+      <!--/.Copyright-->
+      <p class="center">© 2018 Copyright: <a href="./index.html" class="color_red"><strong>bPeaks application</strong></a></p>
+      <!--/.Copyright-->
+
+    </div>
+  </footer>
 
 
 </body>
