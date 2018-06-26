@@ -1,5 +1,5 @@
 # bPeaks-application
-This is a Web Application developed to facilitate the use of the bPeaks R package. It helps 1) tu run a peak calling analysis with bPeaks and 2) to explore the obtained results.
+This is a Web Application developed to facilitate the use of the bPeaks R package. It helps 1) tu run a peak calling analysis with bPeaks and 2) to explore the obtained results. bPeaks application web site is available [here](https://thomasdenecker.github.io/bPeaks-application/)
 
 ## Requirements
 
