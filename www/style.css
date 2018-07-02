@@ -7,7 +7,8 @@ Style css - bPeaks application
 /*******************************************************************************
 General
 *******************************************************************************/
-html{
+
+html {
   padding-top: 10px;
   padding-bottom: 20px;
 }
@@ -28,13 +29,57 @@ h1.title_principal {
 /*******************************************************************************
 Div style
 *******************************************************************************/
+div.template {
+  border: solid 1px gray;
+  padding: 10px;
+  text-align: justify;
+}
+
+div.authen {
+  text-align: center;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  padding: 20px;
+  width: 400px;
+  margin: auto;
+}
+
+.center_input{
+  display: inline-block;
+  margin: 0 auto;
+}
+
+#EMAIL {
+  background: url(Images/user.svg) no-repeat scroll 2px 2px;
+  padding-left: 35px;
+  background-size: 30px 30px;
+}
+
+#PW {
+  background: url(Images/padlock.svg) no-repeat scroll 2px 2px;
+  padding-left: 35px;
+  background-size: 30px 30px;
+}
+
+#login {
+  width: 100px;
+  background-color: #b30000;
+  color: white;
+}
+
+hr.hrStyle {
+  border-top: 1px solid #8c8b8b;
+}
+
+/*******************************************************************************
+Div style
+*******************************************************************************/
 
 .row-flex {
   display: flex;
   flex-wrap: wrap;
 }
 
-.div_area{
+.div_area {
   height: 100%;
   background: #f2f2f2;
   border: 1px solid red;
@@ -42,22 +87,21 @@ Div style
   border-radius: 25px;
 }
 
-
-div.pad{
+div.pad {
   padding: 20px 0;
 }
 
-.div_TITLE{
+.div_TITLE {
   background: #ffebe6;
   border: 1px solid gray;
   border-radius: 10px;
 }
 
-#Hidebox{
+#Hidebox {
   margin-top: 20px;
 }
 
-div.textFolder{
+div.textFolder {
   width: 100%;
   height: 25px;
   padding: 3px 5px;
@@ -66,46 +110,46 @@ div.textFolder{
   border-radius: 5px;
 }
 
-.SidePanel{
+.SidePanel {
   background-color: #f2f2f2;
   border: 1px solid gray;
-  border-radius:10px;
+  border-radius: 10px;
   min-width: 360px;
   max-width: 360px;
   padding: 10px 10px;
 }
 
-.MainPanel{
+.MainPanel {
   width: calc(100% - 360px);
 }
 
-.cont{
+.cont {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-
-.figure{
+.figure {
   border: 2px solid #cc0000;
   border-radius: 10px;
   padding: 5px;
   margin-top: 10px;
 }
 
-.StyleChrom{
+.StyleChrom {
   background-color: #f2f2f2;
   border: 1px solid gray;
-  border-radius:10px;
+  border-radius: 10px;
   padding: 10px;
 }
 
-h5{
+h5 {
   font-weight: bold;
 }
 
 /*******************************************************************************
 Image
 *******************************************************************************/
+
 img.logo {
   height: 150px;
 }
@@ -118,6 +162,7 @@ img.center {
 /*******************************************************************************
 Button
 *******************************************************************************/
+
 button.myBtn {
   color: white;
   background: #ff3300;
@@ -136,18 +181,20 @@ button.myBtn:hover {
 }
 
 button:active {
-outline: none;
-border: none;
+  outline: none;
+  border: none;
 }
 
-button:focus { outline:0 !important; }
+button:focus {
+  outline: 0 !important;
+}
 
 button.center {
   margin: auto;
   display: block;
 }
 
-button.loadFolder{
+button.loadFolder {
   color: white;
   background: #ff3300;
   border: 2px solid #cc2900;
@@ -155,7 +202,7 @@ button.loadFolder{
   width: 120px;
   height: 40px;
   font-size: 20px;
-  padding:0px;
+  padding: 0px;
   margin-top: 10px;
   margin-bottom: 20px;
 }
