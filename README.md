@@ -33,7 +33,7 @@ Check "Always Open With" and after clicking OK you should be able to execute you
 
 ### bPeaks application utilisation
 
-Double click on bPeaks-application file and open your internet browser, typing the following url: http://localhost:3838/ and it should work™.
+Double click on bPeaks-application file and open your internet browser, typing the following url: http://localhost:3838/ and it should work™. Default user is admin with password : admin. We recommend you to change this password the first time you use it. 
 
 **NOTE** (MAC users) : You may need to repeat the same manipulation as for the installation file (only once).
 
