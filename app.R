@@ -32,11 +32,11 @@ adminAdress = "thomas.denecker@gmail.com"
 ################################################################################
 # Database connection
 ################################################################################
-
+ 
 ipDB = read.table("Database/ipDB.txt", header = F, stringsAsFactors = F)[1,1]
 pg <- dbDriver("PostgreSQL")
 con <- dbConnect(pg, user="docker", password="docker",
-                 host=ipDB, port=5432)
+                host=ipDB, port=5432)
 
 ################################################################################
 # UI
@@ -87,9 +87,54 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        br(),
                                        actionButton("login", "Login"), 
                                        hr(class="hrStyle"),
-                                       actionButton("ChangePW", "Change your password"),
-                                       actionButton("SignUp", "Sign up")
+                                       actionButton("SignUp", "Sign up"),br(),br(),
+                                       actionButton("ChangePW", "Change your password"), br(),br(),
+                                       actionButton("AddUsers", "Add new user (admin)")
                                        
+                                     ),
+                                     
+                                     HTML("</div>")
+                            ),
+                            
+                            
+                            
+                            
+                            #---------------------------------------------------
+                            # ChangePassWord
+                            #---------------------------------------------------
+                            
+                            tabPanel(title = "AddUsersPage", value = "AddUsersPage",
+                                     
+                                     HTML("<div class ='container'>"),
+                                     
+                                     br(),
+                                     
+                                     div(
+                                       class = "authen",
+                                       h1("Add new user", class ="center"),
+                                       h2("Admin part"),
+                                       h3("Admin Authentification"),
+                                       div(class = "center_input",textInput("EMAIL_ADMIN", NULL, placeholder = "Admin username or email")),
+                                       h3("Admin password"),
+                                       div(class = "center_input", passwordInput("PW_ADMIN", NULL, placeholder = "Admin password")),
+                                       hr(),
+                                       h2("New user part"),
+                                       h3("New user email"),
+                                       div(class = "center_input",textInput("USERNAME_NU", NULL, placeholder = "Username")),
+                                       h3("New user first name"),
+                                       div(class = "center_input",textInput("FN_NU", NULL, placeholder = "First name")),
+                                       h3("New user last name"),
+                                       div(class = "center_input",textInput("LN_NU", NULL, placeholder = "Last name")),
+                                       h3("New user email"),
+                                       div(class = "center_input",textInput("EMAIL_NU", NULL, placeholder = "Email")),
+                                       h3("Temp password"),
+                                       div(class = "center_input",textInput("TEMP_PW", label = NULL)), 
+                                       h3("User type"),
+                                       div(class = "center_input",selectInput("UserType", NULL,
+                                                   c("Admin" = "Admin",
+                                                     "User" = "User"))),
+                                       br(),
+                                       actionButton("AddDB", "Add in database")
                                      ),
                                      
                                      HTML("</div>")
@@ -600,7 +645,6 @@ server <- function(input, output, session) {
   # Authentification
   #=============================================================================
   
-  
   observeEvent(input$ChangePW, {
     # Show bPeaks Analy
     showTab(inputId = "application", target = "ChangePassWord")
@@ -610,6 +654,20 @@ server <- function(input, output, session) {
                       selected = "ChangePassWord")
     
   })
+  
+  observeEvent(input$AddUsers, {
+    # Show bPeaks Analy
+    showTab(inputId = "application", target = "AddUsersPage")
+    
+    # Move in this next page
+    updateTabsetPanel(session, "application",
+                      selected = "AddUsersPage")
+    
+    updateTextInput(session, "TEMP_PW",
+                    value = paste(sample(c(LETTERS, 0:9), 8, replace = T), collapse = ""))
+    
+  })
+  
   
   observeEvent(input$SignUp, {
     # Show bPeaks Analy
@@ -632,7 +690,6 @@ server <- function(input, output, session) {
     
   })
   
-  
   observeEvent(input$Change, {
     REQUEST = paste0("UPDATE users SET password = crypt('",
                      input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
@@ -654,12 +711,64 @@ server <- function(input, output, session) {
       updateTabsetPanel(session, "application",
                         selected = "Authentification")
       
+      shinyalert("Done!","Your password are changed!", type = "success")
       
     } else {
       shinyalert("Oops!", "Something went wrong (Username or old password).", type = "error")
     }
     
   })
+  
+  
+  
+  observeEvent(input$AddDB, {
+
+    REQUEST_ADMIN = paste0("SELECT * 
+                           FROM users
+                           WHERE ( email = '",input$EMAIL_ADMIN,"' or user_name = '",input$EMAIL_ADMIN,"') 
+                           AND password = crypt('",input$PW_ADMIN,"', password) 
+                           AND usertype = 'Admin';")
+    
+
+    if(nrow(dbGetQuery(con, REQUEST_ADMIN)) == 0 ){
+      shinyalert("Oops!", "Something went wrong (Are you admin?).", type = "error")
+    } else {
+      REQUEST_EXISTING = paste0("SELECT *
+                           FROM users
+                             WHERE email = '",input$EMAIL_NU,"' or user_name = '",input$USERNAME_NU,"';")
+      if(nrow(dbGetQuery(con, REQUEST_EXISTING)) != 0 ){
+        shinyalert("Oops!", "This user is already in the database", type = "error")
+      } else {
+
+        REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, password) VALUES (
+                          '",input$FN_NU, "',
+                          '",input$LN_NU, "',
+                          '",input$USERNAME_NU,"',
+                          '",input$EMAIL_NU, "',
+                          '",input$UserType, "',
+                          crypt('",input$TEMP_PW,"', gen_salt('bf'))
+                        );
+                        ")
+        dbGetQuery(con, REQUESTE_ADD)
+
+        shinyalert("Nice!", paste0("Communicate these informations to the new user: To use bPeaks application
+                                   your mail is : ", input$EMAIL_NU,
+                                   ", your username is ", input$USERNAME_NU,
+                                   "and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
+                                   , type = "success")
+        # Show bPeaks Analy
+        showTab(inputId = "application", target = "Authentification")
+
+        # Move in this next page
+        updateTabsetPanel(session, "application",
+                          selected = "Authentification")
+
+
+      }
+    }
+    
+  })
+  
   
   #Link action buttons to their respective pages
   observeEvent(input$login, {
