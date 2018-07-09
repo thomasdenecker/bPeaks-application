@@ -557,12 +557,11 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        column(2, class="SidePanel",
                                               h3("Select folder"),
                                               p("Select an output bPeaks analyzer folder"),
-                                              shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
+                                              # shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
+                                              fileInput("InputZip",label = NULL,
+                                                        buttonLabel = "Browse...",
+                                                        placeholder = "No file selected"),
                                               br(),
-                                              tags$b(p("Selected folder :")),
-                                              HTML("<div class='textFolder'>"),
-                                              textOutput("pathFolder"),
-                                              HTML("</div>"),
                                               h3("GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
                                               fileInput("GFF",label = NULL,
@@ -860,36 +859,23 @@ server <- function(input, output, session) {
   })
   
   #*****************************************************************************
-  # Folder choose
+  # ZIP result choose
   #*****************************************************************************
   
-  listFiles = list.files(path = "./Outputs")
-  posRestrictions = grep("*(tempFolder)", listFiles)
-  if(length(posRestrictions) > 0){
-    restri = listFiles[posRestrictions]
-  } else {
-    restri = NULL
-  }
-  
-  shinyDirChoose(input, 'folder', roots=c(wd='./Outputs'), restrictions = restri )
-  
-  output$pathFolder <- renderText({
-    parseDirPath(c(wd='./Outputs'), input$folder)
-  })
-  
-  observeEvent(input$folder,{
+  observeEvent(input$InputZip,{
     
     # Get complet path to folder
-    rv$PATH = parseDirPath(c(wd='./Outputs'), input$folder)
+    rv$PATH = paste0("./Outputs/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
+    unzip(input$InputZip$datapath, exdir ="./Outputs/")
     
     # Get output name of bPeaks package
     filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
     rv$FILENAME = unlist(strsplit(filelist[grep(pattern = "*_bPeaks_allGenome.bed",filelist)], "_bPeaks_allGenome.bed"))
     
-    
     #...........................................................................
     # bPeaks package results
     #...........................................................................
+    id <- showNotification("Read summary", duration = NULL)
     
     # Peak informations
     rv$allGenome = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_allGenome.bed"), sep = "\t", header = F)
@@ -910,15 +896,19 @@ server <- function(input, output, session) {
     
     rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == rv$CHROMOSOME[1] )
     
+    removeNotification(id)
     
     #...........................................................................
     # Signal data
     #...........................................................................
     
+    id <- showNotification("Read IP data", duration = NULL)
     rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
+    removeNotification(id)
     
-    
+    id <- showNotification("Read CO data", duration = NULL)
     rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
+    removeNotification(id)
     
     # add in reactive variable plot limits
     rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
@@ -934,18 +924,24 @@ server <- function(input, output, session) {
     #...........................................................................
     
     # Repartition
+    id <- showNotification("Read repartition data", duration = NULL)
     rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
+    removeNotification(id)
     
     # Lorenz curve
+    id <- showNotification("Read Lorenz curve data", duration = NULL)
     rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
+    removeNotification(id)
     
     # PBC
+    id <- showNotification("Read PBC data", duration = NULL)
     rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
     rv$PBC_all_IP = subset(rv$PBC, rv$PBC[,3] == "ALL")[1]
     rv$PBC_all_CO = subset(rv$PBC, rv$PBC[,3] == "ALL")[2]
     
     rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[1]
     rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[2]
+    removeNotification(id)
     
     if(!is.null(rv$Region)){
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
