@@ -527,7 +527,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      fluidRow(
                                        HTML("<div class='DivDownload'>"),
                                        h4("Summary of the last analysis", class="center"),
-                                       HTML("<p class='center warning'> &#9888; Analyses are not stored on the server. Download the results with the button below &#9888;</p>"),
+                                       HTML("<p class='center warning'> &#9888; Analyses are not stored on the server. Download the results with the button above &#9888;</p>"),
                                        textOutput("folderName"),
                                        textOutput("bPeakDetected"),
                                        dataTableOutput("SummaryRun"),
@@ -555,36 +555,41 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        
                                        
                                        column(2, class="SidePanel",
-                                              h3("Select folder"),
+                                              h3("Input file"),
+                                              tags$hr(),
+                                              h4("Select Zip folder"),
                                               p("Select an output bPeaks analyzer folder"),
                                               # shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
                                               fileInput("InputZip",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
-                                              br(),
-                                              h3("GFF file (.gff or gff.gz) "),
+                                              
+                                              h4("GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
                                               fileInput("GFF",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
+                                              
+                                              
+                                              h3("Chromosome selection"),
+                                              tags$hr(),
+                                              radioButtons("ChromRadio",NULL, c("None"),inline=T),
+                                              h5("Supplementary data (by chromosome)"),
+                                              downloadButton("DL_SUM", "Summary"),
+                                              downloadButton("DL_DRAW", "Drawing"),
+                                              h4("Detected peaks"),
+                                              plotlyOutput("peaks_barplot", height = "300px"),
+                                              
                                               h3("Summary"),
-                                              tableOutput("Summary"),
-                                              h3("PBC"),
-                                              tableOutput("PBC"),
-                                              h3("Detected peaks"),
-                                              plotlyOutput("peaks_barplot", height = "450px")
+                                              tags$hr(),
+                                              tableOutput("Summary")
+                                              
+                                              
                                        ),
                                        
                                        
                                        column(10, class="MainPanel",
                                               
-                                              div(class="StyleChrom",
-                                                  h5("Chromosome selection"),
-                                                  radioButtons("ChromRadio",NULL, c("None"),inline=T),
-                                                  h5("Supplementary data (by chromosome)"),
-                                                  downloadButton("DL_SUM", "Summary"),
-                                                  downloadButton("DL_DRAW", "Drawing")
-                                              ),
                                               
                                               #/////////////////////////////////
                                               # Area with general plot
@@ -592,7 +597,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               
                                               fluidRow(
                                                 plotlyOutput("GenomeBrowser",
-                                                             height = "528px")
+                                                             height = "541px")
                                               ),
                                               
                                               #/////////////////////////////////
@@ -620,9 +625,11 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                 
                                               ),
                                               fluidRow(
-                                                column(6,
+                                                column(4,
                                                        div(class="figure",plotlyOutput("LORENZ_plot"))),
-                                                column(6,
+                                                column(4,
+                                                       div(class="figure",plotlyOutput("PBC_plot"))),
+                                                column(4,
                                                        div(class="figure",plotlyOutput("REPARTITION_barplot")))
                                                 
                                                 
@@ -895,7 +902,7 @@ server <- function(input, output, session) {
     )
     
     rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == rv$CHROMOSOME[1] )
-    
+    rv$ChrSelected = rv$CHROMOSOME[1]
     removeNotification(id)
     
     #...........................................................................
@@ -936,11 +943,11 @@ server <- function(input, output, session) {
     # PBC
     id <- showNotification("Read PBC data", duration = NULL)
     rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
-    rv$PBC_all_IP = subset(rv$PBC, rv$PBC[,3] == "ALL")[1]
-    rv$PBC_all_CO = subset(rv$PBC, rv$PBC[,3] == "ALL")[2]
-    
-    rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[1]
-    rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[2]
+    # rv$PBC_all_IP = subset(rv$PBC, rv$PBC[,3] == "ALL")[1]
+    # rv$PBC_all_CO = subset(rv$PBC, rv$PBC[,3] == "ALL")[2]
+    # 
+    # rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[1]
+    # rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[2]
     removeNotification(id)
     
     if(!is.null(rv$Region)){
@@ -953,14 +960,14 @@ server <- function(input, output, session) {
   
   observeEvent(input$ChromRadio,{
     if(!is.null(rv$REPARTITION)){
-      
+      rv$ChrSelected = input$ChromRadio
       rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == input$ChromRadio )
       
       rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",input$ChromRadio,".txt"), sep = "\t", header = T)
       rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",input$ChromRadio,".txt"), sep = "\t", header = T)
       
-      rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[1]
-      rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[2]
+      # rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[1]
+      # rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[2]
       
       
       rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",input$ChromRadio,".txt"), sep = "\t", header = F)
@@ -993,18 +1000,18 @@ server <- function(input, output, session) {
     }
   )
   
-  output$PBC <- renderTable(
-    if(!is.null(rv$SUMMARY)){
-      table_PBC = rbind(c("PBC IP ALL", rv$PBC_all_IP),
-                        c("PBC CO ALL", rv$PBC_all_CO),
-                        c("PBC IP CHR", rv$PBC_chr_IP),
-                        c("PBC CO CHR", rv$PBC_chr_CO))
-      colnames(table_PBC) = c("PBC", "Values")
-      table_PBC
-    }else{
-      return()
-    }
-  )
+  # output$PBC <- renderTable(
+  #   if(!is.null(rv$SUMMARY)){
+  #     table_PBC = rbind(c("PBC IP ALL", rv$PBC_all_IP),
+  #                       c("PBC CO ALL", rv$PBC_all_CO),
+  #                       c("PBC IP CHR", rv$PBC_chr_IP),
+  #                       c("PBC CO CHR", rv$PBC_chr_CO))
+  #     colnames(table_PBC) = c("PBC", "Values")
+  #     table_PBC
+  #   }else{
+  #     return()
+  #   }
+  # )
   
   #*****************************************************************************
   # Download buttons
@@ -1225,9 +1232,32 @@ server <- function(input, output, session) {
         layout(yaxis = list(title = "Sum of window averages in %"),
                xaxis = list(title = "Average reads per window in %"),
                title = "Lorenz curves")
+    }else {
+      return()
+    }
+  })
+  
+  output$PBC_plot <- renderPlotly({
+    if(!is.null(rv$PBC) & !is.null(rv$allGenome) & !is.null(rv$ChrSelected)){
       
-      
-      
+      if(input$ChromRadio != "none")
+      plot_ly(type = 'scatter', mode = 'markers') %>%
+        add_trace(x = as.numeric(rv$PBC[,1]),
+                  y = as.numeric(rv$PBC[,2]),
+                  name = "Others", text = rv$PBC[,3],
+                  marker = list(color = 'blue')) %>%
+        add_trace(x = as.numeric(rv$PBC[which(rv$PBC[,3] == "ALL"),1]),
+                  y = as.numeric(rv$PBC[which(rv$PBC[,3] == "ALL"),2]),
+                  name = 'ALL', text = "ALL",
+                  marker = list( color = 'forestgreen')) %>%
+        add_trace(x = as.numeric(rv$PBC[which(rv$PBC[,3] == rv$ChrSelected),1]),
+                  y = as.numeric(rv$PBC[which(rv$PBC[,3] == rv$ChrSelected),2]),
+                  name = rv$ChrSelected, text = rv$ChrSelected,
+                  marker = list(color = 'chartreuse')) %>%
+        
+        layout(yaxis = list(title = "PBC of CO"),
+               xaxis = list(title = "PBC of IP"),
+               title = "PBC")
     }else {
       return()
     }
@@ -1398,7 +1428,7 @@ server <- function(input, output, session) {
     if(!is.null(paste0("./Outputs/",rv$folder_name_final, ".zip"))){
       unlink(paste0("./Outputs/",rv$folder_name_final, ".zip"), recursive = T)
     }
-
+    
     withProgress(message = 'bPeaks analysis', value = 0, {
       
       n = 12
@@ -1419,7 +1449,7 @@ server <- function(input, output, session) {
       }
       
       dir.create(folder_name_final)
-
+      
       setwd(folder_name_final)
       dir.create("bPeaks")
       dir.create("LorenzCurve")
@@ -1798,7 +1828,7 @@ server <- function(input, output, session) {
     options = list(scrollX = TRUE, dom = 't')
   )
   
-
+  
 }
 
 shinyApp(ui, server)
