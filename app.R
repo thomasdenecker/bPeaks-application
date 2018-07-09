@@ -32,11 +32,11 @@ adminAdress = "thomas.denecker@gmail.com"
 ################################################################################
 # Database connection
 ################################################################################
- 
+
 ipDB = read.table("Database/ipDB.txt", header = F, stringsAsFactors = F)[1,1]
 pg <- dbDriver("PostgreSQL")
 con <- dbConnect(pg, user="docker", password="docker",
-                host=ipDB, port=5432)
+                 host=ipDB, port=5432)
 
 ################################################################################
 # UI
@@ -131,8 +131,8 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        div(class = "center_input",textInput("TEMP_PW", label = NULL)), 
                                        h3("User type"),
                                        div(class = "center_input",selectInput("UserType", NULL,
-                                                   c("Admin" = "Admin",
-                                                     "User" = "User"))),
+                                                                              c("Admin" = "Admin",
+                                                                                "User" = "User"))),
                                        br(),
                                        actionButton("AddDB", "Add in database")
                                      ),
@@ -191,13 +191,13 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                          temporary password. A model email is proposed below:"), br(),
                                        
                                        div(class = "template","Hello admin!", br(), br(),
-                                          "I would like to access your bPeaks application instance.
+                                           "I would like to access your bPeaks application instance.
                                           To register, my identifiers are as follows:", br(),
-                                          tags$ul(
-                                            tags$li("First name :"),
-                                            tags$li("Last name :"),
-                                            tags$li("Email :")
-                                          ),"Thank you very much."),
+                                           tags$ul(
+                                             tags$li("First name :"),
+                                             tags$li("Last name :"),
+                                             tags$li("Email :")
+                                           ),"Thank you very much."),
                                        br(),
                                        actionButton("BackAuthen", "Back")
                                      ),
@@ -515,7 +515,24 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      
                                      fluidRow(
                                        HTML("<div id='Hidebox'>"),
-                                       actionButton(inputId = "RUN", label = "RUN", class ="center", class= "myBtn" ),
+                                       column(6,  actionButton(inputId = "RUN", label = "RUN", class= "myBtn" )),
+                                       column(6, downloadButton("downloadData", label = "Download", class ="downloadData center")),
+                                       HTML("</div>")
+                                     ),
+                                     
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # Download
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     
+                                     fluidRow(
+                                       HTML("<div class='DivDownload'>"),
+                                       h4("Summary of the last analysis", class="center"),
+                                       HTML("<p class='center warning'> &#9888; Analyses are not stored on the server. Download the results with the button below &#9888;</p>"),
+                                       textOutput("folderName"),
+                                       textOutput("bPeakDetected"),
+                                       dataTableOutput("SummaryRun"),
+                                       br(),
+                                       
                                        HTML("</div>")
                                      ),
                                      
@@ -722,14 +739,14 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$AddDB, {
-
+    
     REQUEST_ADMIN = paste0("SELECT * 
                            FROM users
                            WHERE ( email = '",input$EMAIL_ADMIN,"' or user_name = '",input$EMAIL_ADMIN,"') 
                            AND password = crypt('",input$PW_ADMIN,"', password) 
                            AND usertype = 'Admin';")
     
-
+    
     if(nrow(dbGetQuery(con, REQUEST_ADMIN)) == 0 ){
       shinyalert("Oops!", "Something went wrong (Are you admin?).", type = "error")
     } else {
@@ -739,7 +756,7 @@ server <- function(input, output, session) {
       if(nrow(dbGetQuery(con, REQUEST_EXISTING)) != 0 ){
         shinyalert("Oops!", "This user is already in the database", type = "error")
       } else {
-
+        
         REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, password) VALUES (
                           '",input$FN_NU, "',
                           '",input$LN_NU, "',
@@ -750,20 +767,20 @@ server <- function(input, output, session) {
                         );
                         ")
         dbGetQuery(con, REQUESTE_ADD)
-
+        
         shinyalert("Nice!", paste0("Communicate these informations to the new user: To use bPeaks application
                                    your mail is : ", input$EMAIL_NU,
                                    ", your username is ", input$USERNAME_NU,
                                    "and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
-                                   , type = "success")
+                   , type = "success")
         # Show bPeaks Analy
         showTab(inputId = "application", target = "Authentification")
-
+        
         # Move in this next page
         updateTabsetPanel(session, "application",
                           selected = "Authentification")
-
-
+        
+        
       }
     }
     
@@ -779,7 +796,7 @@ server <- function(input, output, session) {
             AND password = crypt('",input$PW,"', password);")
     
     if(nrow(dbGetQuery(con, REQUEST)) != 0 ){
-     # Show bPeaks Analy
+      # Show bPeaks Analy
       showTab(inputId = "application", target = "Homepage")
       
       # Move in this next page
@@ -1382,38 +1399,31 @@ server <- function(input, output, session) {
   observeEvent(input$RUN,{
     
     shinyjs::hide(id = "Hidebox")
+    if(!is.null(paste0("./Outputs/",rv$folder_name_final, ".zip"))){
+      unlink(paste0("./Outputs/",rv$folder_name_final, ".zip"), recursive = T)
+    }
+
     withProgress(message = 'bPeaks analysis', value = 0, {
       
-      n = 11
+      n = 12
       #=========================================================================
       # Folder creation
       #=========================================================================
       setwd("Outputs")
       incProgress(1/n, detail = "Create folder")
-      CREATED = FALSE
-      inc = 1
       folder_name = gsub(" ","_",input$folderName)
       
-      while(CREATED == FALSE){
-        if( dir.exists(paste0(folder_name,"_V", inc)) == FALSE ){
-          
-          folder_name_final = paste0(folder_name,"_V", inc)
-          
-          if(length(as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))) > 1 ||
-             length(as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))) > 1 ||
-             length(as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))) > 1 ||
-             length(as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))) > 1){
-            folder_name_final = paste0(folder_name_final, "_(tempFolder)")
-          }
-          
-          dir.create(folder_name_final)
-          CREATED = TRUE
-          
-        } else {
-          inc = inc +1
-        }
+      folder_name_final = paste0(folder_name,"_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
+      
+      if(length(as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))) > 1){
+        folder_name_final = paste0(folder_name_final, "_(tempFolder)")
       }
       
+      dir.create(folder_name_final)
+
       setwd(folder_name_final)
       dir.create("bPeaks")
       dir.create("LorenzCurve")
@@ -1500,6 +1510,9 @@ server <- function(input, output, session) {
                              promSize = input$promSize,
                              withoutOverlap = as.logical(input$withoutOverlap))
       
+      
+      rv$SummaryRun = read.table(paste0(input$resultName,"_bPeaks_parameterSummary.txt"), 
+                                 sep = "\t", header = T)
       dir.create("Subdata")
       for(chromosome in unique(IP[,1])){
         write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
@@ -1705,9 +1718,9 @@ server <- function(input, output, session) {
         x=testIP[-1]
         
         tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
-        # sorti txt de nos données
+        
         write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
-        #
+        
         
         
         if(as.factor(input$graphicalTF) == TRUE ){
@@ -1746,15 +1759,50 @@ server <- function(input, output, session) {
         Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
       }
       
-      setwd("..")
-      
       setwd("../..")
+      
+      incProgress(1/n, detail = "Zip folder and Download")
+      rv$folder_name_final = folder_name_final
+      zip(folder_name_final, folder_name_final)
+      unlink(folder_name_final, recursive = T)
+      setwd("..")
       
     })
     
     shinyjs::show(id = "Hidebox")
     
   })
+  
+  output$downloadData <- downloadHandler(
+    filename <- function() {
+      paste(rv$folder_name_final, "zip", sep=".")
+    },
+    
+    content <- function(file) {
+      file.copy(paste0("./Outputs/",rv$folder_name_final, ".zip"), file)
+      unlink(paste0("./Outputs/",rv$folder_name_final, ".zip"), recursive = T)
+    },
+    contentType = "application/zip"
+  )
+  
+  output$folderName <- renderText({
+    paste0("Folder name : ", rv$folder_name_final)
+  })
+  
+  output$bPeakDetected <- renderText({
+    paste0("Peaks detected : ", rv$SummaryRun[1,"bPeaksNumber"])
+  })
+  
+  output$SummaryRun <- renderDataTable(
+    {if(!is.null(rv$SummaryRun)){
+      rv$SummaryRun
+    }else{
+      return()
+    }},
+    options = list(scrollX = TRUE, dom = 't')
+  )
+  
+
 }
 
 shinyApp(ui, server)
