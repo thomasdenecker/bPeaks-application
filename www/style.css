@@ -21,6 +21,11 @@ p {
   text-align: justify;
 }
 
+p.warning{
+  color: red;
+  font-weight: bold;
+}
+
 h1.title_principal {
   font-style: italic;
   font-size: 20px;
@@ -46,6 +51,12 @@ div.authen {
 .center_input{
   display: inline-block;
   margin: 0 auto;
+}
+
+.DivDownload{
+  border: black solid 1px;
+  padding: 10px;
+  margin-top: 20px;
 }
 
 #EMAIL {
@@ -163,6 +174,19 @@ img.center {
 Button
 *******************************************************************************/
 
+.downloadData{
+  width: 200px;
+  font-size: 24px;
+  padding: 14px 40px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: 2px solid #cc2900;
+  border-radius: 12px;
+}
+
 button.myBtn {
   color: white;
   background: #ff3300;
@@ -172,6 +196,10 @@ button.myBtn {
   padding: 14px 40px;
   margin-top: 20px;
   margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 200px;
 }
 
 button.myBtn:hover {
