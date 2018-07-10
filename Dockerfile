@@ -14,5 +14,5 @@ RUN apt-get update && apt-get install -y gnupg2 \
 ## install packages from CRAN (and clean up)
 
 RUN Rscript -e "install.packages(installed.packages()[,'Package'])"
-RUN Rscript -e "install.packages(c('shiny','shinyjs','shinyFiles','evobiR','plotly','ape', 'bPeaks', 'RPostgreSQL', 'rJava', 'mailR', 'shinyalert'), repos='https://cran.rstudio.com/', dependencies = TRUE)" \
+RUN Rscript -e "install.packages(c('shiny','shinyjs','shinyFiles','evobiR','plotly','ape', 'bPeaks', 'RPostgreSQL', 'rJava', 'mailR', 'shinyalert', 'googleVis'), repos='https://cran.rstudio.com/', dependencies = TRUE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds

@@ -22,12 +22,20 @@ library(plotly)
 library(ape)
 library('RPostgreSQL')
 library(shinyalert)
+library(googleVis)
 
 ################################################################################
 # Admin adress
 ################################################################################
 
 adminAdress = "thomas.denecker@gmail.com"
+
+################################################################################
+# Country list (from googleVis in population dataframe)
+################################################################################
+
+COUNTRY = as.list(sort(Population$Country))
+names(COUNTRY) = sort(Population$Country)
 
 ################################################################################
 # Database connection
@@ -119,7 +127,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        div(class = "center_input", passwordInput("PW_ADMIN", NULL, placeholder = "Admin password")),
                                        hr(),
                                        h2("New user part"),
-                                       h3("New user email"),
+                                       h3("New user name"),
                                        div(class = "center_input",textInput("USERNAME_NU", NULL, placeholder = "Username")),
                                        h3("New user first name"),
                                        div(class = "center_input",textInput("FN_NU", NULL, placeholder = "First name")),
@@ -127,6 +135,11 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        div(class = "center_input",textInput("LN_NU", NULL, placeholder = "Last name")),
                                        h3("New user email"),
                                        div(class = "center_input",textInput("EMAIL_NU", NULL, placeholder = "Email")),
+                                       h3("Country"),
+                                       div(class = "center_input",selectInput("COUNTRY_NU", NULL, 
+                                                                              choices = COUNTRY, 
+                                                                              selected = "France")),
+                                       
                                        h3("Temp password"),
                                        div(class = "center_input",textInput("TEMP_PW", label = NULL)), 
                                        h3("User type"),
@@ -205,7 +218,9 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      HTML("</div>")
                             ),
                             
-                            
+                            #---------------------------------------------------
+                            # Home page
+                            #---------------------------------------------------
                             
                             tabPanel(title = "Home page", value = "Homepage",
                                      img(src = "Images/bPeaks_logo.svg",
@@ -230,6 +245,58 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                            p("bPeaks explorer is a Web interface to explore and visualize the peak calling results, obtained with the bPeaks R package")
                                                       )
                                                )
+                                     ),
+                                     
+                                     br(),
+                                     
+                                     div( class="div_area", 
+                                          h1('In a few numbers', class = 'center'),
+                                          br(),
+                                          fluidRow( class="row-flex",
+                                                    column(width = 3, 
+                                                           div( class = "peaks_detected boxDashboard",
+                                                                p("Peak detected", class= "center"),
+                                                                div(class='UpPolice', textOutput("peaks_detected")))),
+                                                    
+                                                    column(width = 3, 
+                                                           div( class = "chromosome_studied boxDashboard",
+                                                                p("Chomosome Studied", class= "center"),
+                                                                div(class='UpPolice', textOutput("chromosome_studied")))),
+                                                    
+                                                    column(width = 3, 
+                                                           div( class = "nbr_analysis boxDashboard",
+                                                                p("# of analysis performed", class= "center"),
+                                                                div(class='UpPolice', textOutput("nbr_analysis")))),
+                                                    
+                                                    column(width = 3, 
+                                                           div( class = "nbr_exploration boxDashboard",
+                                                                p("# of exploration performed", class= "center"),
+                                                                div(class='UpPolice', textOutput("nbr_exploration"))))
+                                          ),
+                                          br(),
+                                          h1('Users', class = 'center'),
+                                          
+                                          fluidRow( class="row-flex",
+                                                    column(width = 6, 
+                                                           h3("Contact us"),
+                                                           dataTableOutput(outputId = "UsersTable")),
+                                                    
+                                                    column(width = 6,   
+                                                           h3("Where are we?"),
+                                                           htmlOutput("UsersMap"))
+                                          ),
+                                          
+                                          br(),
+                                          h1('Utilisation', class = 'center'),
+                                          
+                                          fluidRow( class="row-flex",
+                                                    htmlOutput("calendarAnalyzer")
+                                          ),
+                                          
+                                          fluidRow( class="row-flex",      
+                                                    htmlOutput("calendarExplorer")
+                                          )
+                                          
                                      ),
                                      
                                      HTML("</div>")
@@ -763,12 +830,13 @@ server <- function(input, output, session) {
         shinyalert("Oops!", "This user is already in the database", type = "error")
       } else {
         
-        REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, password) VALUES (
+        REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, Country, password) VALUES (
                           '",input$FN_NU, "',
                           '",input$LN_NU, "',
                           '",input$USERNAME_NU,"',
                           '",input$EMAIL_NU, "',
                           '",input$UserType, "',
+                          '",input$COUNTRY_NU, "',
                           crypt('",input$TEMP_PW,"', gen_salt('bf'))
                         );
                         ")
@@ -777,7 +845,7 @@ server <- function(input, output, session) {
         shinyalert("Nice!", paste0("Communicate these informations to the new user: To use bPeaks application
                                    your mail is : ", input$EMAIL_NU,
                                    ", your username is ", input$USERNAME_NU,
-                                   "and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
+                                   " and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
                    , type = "success")
         # Show bPeaks Analy
         showTab(inputId = "application", target = "Authentification")
@@ -840,6 +908,101 @@ server <- function(input, output, session) {
     library(plotly)
   })
   
+  #*****************************************************************************
+  # Google plot
+  #*****************************************************************************
+  
+  output$peaks_detected <- renderText({
+    REQUEST_PD = paste("SELECT sum(peaks_detected) FROM dashboard where type_use = 'analysis';")
+    dbGetQuery(con, REQUEST_PD)[1,1]
+  })
+  
+  output$chromosome_studied <- renderText({
+    REQUEST_CS = paste("SELECT sum(chromosome_studied) FROM dashboard where type_use = 'analysis';")
+    dbGetQuery(con, REQUEST_CS)[1,1]
+  })
+  
+  output$nbr_analysis <- renderText({
+    REQUEST_NA = paste("SELECT count(*) FROM dashboard where type_use = 'analysis';")
+    dbGetQuery(con, REQUEST_NA)[1,1]
+  })
+  
+  output$nbr_exploration <- renderText({
+    REQUEST_NA = paste("SELECT count(*) FROM dashboard where type_use = 'exploration';")
+    dbGetQuery(con, REQUEST_NA)[1,1]
+  })
+  
+  
+  output$UsersMap <- renderGvis({
+    REQUEST_MAP = paste0("SELECT country, count(*) FROM users GROUP BY country ;")
+    MapTable = dbGetQuery(con, REQUEST_MAP)
+    gvisGeoChart(MapTable, locationvar="country", 
+                 colorvar="count",
+                 options=list(projection="kavrayskiy-vii"))
+  })
+  
+  
+  output$UsersTable = renderDataTable({
+    formatDate = "'YYYY-MM-DD'"
+    SEP_SQL = "' '"
+    REQUEST_Table = paste('SELECT concat_ws(',SEP_SQL ,', first_name, last_name)  as "Name",',
+                          'email as "Email",',
+                          'to_char(creation_date,',formatDate,') as "Joined on"',
+                          'FROM users;')
+    dbGetQuery(con, REQUEST_Table)
+  },  options = list(scrollX = TRUE , dom = 't'))
+  
+  output$calendarAnalyzer <- renderGvis({
+
+    REQUEST_CA = "SELECT to_char(utilisation_date,'YYYY-MM-DD') as Date, count(*) 
+    FROM dashboard
+    WHERE type_use = 'analysis' GROUP BY to_char(utilisation_date,'YYYY-MM-DD');"
+    
+    calendarA = dbGetQuery(con, REQUEST_CA)
+    
+    if(nrow(calendarA) != 0){
+    calendarA[,1] = as.Date(calendarA[,1])
+    gvisCalendar(calendarA, 
+                 datevar="date", 
+                 numvar="count",
+                 options=list(
+                   title="bPeaks analysis",
+                   height=200,
+                   width=1000,
+                   colorAxis="{colors:['#ffe6e6','#b30000']}", 
+                   calendar="{focusedCellColor: {stroke:'red'}}")
+    )} else{
+      return()
+    }
+  })
+  
+  output$calendarExplorer <- renderGvis({
+    
+    REQUEST_CE = "SELECT to_char(utilisation_date,'YYYY-MM-DD') as Date, count(*) 
+    FROM dashboard
+    WHERE type_use = 'exploration' GROUP BY to_char(utilisation_date,'YYYY-MM-DD');"
+    
+    calendarE = dbGetQuery(con, REQUEST_CE)
+    
+    if(nrow(calendarE) != 0){
+      calendarE[,1] = as.Date(calendarE[,1])
+      gvisCalendar(calendarE, 
+                   datevar="date", 
+                   numvar="count",
+                   options=list(
+                     title="bPeaks explorer",
+                     height=200,
+                     width=1000,
+                     colorAxis="{colors:['#ffe6e6','#b30000']}", 
+                     calendar="{focusedCellColor: {stroke:'red'}}")
+      )
+    }else {
+      return()
+    }
+
+  })
+  
+  
   
   #=============================================================================
   # bPeaks Analyzer
@@ -886,6 +1049,11 @@ server <- function(input, output, session) {
     
     # Peak informations
     rv$allGenome = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_allGenome.bed"), sep = "\t", header = F)
+    
+    REQUEST_Explo = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
+                          nrow(rv$allGenome), ",", length(unique(rv$allGenome[,1])), ", 'exploration');")
+    
+    dbGetQuery(con, REQUEST_Explo)
     
     # Parameter informations
     interSum = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_parameterSummary.txt"), sep = "\t", header = F)
@@ -1241,7 +1409,7 @@ server <- function(input, output, session) {
     if(!is.null(rv$PBC) & !is.null(rv$allGenome) & !is.null(rv$ChrSelected)){
       
       if(input$ChromRadio != "none")
-      plot_ly(type = 'scatter', mode = 'markers') %>%
+        plot_ly(type = 'scatter', mode = 'markers') %>%
         add_trace(x = as.numeric(rv$PBC[,1]),
                   y = as.numeric(rv$PBC[,2]),
                   name = "Others", text = rv$PBC[,3],
@@ -1350,7 +1518,7 @@ server <- function(input, output, session) {
   })
   
   #*****************************************************************************
-  # chek values
+  # Check values
   #*****************************************************************************
   
   observeEvent(input$numIPcoeff, {
@@ -1539,6 +1707,22 @@ server <- function(input, output, session) {
       
       rv$SummaryRun = read.table(paste0(input$resultName,"_bPeaks_parameterSummary.txt"), 
                                  sep = "\t", header = T)
+      
+      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      # Add informations in database
+      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      
+      TEMP = read.table(paste0(input$resultName,"_bPeaks_allGenome.bed"), 
+                        sep = "\t", header = F)
+      REQUEST_Table = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
+                            nrow(TEMP), ",", length(unique(TEMP[,1])), ", 'analysis');")
+      
+      write.table(REQUEST_Table, "test.txt")
+      rm(TEMP)
+      
+      dbGetQuery(con, REQUEST_Table)
+      
+      
       dir.create("Subdata")
       for(chromosome in unique(IP[,1])){
         write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
@@ -1787,7 +1971,7 @@ server <- function(input, output, session) {
       
       setwd("../..")
       
-      incProgress(1/n, detail = "Zip folder and Download")
+      incProgress(1/n, detail = "Zip folder")
       rv$folder_name_final = folder_name_final
       zip(folder_name_final, folder_name_final)
       unlink(folder_name_final, recursive = T)
