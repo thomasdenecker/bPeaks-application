@@ -32,6 +32,47 @@ h1.title_principal {
 }
 
 /*******************************************************************************
+Dashboard
+*******************************************************************************/
+
+.UpPolice{
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.boxDashboard{
+  text-align: center;
+  background: green;
+  color: white;
+  padding: 10px
+}
+.peaks_detected{
+  background: #c71585;
+}
+
+.chromosome_studied{
+  background: #228b22;
+}
+
+.nbr_analysis{
+  background:#4169e1;
+}
+
+.nbr_exploration{
+  background: #ffa142;
+}
+
+#calendarAnalyzer{
+  display: block;
+  margin: 0 auto;
+}
+
+#calendarExplorer{
+  display: block;
+  margin: 0 auto;
+}
+
+/*******************************************************************************
 Div style
 *******************************************************************************/
 div.template {
