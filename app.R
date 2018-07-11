@@ -678,7 +678,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                 column(2,numericInput("min", label = NA, value = NULL)),
                                                 column(2,h5("End of the viewing window")),
                                                 column(2,numericInput("max", label = NA, value = NULL)),
-                                                column(2,actionButton("action2", label = "Change")),
+                                                column(2,actionButton("limite", label = "Change")),
                                                 column(1)
                                               ),
                                               
@@ -1273,7 +1273,7 @@ server <- function(input, output, session) {
   # Plot limit
   #*****************************************************************************
   
-  observeEvent(input$action2, {
+  observeEvent(input$limite, {
     rv$min <- input$min
     rv$max <- input$max
   })
