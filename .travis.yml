@@ -1,0 +1,18 @@
+language: generic
+sudo: required
+
+services:
+- docker
+
+before_install:
+- docker pull tdenecker/bpeaks_db
+- docker run --name bPeaksDB -d tdenecker/bpeaks_db
+- docker pull tdenecker/bpeaks_docker
+- docker start bPeaksDB
+- docker run -ti --rm -d --name test --link bPeaksDB:postgres -p 3838:3838 -v $TRAVIS_BUILD_DIR:/srv/shiny-server tdenecker/bpeaks_docker
+
+script:
+- docker exec test R -f /srv/shiny-server/run_tests.R
+
+after_success:
+- docker rm -f test

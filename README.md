@@ -1,4 +1,7 @@
 # bPeaks-application
+
+[![Build Status](https://travis-ci.org/thomasdenecker/bPeaks-application.svg?branch=master)](https://travis-ci.org/thomasdenecker/bPeaks-application)
+
 This is a Web Application developed to facilitate the use of the bPeaks R package. It helps 1) tu run a peak calling analysis with bPeaks and 2) to explore the obtained results. bPeaks application web site is available [here](https://thomasdenecker.github.io/bPeaks-application/)
 
 ## Requirements
@@ -33,7 +36,7 @@ Check "Always Open With" and after clicking OK you should be able to execute you
 
 ### bPeaks application utilisation
 
-Double click on bPeaks-application file and open your internet browser, typing the following url: http://localhost:3838/ and it should work™. Default user is admin with password : admin. We recommend you to change this password the first time you use it. 
+Double click on bPeaks-application file and open your internet browser, typing the following url: http://localhost:3838/ and it should work™. Default user is admin with password : admin. We recommend you to change this password the first time you use it.
 
 **NOTE** (MAC users) : You may need to repeat the same manipulation as for the installation file (only once).
 
@@ -41,7 +44,7 @@ Double click on bPeaks-application file and open your internet browser, typing t
 If you use bPeaks application, please cite the bPeaks R package:
 
 Merhej J., Frigo A., Le Crom S. Camadro J.‐M. Devaux F. and Lelandais G. (2014),
-bPeaks: a bioinformatics tool to detect transcription factor binding sites from ChIPseq data in yeasts and other organisms with small genomes, 
+bPeaks: a bioinformatics tool to detect transcription factor binding sites from ChIPseq data in yeasts and other organisms with small genomes,
 Yeast, 31, pages 375–391, doi: 10.1002/yea.3031
 
 ## Contributing
