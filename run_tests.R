@@ -1,0 +1,8 @@
+library(testthat)
+library(shinytest)
+
+test_that("Application works", {
+  expect_pass(testApp("/srv/shiny-server/",
+                      testnames = "mytest",
+                      compareImages = FALSE))
+})

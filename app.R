@@ -1035,8 +1035,8 @@ server <- function(input, output, session) {
   observeEvent(input$InputZip,{
     
     # Get complet path to folder
-    rv$PATH = paste0("./Outputs/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
     unzip(input$InputZip$datapath, exdir ="./Outputs/")
+    rv$PATH = paste0("./Outputs/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
     
     # Get output name of bPeaks package
     filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
