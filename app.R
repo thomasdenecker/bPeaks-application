@@ -37,6 +37,7 @@ adminAdress = "thomas.denecker@gmail.com"
 COUNTRY = as.list(sort(Population$Country))
 names(COUNTRY) = sort(Population$Country)
 
+
 ################################################################################
 # Database connection
 ################################################################################
@@ -73,7 +74,6 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                 # BODY
                 ################################################################
                 
-                
                 tabsetPanel(id = "application",
                             #---------------------------------------------------
                             # Authentification
@@ -104,19 +104,14 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      HTML("</div>")
                             ),
                             
-                            
-                            
-                            
                             #---------------------------------------------------
-                            # ChangePassWord
+                            # Add users
                             #---------------------------------------------------
                             
                             tabPanel(title = "AddUsersPage", value = "AddUsersPage",
                                      
                                      HTML("<div class ='container'>"),
-                                     
                                      br(),
-                                     
                                      div(
                                        class = "authen",
                                        h1("Add new user", class ="center"),
@@ -160,9 +155,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                             tabPanel(title = "ChangePassWord", value = "ChangePassWord",
                                      
                                      HTML("<div class ='container'>"),
-                                     
                                      br(),
-                                     
                                      div(
                                        class = "authen",
                                        h1("Change your passeword", class ="center"),
@@ -175,7 +168,6 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        br(),
                                        actionButton("Change", "Change")
                                      ),
-                                     
                                      HTML("</div>")
                             ),
                             
@@ -447,7 +439,6 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                             data-placement="bottom" title="Size of the sliding windows to scan chromosomes">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                      
-                                                     
                                                      numericInput("numWs", NULL,
                                                                   value = 150,  width = "100%"),
                                                      class = "center"),
@@ -620,7 +611,6 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      br(),
                                      fluidRow(
                                        
-                                       
                                        column(2, class="SidePanel",
                                               h3("Input file"),
                                               tags$hr(),
@@ -650,13 +640,9 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               h3("Summary"),
                                               tags$hr(),
                                               tableOutput("Summary")
-                                              
-                                              
                                        ),
                                        
-                                       
                                        column(10, class="MainPanel",
-                                              
                                               
                                               #/////////////////////////////////
                                               # Area with general plot
@@ -716,6 +702,19 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
 
 server <- function(input, output, session) {
   
+  #=============================================================================
+  # End session
+  #=============================================================================
+  
+  session$onSessionEnded(function() {
+    
+    dbDisconnect(con)
+    dbUnloadDriver(pg)
+    if(length(isolate(rv$userTempFolder)) != 0){
+      unlink(paste0(getwd(),"/Outputs/", isolate(rv$userTempFolder)), recursive = T)
+    }
+    
+  })
   
   #=============================================================================
   # General
@@ -735,6 +734,10 @@ server <- function(input, output, session) {
   # Authentification
   #=============================================================================
   
+  #-----------------------------------------------------------------------------
+  # Change password
+  #-----------------------------------------------------------------------------
+  
   observeEvent(input$ChangePW, {
     # Show bPeaks Analy
     showTab(inputId = "application", target = "ChangePassWord")
@@ -744,6 +747,39 @@ server <- function(input, output, session) {
                       selected = "ChangePassWord")
     
   })
+  
+  observeEvent(input$Change, {
+    REQUEST_CHANGE = paste0("UPDATE users SET password = crypt('",
+                            input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
+                     or user_name = '",input$EMAIL_CPW,"') AND password =crypt('",
+                            input$PW_old,"', password);")
+    
+    dbGetQuery(con, REQUEST_CHANGE)
+    
+    REQUEST_CHECK = paste0("SELECT * 
+                           FROM users
+                           WHERE ( email = '",input$EMAIL_CPW,"' or user_name = '",input$EMAIL_CPW,"') 
+                           AND password = crypt('",input$PW_new,"', password);")
+    
+    if(nrow(dbGetQuery(con, REQUEST_CHECK)) != 0 ){
+      # Show bPeaks home page
+      showTab(inputId = "application", target = "Authentification")
+      
+      # Move in this next page
+      updateTabsetPanel(session, "application",
+                        selected = "Authentification")
+      
+      shinyalert("Done!","Your password are changed!", type = "success")
+      
+    } else {
+      shinyalert("Oops!", "Something went wrong (Username or old password).", type = "error")
+    }
+    
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Add users
+  #-----------------------------------------------------------------------------
   
   observeEvent(input$AddUsers, {
     # Show bPeaks Analy
@@ -758,6 +794,56 @@ server <- function(input, output, session) {
     
   })
   
+  observeEvent(input$AddDB, {
+    
+    REQUEST_ADMIN = paste0("SELECT * 
+                           FROM users
+                           WHERE ( email = '",input$EMAIL_ADMIN,"' or user_name = '",input$EMAIL_ADMIN,"') 
+                           AND password = crypt('",input$PW_ADMIN,"', password) 
+                           AND usertype = 'Admin';")
+    
+    
+    if(nrow(dbGetQuery(con, REQUEST_ADMIN)) == 0 ){
+      shinyalert("Oops!", "Something went wrong (Are you admin?).", type = "error")
+    } else {
+      REQUEST_EXISTING = paste0("SELECT *
+                                FROM users
+                                WHERE email = '",input$EMAIL_NU,"' or user_name = '",input$USERNAME_NU,"';")
+      if(nrow(dbGetQuery(con, REQUEST_EXISTING)) != 0 ){
+        shinyalert("Oops!", "This user is already in the database", type = "error")
+      } else {
+        
+        REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, Country, password) VALUES (
+                              '",input$FN_NU, "',
+                              '",input$LN_NU, "',
+                              '",input$USERNAME_NU,"',
+                              '",input$EMAIL_NU, "',
+                              '",input$UserType, "',
+                              '",input$COUNTRY_NU, "',
+                              crypt('",input$TEMP_PW,"', gen_salt('bf'))
+        );
+                              ")
+        dbGetQuery(con, REQUESTE_ADD)
+        
+        shinyalert("Nice!", paste0("Communicate these informations to the new user: To use bPeaks application
+                                   your mail is : ", input$EMAIL_NU,
+                                   ", your username is ", input$USERNAME_NU,
+                                   " and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
+                   , type = "success")
+        # Show bPeaks Analy
+        showTab(inputId = "application", target = "Authentification")
+        
+        # Move in this next page
+        updateTabsetPanel(session, "application",
+                          selected = "Authentification")
+      }
+    }
+    
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Sign up
+  #-----------------------------------------------------------------------------
   
   observeEvent(input$SignUp, {
     # Show bPeaks Analy
@@ -780,88 +866,11 @@ server <- function(input, output, session) {
     
   })
   
-  observeEvent(input$Change, {
-    REQUEST = paste0("UPDATE users SET password = crypt('",
-                     input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
-                     or user_name = '",input$EMAIL_CPW,"') AND password =crypt('",
-                     input$PW_old,"', password);")
-    
-    dbGetQuery(con, REQUEST)
-    
-    REQUEST_CHECK = paste0("SELECT * 
-            FROM users
-                     WHERE ( email = '",input$EMAIL_CPW,"' or user_name = '",input$EMAIL_CPW,"') 
-                     AND password = crypt('",input$PW_new,"', password);")
-    
-    if(nrow(dbGetQuery(con, REQUEST_CHECK)) != 0 ){
-      # Show bPeaks Analy
-      showTab(inputId = "application", target = "Authentification")
-      
-      # Move in this next page
-      updateTabsetPanel(session, "application",
-                        selected = "Authentification")
-      
-      shinyalert("Done!","Your password are changed!", type = "success")
-      
-    } else {
-      shinyalert("Oops!", "Something went wrong (Username or old password).", type = "error")
-    }
-    
-  })
   
+  #-----------------------------------------------------------------------------
+  # Login
+  #-----------------------------------------------------------------------------
   
-  
-  observeEvent(input$AddDB, {
-    
-    REQUEST_ADMIN = paste0("SELECT * 
-                           FROM users
-                           WHERE ( email = '",input$EMAIL_ADMIN,"' or user_name = '",input$EMAIL_ADMIN,"') 
-                           AND password = crypt('",input$PW_ADMIN,"', password) 
-                           AND usertype = 'Admin';")
-    
-    
-    if(nrow(dbGetQuery(con, REQUEST_ADMIN)) == 0 ){
-      shinyalert("Oops!", "Something went wrong (Are you admin?).", type = "error")
-    } else {
-      REQUEST_EXISTING = paste0("SELECT *
-                           FROM users
-                             WHERE email = '",input$EMAIL_NU,"' or user_name = '",input$USERNAME_NU,"';")
-      if(nrow(dbGetQuery(con, REQUEST_EXISTING)) != 0 ){
-        shinyalert("Oops!", "This user is already in the database", type = "error")
-      } else {
-        
-        REQUESTE_ADD = paste0("INSERT INTO users (first_name, last_name, user_name, email, UserType, Country, password) VALUES (
-                          '",input$FN_NU, "',
-                          '",input$LN_NU, "',
-                          '",input$USERNAME_NU,"',
-                          '",input$EMAIL_NU, "',
-                          '",input$UserType, "',
-                          '",input$COUNTRY_NU, "',
-                          crypt('",input$TEMP_PW,"', gen_salt('bf'))
-                        );
-                        ")
-        dbGetQuery(con, REQUESTE_ADD)
-        
-        shinyalert("Nice!", paste0("Communicate these informations to the new user: To use bPeaks application
-                                   your mail is : ", input$EMAIL_NU,
-                                   ", your username is ", input$USERNAME_NU,
-                                   " and your temp password is ", input$TEMP_PW,". Don't forget to change your password!")
-                   , type = "success")
-        # Show bPeaks Analy
-        showTab(inputId = "application", target = "Authentification")
-        
-        # Move in this next page
-        updateTabsetPanel(session, "application",
-                          selected = "Authentification")
-        
-        
-      }
-    }
-    
-  })
-  
-  
-  #Link action buttons to their respective pages
   observeEvent(input$login, {
     
     REQUEST = paste0("SELECT * 
@@ -869,19 +878,27 @@ server <- function(input, output, session) {
             WHERE ( email = '",input$EMAIL,"' or user_name = '",input$EMAIL,"') 
             AND password = crypt('",input$PW,"', password);")
     
-    if(nrow(dbGetQuery(con, REQUEST)) != 0 ){
-      # Show bPeaks Analy
-      showTab(inputId = "application", target = "Homepage")
+    if(input$EMAIL != "" & input$PW != ""){
+      RESULT_REQUEST = dbGetQuery(con, REQUEST)
       
-      # Move in this next page
-      updateTabsetPanel(session, "application",
-                        selected = "Homepage")
-      
-      
-    } else {
-      shinyalert("Oops!", "Something went wrong (Username or password).", type = "error")
+      if(nrow(RESULT_REQUEST) != 0 ){
+        # Show bPeaks Analy
+        showTab(inputId = "application", target = "Homepage")
+        
+        # Move in this next page
+        updateTabsetPanel(session, "application",
+                          selected = "Homepage")
+        
+        rv$userTempFolder <- paste0(RESULT_REQUEST[1,'user_name'],"_",format(Sys.time(),'%y%m%d_%H%M%S'))
+        
+        dir.create(paste0("./Outputs/", rv$userTempFolder))
+        
+      } else {
+        shinyalert("Oops!", "Something went wrong (Username or password).", type = "error")
+      }
+    }else {
+      shinyalert("Oops!", "Username or password is empty.", type = "error")
     }
-    
   })
   
   #=============================================================================
@@ -908,9 +925,9 @@ server <- function(input, output, session) {
     library(plotly)
   })
   
-  #*****************************************************************************
-  # Google plot
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
+  # Few numbers
+  #-----------------------------------------------------------------------------
   
   output$peaks_detected <- renderText({
     REQUEST_PD = paste("SELECT sum(peaks_detected) FROM dashboard where type_use = 'analysis';")
@@ -932,15 +949,9 @@ server <- function(input, output, session) {
     dbGetQuery(con, REQUEST_NA)[1,1]
   })
   
-  
-  output$UsersMap <- renderGvis({
-    REQUEST_MAP = paste0("SELECT country, count(*) FROM users GROUP BY country ;")
-    MapTable = dbGetQuery(con, REQUEST_MAP)
-    gvisGeoChart(MapTable, locationvar="country", 
-                 colorvar="count",
-                 options=list(projection="kavrayskiy-vii"))
-  })
-  
+  #-----------------------------------------------------------------------------
+  # Contact us
+  #-----------------------------------------------------------------------------
   
   output$UsersTable = renderDataTable({
     formatDate = "'YYYY-MM-DD'"
@@ -952,8 +963,21 @@ server <- function(input, output, session) {
     dbGetQuery(con, REQUEST_Table)
   },  options = list(scrollX = TRUE , dom = 't'))
   
+  
+  #-----------------------------------------------------------------------------
+  # Google plots
+  #-----------------------------------------------------------------------------
+  
+  output$UsersMap <- renderGvis({
+    REQUEST_MAP = paste0("SELECT country, count(*) FROM users GROUP BY country ;")
+    MapTable = dbGetQuery(con, REQUEST_MAP)
+    gvisGeoChart(MapTable, locationvar="country", 
+                 colorvar="count",
+                 options=list(projection="kavrayskiy-vii"))
+  })
+  
   output$calendarAnalyzer <- renderGvis({
-
+    
     REQUEST_CA = "SELECT to_char(utilisation_date,'YYYY-MM-DD') as Date, count(*) 
     FROM dashboard
     WHERE type_use = 'analysis' GROUP BY to_char(utilisation_date,'YYYY-MM-DD');"
@@ -961,19 +985,19 @@ server <- function(input, output, session) {
     calendarA = dbGetQuery(con, REQUEST_CA)
     
     if(nrow(calendarA) != 0){
-    calendarA[,1] = as.Date(calendarA[,1])
-    gvisCalendar(calendarA, 
-                 datevar="date", 
-                 numvar="count",
-                 options=list(
-                   title="bPeaks analysis",
-                   height=200,
-                   width=1000,
-                   colorAxis="{colors:['#ffe6e6','#b30000']}", 
-                   calendar="{focusedCellColor: {stroke:'red'}}")
-    )} else{
-      return()
-    }
+      calendarA[,1] = as.Date(calendarA[,1])
+      gvisCalendar(calendarA, 
+                   datevar="date", 
+                   numvar="count",
+                   options=list(
+                     title="bPeaks analysis",
+                     height=200,
+                     width=1000,
+                     colorAxis="{colors:['#ffe6e6','#b30000'], minValue:1}", 
+                     calendar="{focusedCellColor: {stroke:'red'}}")
+      )} else{
+        return()
+      }
   })
   
   output$calendarExplorer <- renderGvis({
@@ -993,24 +1017,618 @@ server <- function(input, output, session) {
                      title="bPeaks explorer",
                      height=200,
                      width=1000,
-                     colorAxis="{colors:['#ffe6e6','#b30000']}", 
+                     colorAxis="{colors:['#ffe6e6','#b30000'], minValue:1}", 
                      calendar="{focusedCellColor: {stroke:'red'}}")
       )
     }else {
       return()
     }
-
+    
   })
-  
-  
   
   #=============================================================================
   # bPeaks Analyzer
   #=============================================================================
   
+  #-----------------------------------------------------------------------------
+  # Data Preview
+  #-----------------------------------------------------------------------------
+  
   #*****************************************************************************
+  # IP preview
+  #*****************************************************************************
+  
+  output$contents_IP <-  renderDataTable({
+    
+    req(input$fileIP)
+    
+    df <- read.csv(input$fileIP$datapath,
+                   header = as.logical(input$header_IP),
+                   sep = input$sep_IP,
+                   quote = input$quote_IP,
+                   nrows=10
+    )
+    
+  },  options = list(scrollX = TRUE , dom = 't'))
+  
+  #*****************************************************************************
+  # CO preview
+  #*****************************************************************************
+  
+  output$contents_CO <-  renderDataTable({
+    
+    req(input$fileCO)
+    
+    
+    df <- read.csv(input$fileCO$datapath,
+                   header = as.logical(input$header_CO),
+                   sep = input$sep_CO,
+                   quote = input$quote_CO,
+                   nrows=10
+    )
+    
+  },  options = list(scrollX = TRUE, dom = 't'))
+  
+  #*****************************************************************************
+  # CDS preview
+  #*****************************************************************************
+  
+  output$contents_CDS <-  renderDataTable({
+    
+    req(input$fileCDS)
+    
+    df <- read.csv(input$fileCDS$datapath,
+                   header = as.logical(input$header_CDS),
+                   sep = input$sep_CDS,
+                   quote = input$quote_CDS,
+                   nrows=10
+    )
+    
+  },  options = list(scrollX = TRUE, dom = 't'))
+  
+  #-----------------------------------------------------------------------------
+  # Output
+  #-----------------------------------------------------------------------------
+  
+  observe({
+    if(input$graphicalTF == FALSE){
+      disable("graphicalType")
+    }else{
+      enable("graphicalType")
+    }
+  })
+  
+  
+  #-----------------------------------------------------------------------------
+  # RUN
+  #-----------------------------------------------------------------------------
+  
+  observe({
+    if(is.null(input$fileIP) || is.null(input$fileCO)){
+      disable("RUN")
+    }else{
+      enable("RUN")
+    }
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Check values
+  #-----------------------------------------------------------------------------
+  
+  #*****************************************************************************
+  # IPcoeff
+  #*****************************************************************************
+  
+  observeEvent(input$numIPcoeff, {
+    IPcoeff = as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))
+    if(sum(is.na(IPcoeff)) != 0 || length(IPcoeff) == 0){
+      showNotification(id ="NotifIP",  "Error : IP coeff is not numeric!", type = "error", 
+                       duration = NULL, closeButton = FALSE)
+      disable("RUN")
+    }else{
+      removeNotification(id = "NotifIP")
+      if(is.null(input$fileIP) || is.null(input$fileCO)){
+        disable("RUN")
+      }else{
+        enable("RUN")
+      }
+    }
+  })
+  
+  #*****************************************************************************
+  # numAq
+  #*****************************************************************************
+  
+  observeEvent(input$numAq, {
+    numAq = as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))
+    if(sum(is.na(numAq)) != 0 || length(numAq) == 0){
+      showNotification(id ="NotifAq",  "Error : Average quantiles is not numeric!", type = "error", 
+                       duration = NULL, closeButton = FALSE)
+      disable("RUN")
+    }else{
+      removeNotification(id = "NotifAq")
+      if(is.null(input$fileIP) || is.null(input$fileCO)){
+        disable("RUN")
+      }else{
+        enable("RUN")
+      }
+    }
+  })
+  
+  #*****************************************************************************
+  # Log2FC
+  #*****************************************************************************
+  
+  observeEvent(input$numLog2FC, {
+    Log2FCcoeff = as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))
+    if(sum(is.na(Log2FCcoeff)) != 0 || length(Log2FCcoeff) == 0){
+      showNotification(id ="NotifLogFC",  "Error : LogFC is not numeric!", type = "error", 
+                       duration = NULL, closeButton = FALSE)
+      disable("RUN")
+    }else{
+      removeNotification(id = "NotifLogFC")
+      if(is.null(input$fileIP) || is.null(input$fileCO)){
+        disable("RUN")
+      }else{
+        enable("RUN")
+      }
+    }
+  })
+  
+  #*****************************************************************************
+  # COcoeff
+  #*****************************************************************************
+  
+  observeEvent(input$numCOcoeff, {
+    COcoeff = as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))
+    if(sum(is.na(COcoeff)) != 0 || length(COcoeff) == 0){
+      showNotification(id ="NotifCO",  "Error : Co coeff is not numeric!", type = "error", 
+                       duration = NULL, closeButton = FALSE)
+      disable("RUN")
+    }else{
+      removeNotification(id = "NotifCO")
+      if(is.null(input$fileIP) || is.null(input$fileCO)){
+        disable("RUN")
+      }else{
+        enable("RUN")
+      }
+    }
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Analyze
+  #-----------------------------------------------------------------------------
+  
+  #Create a button that launches the bPeaks analysis taking into account the entered parameters
+  observeEvent(input$RUN,{
+    
+    shinyjs::hide(id = "Hidebox")
+    if(!is.null(paste0("./Outputs/",rv$userTempFolder,"/", rv$folder_name_final, ".zip"))){
+      unlink(paste0("./Outputs/",rv$userTempFolder,"/", rv$folder_name_final, ".zip"), recursive = T)
+    }
+    
+    withProgress(message = 'bPeaks analysis', value = 0, {
+      
+      n = 12
+      #*************************************************************************
+      # Folder creation
+      #*************************************************************************
+      
+      setwd(paste0("Outputs/",rv$userTempFolder))
+      incProgress(1/n, detail = "Create folder")
+      folder_name = gsub(" ","_",input$folderName)
+      
+      folder_name_final = paste0(folder_name,"_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
+      
+      if(length(as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))) > 1 ||
+         length(as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))) > 1){
+        folder_name_final = paste0(folder_name_final, "_(tempFolder)")
+      }
+      
+      dir.create(folder_name_final)
+      
+      setwd(folder_name_final)
+      dir.create("bPeaks")
+      dir.create("LorenzCurve")
+      dir.create("PBC")
+      dir.create("Repartition")
+      dir.create("Temp")
+      
+      #*************************************************************************
+      # Read data
+      #*************************************************************************
+      incProgress(1/n, detail = "Read data")
+      
+      inFileIP= input$fileIP
+      inFileCO=input$fileCO
+      inFileCDS=input$fileCDS
+      
+      if (!is.null(input$fileCDS$datapath)){
+        file.copy(input$fileCDS$datapath, "Temp")
+        filename = unlist(strsplit(input$fileCDS$datapath, "/"))
+        filename = filename[length(filename)]
+        file.rename(paste0("Temp/", filename), paste0("Temp/", "CDS"))
+      }
+      
+      file.copy(input$fileIP$datapath, "Temp")
+      filename = unlist(strsplit(input$fileIP$datapath, "/"))
+      filename = filename[length(filename)]
+      file.rename(paste0("Temp/", filename), "Temp/IP")
+      
+      file.copy(input$fileCO$datapath, "Temp")
+      filename = unlist(strsplit(input$fileCO$datapath, "/"))
+      filename = filename[length(filename)]
+      file.rename(paste0("Temp/", filename), "Temp/CO")
+      
+      #Condition to run the application without informing the CDSdata
+      if (!is.null(input$fileCDS$datapath)){
+        CDS=read.csv2('Temp/CDS',
+                      header = as.logical(input$header_CDS),
+                      sep = input$sep_CDS,
+                      quote = input$quote_CDS)
+      }else {
+        CDS=NULL
+      }
+      
+      incProgress(1/n, detail = "Read data IP")
+      
+      IP=read.csv2('Temp/IP',
+                   header = as.logical(input$header_IP),
+                   sep = input$sep_IP,
+                   quote = input$quote_IP)
+      
+      incProgress(1/n, detail = "Read data CO")
+      
+      CO=read.csv2('Temp/CO',
+                   header = as.logical(input$header_CO),
+                   sep = input$sep_CO,
+                   quote = input$quote_CO)
+      
+      #*************************************************************************
+      # Analysis
+      #*************************************************************************
+      
+      setwd("bPeaks")
+      
+      # Increment the progress bar, and update the detail text.
+      incProgress(4/n, detail = "Analysis")
+      
+      if(length(which(search() == "package:plotly")) != 0){
+        detach("package:plotly", unload=TRUE)
+      }
+      
+      bPeaks::bPeaksAnalysis(IPdata = IP,
+                             controlData = CO,
+                             cdsPositions = CDS,
+                             smoothingValue = input$smoothingValue,
+                             windowSize = input$numWs,
+                             windowOverlap = input$numWo,
+                             IPcoeff = as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";")))),
+                             controlCoeff = as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";")))),
+                             log2FC = as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";")))),
+                             averageQuantiles = as.numeric(as.character(unlist(strsplit(input$numAq, ";")))),
+                             resultName = input$resultName,
+                             peakDrawing = as.logical(input$peakDrawing),
+                             promSize = input$promSize,
+                             withoutOverlap = as.logical(input$withoutOverlap))
+      
+      
+      rv$SummaryRun = read.table(paste0(input$resultName,"_bPeaks_parameterSummary.txt"), 
+                                 sep = "\t", header = T)
+      
+      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      # Add informations in database
+      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      
+      TEMP = read.table(paste0(input$resultName,"_bPeaks_allGenome.bed"), 
+                        sep = "\t", header = F)
+      REQUEST_Table = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
+                            nrow(TEMP), ",", length(unique(TEMP[,1])), ", 'analysis');")
+      
+      rm(TEMP)
+      
+      dbGetQuery(con, REQUEST_Table)
+      
+      
+      dir.create("Subdata")
+      for(chromosome in unique(IP[,1])){
+        write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
+        write.table(subset(CO, CO[,1] == chromosome), paste0("Subdata/SubCO_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
+      }
+      
+      library(plotly)
+      setwd("..")
+      
+      #*************************************************************************
+      # PBC
+      #*************************************************************************
+      
+      incProgress(1/n, detail = "PBC")
+      
+      setwd("PBC")
+      
+      PBC=function(chr = "ALL", signal_data, c_chr , c_reads ){
+        
+        # If ALL, complet table are analyzed else a subset are realized with chr
+        if(chr != "ALL"){
+          signal_data = subset(signal_data,signal_data[,c_chr] == chr)
+        }
+        
+        pbc = length(which(signal_data[,c_reads]==1)) / length(which(signal_data[,c_reads]>=1))
+        
+        return(pbc)
+      }
+      
+      chr=as.character(unique(IP[,1]))
+      
+      # Add NA for total table : see function
+      chr = c(chr, "ALL")
+      
+      # Init PBC vector
+      PBC_IP = NULL
+      PBC_CO = NULL
+      
+      for (c in chr){
+        PBC_IP = c(PBC_IP,PBC(chr = c, signal_data = IP, c_chr = 1, c_reads = 3))
+        PBC_CO = c(PBC_CO,PBC(chr = c, signal_data = CO, c_chr = 1, c_reads = 3))
+      }
+      
+      # rename PBC_IP & PBC_CO
+      names(PBC_IP) = gsub("chr=chrmt", "chrM", chr)
+      names(PBC_CO) = gsub("chr=chrmt", "chrM", chr)
+      # sorti txt de nos données
+      
+      write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
+      
+      #*************************************************************************
+      # Figures
+      #*************************************************************************
+      
+      if(as.factor(input$graphicalTF) == TRUE ){
+        if(input$graphicalType == "pdf"){
+          pdf("pbc_final.pdf")
+        }else if(input$graphicalType == "png"){
+          png("pbc_final.png")
+        } else if(input$graphicalType == "jpg"){
+          jpeg("pbc_final.jpg")
+        }
+        
+        layout(matrix(c(1,2), 1, 2, byrow = TRUE),
+               widths = c(5,1))
+        
+        par(mar = c(5, 4, 0, 0) + 0.1)
+        plot(PBC_IP, pch = 19, col = "forestgreen",
+             ylim = c(0,max(PBC_IP)),
+             ylab = "PBC", xlab = "Chromosomes",las = 1, axes =FALSE)
+        lines(PBC_IP[-length(PBC_IP)], col = "forestgreen" )
+        
+        points(PBC_CO, col = "cornflowerblue", pch = 19)
+        lines(PBC_CO[-length(PBC_CO)], col = "cornflowerblue")
+        
+        
+        text(1:length(chr), -0.014 ,
+             srt = 45, adj= 1, xpd = TRUE,
+             labels = gsub("chr=chrmt", "chrM", chr), cex=1)
+        
+        axis(1,at = 1:length(chr), labels = rep("", length(chr)) )
+        axis(2, at = seq(0, max(PBC_IP), 0.03), labels = seq(0,max(PBC_IP), 0.03), las = 1)
+        
+        # Legend
+        par(mar =  c(5, 0, 0, 0) + 0.1)
+        plot(1, type="n", axes = F, xlab ="", ylab = "")
+        legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1,
+               col = c("forestgreen", "cornflowerblue"))
+        dev.off()
+      }
+      
+      
+      setwd("..")
+      
+      #*************************************************************************
+      # Lorenz curve
+      #*************************************************************************
+      
+      incProgress(1/n, detail = "Lorenz curve")
+      
+      setwd("LorenzCurve")
+      
+      #fonction lorenz
+      Lorenz=function(chr, fileIP, fileC,c_chr, c_reads,
+                      window, step){
+        
+        if(chr != "ALL"){
+          fileIP = subset(fileIP,fileIP[,c_chr]== chr)
+          fileC = subset(fileC,fileC[,c_chr] == chr)
+        }
+        
+        IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads],
+                            window=window, step=step)
+        IPLor=sort(IPLor, decreasing = FALSE)
+        
+        ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads],
+                              window=window, step=step)
+        ContLor=sort(ContLor, decreasing = FALSE)
+        
+        # Percent calculs
+        perlen=(1:length(IPLor))*100/length(IPLor)
+        perIP=cumsum(IPLor)*100/max(cumsum(IPLor))
+        perC=cumsum(ContLor)*100/max(cumsum(ContLor))
+        
+        EM=which.max(abs(perIP-perC))
+        
+        # sorti txt de nos données
+        
+        cbind(perIP,perC,perlen)
+        write.table(cbind(perIP,perC,perlen),file=paste0("LorenzCurve_data_",chr,".txt"),
+                    quote= FALSE,sep="\t",row.names = FALSE)
+        
+        if(as.factor(input$graphicalTF) == TRUE ){
+          if(input$graphicalType == "pdf"){
+            pdf(paste0("LorenzCurve_",chr,".pdf"))
+          }else if(input$graphicalType == "png"){
+            png(paste0("LorenzCurve_",chr,".png"))
+          } else if(input$graphicalType == "jpg"){
+            jpeg(paste0("LorenzCurve_",chr,".jpg"))
+          }
+          
+          #curve
+          plot(x=perlen,y=perC, type="l", lwd = 2,
+               xlab= "average reads per window in %" ,ylab = "Cumulative
+               sum of window averages in %",
+               main = paste("Lorenz curve obtained for the PDR1 protein on ",chr),
+               col="blue")
+          
+          lines(x=perlen,y=perIP,col="green", lwd = 2)
+          
+          lines(0:100,0:100,col="black", lwd = 2)
+          arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3,
+                 length = 0.1, col = "firebrick", lwd = 3)
+          text(perlen[EM], mean(c(perIP[EM],perC[EM])),
+               labels = paste(floor(abs(perIP[EM] - perC[EM])), "%"), cex = 0.7,
+               pos = 4)
+          
+          legend("topleft", legend=c("line of equality",
+                                     "Control Lorenz curve",
+                                     "IP Lorenz curve",
+                                     "EM=ecart maximal"), inset = 0.01,
+                 col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA),
+                 bty="n") #added a legend of different curves
+          
+          par(font = 5) #change font to get arrows
+          legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01,
+                 lty = c(rep(1,3),NA),col=c("black","blue", "green", "firebrick"),
+                 bty="n")
+          
+          par(font = 1) #back to default
+          
+          dev.off()
+        }
+      }
+      
+      # Loop for all chromosomes
+      chr=as.character(unique(IP[,1]))
+      chr = c(chr, "ALL")
+      for (c in chr){
+        Lorenz(chr = c,fileIP = IP, fileC = CO,c_chr = 1,c_reads = 3,
+               window = input$numWs, step = input$numWo)
+      }
+      
+      setwd("..")
+      
+      #*************************************************************************
+      # Read repartitions
+      #*************************************************************************
+      
+      incProgress(1/n, detail = "Read repartitions")
+      
+      setwd("Repartition")
+      
+      Barpo=function(chr,fileIP,fileCO,c_chr,c_read){
+        
+        if(chr != "ALL"){
+          
+          fileIP= subset(fileIP,fileIP[,c_chr]==chr)
+        }
+        testIP=table(fileIP[,c_read])
+        
+        x=testIP[-1]
+        
+        tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
+        
+        write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
+        
+        if(as.factor(input$graphicalTF) == TRUE ){
+          if(input$graphicalType == "pdf"){
+            pdf(paste0("ReadRepartition_",chr,".pdf"))
+          }else if(input$graphicalType == "png"){
+            png(paste0("ReadRepartition_",chr,".png"))
+          } else if(input$graphicalType == "jpg"){
+            jpeg(paste0("ReadRepartition_",chr,".jpg"))
+          }
+          
+          plot(tab_inter$POS, tab_inter$LOG,ylim=c(0,12), type = "h",
+               xlim = c(1, 16000),
+               xlab = "Number of reads",
+               ylab = "log(number of positions)",
+               main = paste0("Repartition of reads quantity for ",chr))
+          
+          # Loess curve
+          loessMod <- loess(LOG ~ POS,
+                            data = tab_inter, span=0.1)
+          smoothed <- predict(loessMod)
+          lines( tab_inter$POS,smoothed, col= "red", lwd=2)
+          
+          # Legende
+          legend('topright', "Loess curve", lty = 1, col = "red", lwd = 3,
+                 inset = 0.01, box.lty = 0)
+          
+          dev.off()
+        }
+        
+      }
+      
+      chr=as.character(unique(IP[,1]))
+      chr = c(chr, "ALL")
+      for (c in chr){
+        Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
+      }
+      
+      setwd("../..")
+      
+      incProgress(1/n, detail = "Zip folder")
+      rv$folder_name_final = folder_name_final
+      zip(folder_name_final, folder_name_final)
+      unlink(folder_name_final, recursive = T)
+      setwd("../..")
+      
+    })
+    
+    shinyjs::show(id = "Hidebox")
+    
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Download zone
+  #-----------------------------------------------------------------------------
+  
+  output$downloadData <- downloadHandler(
+    filename <- function() {
+      paste(rv$folder_name_final, "zip", sep=".")
+    },
+    
+    content <- function(file) {
+      file.copy(paste0("./Outputs/",rv$userTempFolder,"/", rv$folder_name_final, ".zip"), file)
+      unlink(paste0("./Outputs/",rv$userTempFolder,"/", rv$folder_name_final, ".zip"), recursive = T)
+    },
+    contentType = "application/zip"
+  )
+  
+  output$folderName <- renderText({
+    paste0("Folder name : ", rv$folder_name_final)
+  })
+  
+  output$bPeakDetected <- renderText({
+    paste0("Peaks detected : ", rv$SummaryRun[1,"bPeaksNumber"])
+  })
+  
+  output$SummaryRun <- renderDataTable(
+    {if(!is.null(rv$SummaryRun)){
+      rv$SummaryRun
+    }else{
+      return()
+    }},
+    options = list(scrollX = TRUE, dom = 't')
+  )
+  
+  #=============================================================================
+  # bPeaks Explorer
+  #=============================================================================
+  
+  #-----------------------------------------------------------------------------
   # GFF
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
   
   observeEvent(input$GFF,{
     rv$GFF = read.gff(input$GFF$datapath)
@@ -1023,20 +1641,24 @@ server <- function(input, output, session) {
     if(input$ChromRadio != "none"){
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+    } else {
+      SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
+      rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
+                          & rv$GFF$type == "gene")
     }
     
     
   })
   
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
   # ZIP result choose
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
   
   observeEvent(input$InputZip,{
     
     # Get complet path to folder
-    unzip(input$InputZip$datapath, exdir ="./Outputs/")
-    rv$PATH = paste0("./Outputs/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
+    unzip(input$InputZip$datapath, exdir = paste0("./Outputs/", rv$userTempFolder))
+    rv$PATH = paste0("./Outputs/",rv$userTempFolder,"/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
     
     # Get output name of bPeaks package
     filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
@@ -1045,6 +1667,7 @@ server <- function(input, output, session) {
     #...........................................................................
     # bPeaks package results
     #...........................................................................
+    
     id <- showNotification("Read summary", duration = NULL)
     
     # Peak informations
@@ -1093,7 +1716,6 @@ server <- function(input, output, session) {
     updateNumericInput(session, "min", value = rv$min)
     updateNumericInput(session, "max", value = rv$max)
     
-    
     #...........................................................................
     # Quality results
     #...........................................................................
@@ -1111,11 +1733,6 @@ server <- function(input, output, session) {
     # PBC
     id <- showNotification("Read PBC data", duration = NULL)
     rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
-    # rv$PBC_all_IP = subset(rv$PBC, rv$PBC[,3] == "ALL")[1]
-    # rv$PBC_all_CO = subset(rv$PBC, rv$PBC[,3] == "ALL")[2]
-    # 
-    # rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[1]
-    # rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == rv$CHROMOSOME[1])[2]
     removeNotification(id)
     
     if(!is.null(rv$Region)){
@@ -1134,10 +1751,6 @@ server <- function(input, output, session) {
       rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",input$ChromRadio,".txt"), sep = "\t", header = T)
       rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",input$ChromRadio,".txt"), sep = "\t", header = T)
       
-      # rv$PBC_chr_IP = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[1]
-      # rv$PBC_chr_CO = subset(rv$PBC, rv$PBC[,3] == input$ChromRadio)[2]
-      
-      
       rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",input$ChromRadio,".txt"), sep = "\t", header = F)
       rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",input$ChromRadio,".txt"), sep = "\t", header = F)
       
@@ -1153,8 +1766,6 @@ server <- function(input, output, session) {
         SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
         rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                             & rv$GFF$type == "gene")
-        
-        
       }
     }
   })
@@ -1168,22 +1779,9 @@ server <- function(input, output, session) {
     }
   )
   
-  # output$PBC <- renderTable(
-  #   if(!is.null(rv$SUMMARY)){
-  #     table_PBC = rbind(c("PBC IP ALL", rv$PBC_all_IP),
-  #                       c("PBC CO ALL", rv$PBC_all_CO),
-  #                       c("PBC IP CHR", rv$PBC_chr_IP),
-  #                       c("PBC CO CHR", rv$PBC_chr_CO))
-  #     colnames(table_PBC) = c("PBC", "Values")
-  #     table_PBC
-  #   }else{
-  #     return()
-  #   }
-  # )
-  
-  #*****************************************************************************
-  # Download buttons
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
+  # Download buttons (data summary & bPeaks drawing)
+  #-----------------------------------------------------------------------------
   
   output$DL_SUM <- downloadHandler(
     filename = function(){paste0(rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf")},
@@ -1197,10 +1795,9 @@ server <- function(input, output, session) {
       file.copy(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"-",input$ChromRadio,"_bPeaksDrawing.pdf"), file)}
   )
   
-  
-  #*****************************************************************************
-  # General plot
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
+  # Genome Browser
+  #-----------------------------------------------------------------------------
   
   output$GenomeBrowser<- renderPlotly({
     if(!is.null(rv$SIGNAL_IP)){
@@ -1220,45 +1817,51 @@ server <- function(input, output, session) {
                  y0 = 0, y1 = (max(c(rv$SIGNAL_IP[,3], rv$SIGNAL_CO[,3])) * 1.1 ), yref = "y")
         }
         
-        
         p <- plot_ly(x = rv$SIGNAL_IP[,2]) %>%
-          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'royalblue')) %>%
-          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP',mode = 'lines', line = list(color = 'red'))%>%
+          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO', type="scatter", mode = 'lines',line = list(color = 'royalblue')) %>%
+          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP', type="scatter", mode = 'lines', line = list(color = 'red'))%>%
           layout(shapes = rect_list, 
                  yaxis = list(title = 'Number of reads', showgrid = F),
                  xaxis = list(title = 'Position' , range = c(rv$min, rv$max), showgrid = F))
         
         if(!is.null(rv$GFF_CHR)){
           for(i in 1:nrow(rv$GFF_CHR)){
-            position_inter = as.numeric(as.character(rv$GFF_CHR$start[i])):as.numeric(as.character(rv$GFF_CHR$end[i]))
+            
+            #position_inter = as.numeric(as.character(rv$GFF_CHR$start[i])):as.numeric(as.character(rv$GFF_CHR$end[i]))
+            position_inter = c(as.numeric(as.character(rv$GFF_CHR$start[i])),
+                               as.numeric(as.character(rv$GFF_CHR$end[i])))
+            
             if(rv$GFF_CHR$strand[i] == "+"){
-              p <- add_trace(p,
+              p <- add_trace(p,  
                              x = position_inter,
-                             y = rep(-100,length(position_inter)) ,mode = 'lines',line = list(color = 'pink'),
+                             y = rep(-100,2) ,
+                             type="scatter",
+                             mode = 'lines',line = list(color = 'pink'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
               )
+              
+              
+              
             } else {
-              p <- add_trace(p,
+              p <- add_trace(p, type="scatter", 
                              x = position_inter,
-                             y = rep(-200,length(position_inter)) ,mode = 'lines',line = list(color = 'purple'),
+                             y = rep(-200,2) ,
+                             mode = 'lines',line = list(color = 'blue'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
               )
             }
-            
           }
         }
         p
         
-        
-        
       } else {
         plot_ly(x = rv$SIGNAL_IP[,2]) %>%
-          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'red')) %>%
-          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP',mode = 'lines', line = list(color = 'royalblue'))%>%
+          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO', type="scatter", mode = 'lines',line = list(color = 'red')) %>%
+          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP', type="scatter", mode = 'lines', line = list(color = 'royalblue'))%>%
           layout(yaxis = list(title = 'Number of reads'),
                  xaxis = list(title = 'Position' , range = c(rv$min, rv$max)))
       }
@@ -1266,36 +1869,45 @@ server <- function(input, output, session) {
     } else {
       return()
     }
-    
   })
   
-  #*****************************************************************************
-  # Plot limit
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
+  # Genome browser limites
+  #-----------------------------------------------------------------------------
   
   observeEvent(input$limite, {
     rv$min <- input$min
     rv$max <- input$max
   })
   
-  #*****************************************************************************
-  # Plot
-  #*****************************************************************************
+  #-----------------------------------------------------------------------------
+  # Barplot : Number of detected peaks
+  #-----------------------------------------------------------------------------
   
   output$peaks_barplot <- renderPlotly({
     if(!is.null(rv$allGenome)){
-      t = table(rv$allGenome[,1])
-      plot_ly(x = names(t), y = t,name = NULL, type = "bar",
+      t = sort(table(rv$allGenome[,1]))
+      table <- data.frame(x = names(t),
+                          y = as.vector(t))
+      table$x <- factor(table$x, levels = names(t))
+      
+      plot_ly(data=table, x = ~x, y = ~y,name = NULL, type = "bar",
               marker = list(color = 'firebrick'),
               line = list(color = 'firebrick') ) %>%
         layout(paper_bgcolor='rgba(0,0,0,0)',margin = list(b = 50),
-               plot_bgcolor='rgba(0,0,0,0)', yaxis = list(title = 'Number of detected peaks'))
+               plot_bgcolor='rgba(0,0,0,0)',
+               yaxis = list(title = 'Number of detected peaks'),
+               xaxis = list(title = ""))
     } else {
       return()
     }
     
   })
-  # Boxplot
+  
+  #-----------------------------------------------------------------------------
+  # Boxplot : Mean values of peaks
+  #-----------------------------------------------------------------------------
+  
   output$IPCO_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll)){
       
@@ -1321,6 +1933,9 @@ server <- function(input, output, session) {
     }
   })
   
+  #-----------------------------------------------------------------------------
+  # Boxplot : Average LogFC
+  #-----------------------------------------------------------------------------
   
   output$LOGFC_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &&  !is.null(rv$allGenome)){
@@ -1340,6 +1955,10 @@ server <- function(input, output, session) {
     }
   })
   
+  #-----------------------------------------------------------------------------
+  # Boxplot : Average quantile
+  #-----------------------------------------------------------------------------
+  
   output$QUANTILE_boxplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &&  !is.null(rv$allGenome)){
       
@@ -1358,6 +1977,9 @@ server <- function(input, output, session) {
     }
   })
   
+  #-----------------------------------------------------------------------------
+  # Barplot : Repartition of reads quantity
+  #-----------------------------------------------------------------------------
   
   output$REPARTITION_barplot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &  !is.null(rv$allGenome)){
@@ -1385,6 +2007,10 @@ server <- function(input, output, session) {
     }
   })
   
+  #-----------------------------------------------------------------------------
+  # Plot : Lorenz curves
+  #-----------------------------------------------------------------------------
+  
   output$LORENZ_plot <- renderPlotly({
     if(!is.null(rv$SubTableAll) &  !is.null(rv$allGenome)){
       
@@ -1392,8 +2018,8 @@ server <- function(input, output, session) {
       
       plot_ly(x=rv$LORENZ[,3],y=rv$LORENZ[,1], name='IP',type = 'scatter',mode= 'lines',
               line = list(color = 'royalblue')) %>%
-        add_trace(y= rv$LORENZ[,2],name='Control', mode='lines',  line = list(color = 'red')) %>%
-        add_trace(x=c(0,100),y= c(0,100),name='Equality',
+        add_trace(y= rv$LORENZ[,2],name='Control',  type="scatter", mode='lines',  line = list(color = 'red')) %>%
+        add_trace(x=c(0,100),y= c(0,100),name='Equality', 
                   line = list(color = 'gray', width = 4, dash = 'dash'))%>%
         add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.',
                   line = list(color = 'black', width = 4), mode = 'lines')%>%
@@ -1404,6 +2030,10 @@ server <- function(input, output, session) {
       return()
     }
   })
+  
+  #-----------------------------------------------------------------------------
+  # Plot : PBC
+  #-----------------------------------------------------------------------------
   
   output$PBC_plot <- renderPlotly({
     if(!is.null(rv$PBC) & !is.null(rv$allGenome) & !is.null(rv$ChrSelected)){
@@ -1430,588 +2060,6 @@ server <- function(input, output, session) {
       return()
     }
   })
-  
-  #=============================================================================
-  # bPeaks Analyzer
-  #=============================================================================
-  
-  #*****************************************************************************
-  # Data Preview
-  #*****************************************************************************
-  
-  #-----------------------------------------------------------------------------
-  # IP preview
-  #-----------------------------------------------------------------------------
-  
-  output$contents_IP <-  renderDataTable({
-    
-    req(input$fileIP)
-    
-    df <- read.csv(input$fileIP$datapath,
-                   header = as.logical(input$header_IP),
-                   sep = input$sep_IP,
-                   quote = input$quote_IP,
-                   nrows=10
-    )
-    
-  },  options = list(scrollX = TRUE , dom = 't'))
-  
-  #-----------------------------------------------------------------------------
-  # CO preview
-  #-----------------------------------------------------------------------------
-  
-  output$contents_CO <-  renderDataTable({
-    
-    req(input$fileCO)
-    
-    
-    df <- read.csv(input$fileCO$datapath,
-                   header = as.logical(input$header_CO),
-                   sep = input$sep_CO,
-                   quote = input$quote_CO,
-                   nrows=10
-    )
-    
-  },  options = list(scrollX = TRUE, dom = 't'))
-  
-  #-----------------------------------------------------------------------------
-  # CDS preview
-  #-----------------------------------------------------------------------------
-  
-  output$contents_CDS <-  renderDataTable({
-    
-    req(input$fileCDS)
-    
-    
-    df <- read.csv(input$fileCDS$datapath,
-                   header = as.logical(input$header_CDS),
-                   sep = input$sep_CDS,
-                   quote = input$quote_CDS,
-                   nrows=10
-    )
-    
-  },  options = list(scrollX = TRUE, dom = 't'))
-  
-  #*****************************************************************************
-  # Output
-  #*****************************************************************************
-  
-  observe({
-    if(input$graphicalTF == FALSE){
-      disable("graphicalType")
-    }else{
-      enable("graphicalType")
-    }
-  })
-  
-  
-  #*****************************************************************************
-  # RUN
-  #*****************************************************************************
-  
-  observe({
-    if(is.null(input$fileIP) || is.null(input$fileCO)){
-      disable("RUN")
-    }else{
-      enable("RUN")
-    }
-  })
-  
-  #*****************************************************************************
-  # Check values
-  #*****************************************************************************
-  
-  observeEvent(input$numIPcoeff, {
-    IPcoeff = as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))
-    if(sum(is.na(IPcoeff)) != 0 || length(IPcoeff) == 0){
-      showNotification(id ="NotifIP",  "Error : IP coeff is not numeric!", type = "error", 
-                       duration = NULL, closeButton = FALSE)
-      disable("RUN")
-    }else{
-      removeNotification(id = "NotifIP")
-      if(is.null(input$fileIP) || is.null(input$fileCO)){
-        disable("RUN")
-      }else{
-        enable("RUN")
-      }
-    }
-  })
-  
-  observeEvent(input$numAq, {
-    numAq = as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))
-    if(sum(is.na(numAq)) != 0 || length(numAq) == 0){
-      showNotification(id ="NotifAq",  "Error : Average quantiles is not numeric!", type = "error", 
-                       duration = NULL, closeButton = FALSE)
-      disable("RUN")
-    }else{
-      removeNotification(id = "NotifAq")
-      if(is.null(input$fileIP) || is.null(input$fileCO)){
-        disable("RUN")
-      }else{
-        enable("RUN")
-      }
-    }
-  })
-  
-  observeEvent(input$numLog2FC, {
-    Log2FCcoeff = as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))
-    if(sum(is.na(Log2FCcoeff)) != 0 || length(Log2FCcoeff) == 0){
-      showNotification(id ="NotifLogFC",  "Error : LogFC is not numeric!", type = "error", 
-                       duration = NULL, closeButton = FALSE)
-      disable("RUN")
-    }else{
-      removeNotification(id = "NotifLogFC")
-      if(is.null(input$fileIP) || is.null(input$fileCO)){
-        disable("RUN")
-      }else{
-        enable("RUN")
-      }
-    }
-  })
-  
-  observeEvent(input$numCOcoeff, {
-    COcoeff = as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))
-    if(sum(is.na(COcoeff)) != 0 || length(COcoeff) == 0){
-      showNotification(id ="NotifCO",  "Error : Co coeff is not numeric!", type = "error", 
-                       duration = NULL, closeButton = FALSE)
-      disable("RUN")
-    }else{
-      removeNotification(id = "NotifCO")
-      if(is.null(input$fileIP) || is.null(input$fileCO)){
-        disable("RUN")
-      }else{
-        enable("RUN")
-      }
-    }
-  })
-  
-  #*****************************************************************************
-  # Analyze
-  #*****************************************************************************
-  
-  #Create a button that launches the bPeaks analysis taking into account the entered parameters
-  observeEvent(input$RUN,{
-    
-    shinyjs::hide(id = "Hidebox")
-    if(!is.null(paste0("./Outputs/",rv$folder_name_final, ".zip"))){
-      unlink(paste0("./Outputs/",rv$folder_name_final, ".zip"), recursive = T)
-    }
-    
-    withProgress(message = 'bPeaks analysis', value = 0, {
-      
-      n = 12
-      #=========================================================================
-      # Folder creation
-      #=========================================================================
-      setwd("Outputs")
-      incProgress(1/n, detail = "Create folder")
-      folder_name = gsub(" ","_",input$folderName)
-      
-      folder_name_final = paste0(folder_name,"_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
-      
-      if(length(as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";"))))) > 1 ||
-         length(as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";"))))) > 1 ||
-         length(as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";"))))) > 1 ||
-         length(as.numeric(as.character(unlist(strsplit(input$numAq, ";"))))) > 1){
-        folder_name_final = paste0(folder_name_final, "_(tempFolder)")
-      }
-      
-      dir.create(folder_name_final)
-      
-      setwd(folder_name_final)
-      dir.create("bPeaks")
-      dir.create("LorenzCurve")
-      dir.create("PBC")
-      dir.create("Repartition")
-      dir.create("Temp")
-      
-      #=========================================================================
-      # Read data
-      #=========================================================================
-      incProgress(1/n, detail = "Read data")
-      
-      inFileIP= input$fileIP
-      inFileCO=input$fileCO
-      inFileCDS=input$fileCDS
-      
-      if (!is.null(input$fileCDS$datapath)){
-        file.copy(input$fileCDS$datapath, "Temp")
-        filename = unlist(strsplit(input$fileCDS$datapath, "/"))
-        filename = filename[length(filename)]
-        file.rename(paste0("Temp/", filename), paste0("Temp/", "CDS"))
-      }
-      
-      
-      file.copy(input$fileIP$datapath, "Temp")
-      filename = unlist(strsplit(input$fileIP$datapath, "/"))
-      filename = filename[length(filename)]
-      file.rename(paste0("Temp/", filename), "Temp/IP")
-      
-      file.copy(input$fileCO$datapath, "Temp")
-      filename = unlist(strsplit(input$fileCO$datapath, "/"))
-      filename = filename[length(filename)]
-      file.rename(paste0("Temp/", filename), "Temp/CO")
-      
-      
-      #Condition to run the application without informing the CDSdata
-      if (!is.null(input$fileCDS$datapath)){
-        CDS=read.csv2('Temp/CDS',
-                      header = as.logical(input$header_CDS),
-                      sep = input$sep_CDS,
-                      quote = input$quote_CDS)
-      }else {
-        CDS=NULL
-      }
-      
-      incProgress(1/n, detail = "Read data IP")
-      
-      IP=read.csv2('Temp/IP',
-                   header = as.logical(input$header_IP),
-                   sep = input$sep_IP,
-                   quote = input$quote_IP)
-      
-      incProgress(1/n, detail = "Read data CO")
-      
-      CO=read.csv2('Temp/CO',
-                   header = as.logical(input$header_CO),
-                   sep = input$sep_CO,
-                   quote = input$quote_CO)
-      
-      #=========================================================================
-      # Analysis
-      #=========================================================================
-      setwd("bPeaks")
-      
-      # Increment the progress bar, and update the detail text.
-      incProgress(4/n, detail = "Analysis")
-      
-      if(length(which(search() == "package:plotly")) != 0){
-        detach("package:plotly", unload=TRUE)
-      }
-      
-      bPeaks::bPeaksAnalysis(IPdata = IP,
-                             controlData = CO,
-                             cdsPositions = CDS,
-                             smoothingValue = input$smoothingValue,
-                             windowSize = input$numWs,
-                             windowOverlap = input$numWo,
-                             IPcoeff = as.numeric(as.character(unlist(strsplit(input$numIPcoeff, ";")))),
-                             controlCoeff = as.numeric(as.character(unlist(strsplit(input$numCOcoeff, ";")))),
-                             log2FC = as.numeric(as.character(unlist(strsplit(input$numLog2FC, ";")))),
-                             averageQuantiles = as.numeric(as.character(unlist(strsplit(input$numAq, ";")))),
-                             resultName = input$resultName,
-                             peakDrawing = as.logical(input$peakDrawing),
-                             promSize = input$promSize,
-                             withoutOverlap = as.logical(input$withoutOverlap))
-      
-      
-      rv$SummaryRun = read.table(paste0(input$resultName,"_bPeaks_parameterSummary.txt"), 
-                                 sep = "\t", header = T)
-      
-      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      # Add informations in database
-      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      
-      TEMP = read.table(paste0(input$resultName,"_bPeaks_allGenome.bed"), 
-                        sep = "\t", header = F)
-      REQUEST_Table = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
-                            nrow(TEMP), ",", length(unique(TEMP[,1])), ", 'analysis');")
-      
-      write.table(REQUEST_Table, "test.txt")
-      rm(TEMP)
-      
-      dbGetQuery(con, REQUEST_Table)
-      
-      
-      dir.create("Subdata")
-      for(chromosome in unique(IP[,1])){
-        write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
-        write.table(subset(CO, CO[,1] == chromosome), paste0("Subdata/SubCO_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
-      }
-      
-      library(plotly)
-      setwd("..")
-      
-      #=========================================================================
-      # PBC
-      #=========================================================================
-      
-      
-      incProgress(1/n, detail = "PBC")
-      
-      setwd("PBC")
-      
-      PBC=function(chr = "ALL", signal_data, c_chr , c_reads ){
-        
-        # If ALL, complet table are analyzed else a subset are realized with chr
-        if(chr != "ALL"){
-          signal_data = subset(signal_data,signal_data[,c_chr] == chr)
-        }
-        
-        pbc = length(which(signal_data[,c_reads]==1)) / length(which(signal_data[,c_reads]>=1))
-        
-        return(pbc)
-      }
-      
-      chr=as.character(unique(IP[,1]))
-      
-      # Add NA for total table : see function
-      chr = c(chr, "ALL")
-      
-      # Init PBC vector
-      PBC_IP = NULL
-      PBC_CO = NULL
-      
-      for (c in chr){
-        PBC_IP = c(PBC_IP,PBC(chr = c, signal_data = IP, c_chr = 1, c_reads = 3))
-        PBC_CO = c(PBC_CO,PBC(chr = c, signal_data = CO, c_chr = 1, c_reads = 3))
-      }
-      
-      # rename PBC_IP & PBC_CO
-      names(PBC_IP) = gsub("chr=chrmt", "chrM", chr)
-      names(PBC_CO) = gsub("chr=chrmt", "chrM", chr)
-      # sorti txt de nos données
-      
-      write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
-      
-      #-------------------------------------------------------------------------
-      # Figures
-      #-------------------------------------------------------------------------
-      
-      if(as.factor(input$graphicalTF) == TRUE ){
-        if(input$graphicalType == "pdf"){
-          pdf("pbc_final.pdf")
-        }else if(input$graphicalType == "png"){
-          png("pbc_final.png")
-        } else if(input$graphicalType == "jpg"){
-          jpeg("pbc_final.jpg")
-        }
-        
-        layout(matrix(c(1,2), 1, 2, byrow = TRUE),
-               widths = c(5,1))
-        
-        par(mar = c(5, 4, 0, 0) + 0.1)
-        plot(PBC_IP, pch = 19, col = "forestgreen",
-             ylim = c(0,max(PBC_IP)),
-             ylab = "PBC", xlab = "Chromosomes",las = 1, axes =FALSE)
-        lines(PBC_IP[-length(PBC_IP)], col = "forestgreen" )
-        
-        points(PBC_CO, col = "cornflowerblue", pch = 19)
-        lines(PBC_CO[-length(PBC_CO)], col = "cornflowerblue")
-        
-        
-        text(1:length(chr), -0.014 ,
-             srt = 45, adj= 1, xpd = TRUE,
-             labels = gsub("chr=chrmt", "chrM", chr), cex=1)
-        
-        axis(1,at = 1:length(chr), labels = rep("", length(chr)) )
-        axis(2, at = seq(0, max(PBC_IP), 0.03), labels = seq(0,max(PBC_IP), 0.03), las = 1)
-        
-        # Legend
-        par(mar =  c(5, 0, 0, 0) + 0.1)
-        plot(1, type="n", axes = F, xlab ="", ylab = "")
-        legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1,
-               col = c("forestgreen", "cornflowerblue"))
-        dev.off()
-      }
-      
-      
-      setwd("..")
-      
-      #=========================================================================
-      # Lorenz curve
-      #=========================================================================
-      
-      incProgress(1/n, detail = "Lorenz curve")
-      
-      setwd("LorenzCurve")
-      
-      #fonction lorenz
-      Lorenz=function(chr, fileIP, fileC,c_chr, c_reads,
-                      window, step){
-        
-        if(chr != "ALL"){
-          fileIP = subset(fileIP,fileIP[,c_chr]== chr)
-          fileC = subset(fileC,fileC[,c_chr] == chr)
-        }
-        
-        IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads],
-                            window=window, step=step)
-        IPLor=sort(IPLor, decreasing = FALSE)
-        
-        ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads],
-                              window=window, step=step)
-        ContLor=sort(ContLor, decreasing = FALSE)
-        
-        # Percent calculs
-        perlen=(1:length(IPLor))*100/length(IPLor)
-        perIP=cumsum(IPLor)*100/max(cumsum(IPLor))
-        perC=cumsum(ContLor)*100/max(cumsum(ContLor))
-        
-        EM=which.max(abs(perIP-perC))
-        
-        # sorti txt de nos données
-        
-        cbind(perIP,perC,perlen)
-        write.table(cbind(perIP,perC,perlen),file=paste0("LorenzCurve_data_",chr,".txt"),
-                    quote= FALSE,sep="\t",row.names = FALSE)
-        
-        if(as.factor(input$graphicalTF) == TRUE ){
-          if(input$graphicalType == "pdf"){
-            pdf(paste0("LorenzCurve_",chr,".pdf"))
-          }else if(input$graphicalType == "png"){
-            png(paste0("LorenzCurve_",chr,".png"))
-          } else if(input$graphicalType == "jpg"){
-            jpeg(paste0("LorenzCurve_",chr,".jpg"))
-          }
-          
-          #curve
-          plot(x=perlen,y=perC, type="l", lwd = 2,
-               xlab= "average reads per window in %" ,ylab = "Cumulative
-             sum of window averages in %",
-               main = paste("Lorenz curve obtained for the PDR1 protein on ",chr),
-               col="blue")
-          
-          lines(x=perlen,y=perIP,col="green", lwd = 2)
-          
-          lines(0:100,0:100,col="black", lwd = 2)
-          arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3,
-                 length = 0.1, col = "firebrick", lwd = 3)
-          text(perlen[EM], mean(c(perIP[EM],perC[EM])),
-               labels = paste(floor(abs(perIP[EM] - perC[EM])), "%"), cex = 0.7,
-               pos = 4)
-          
-          legend("topleft", legend=c("line of equality",
-                                     "Control Lorenz curve",
-                                     "IP Lorenz curve",
-                                     "EM=ecart maximal"), inset = 0.01,
-                 col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA),
-                 bty="n") #added a legend of different curves
-          
-          par(font = 5) #change font to get arrows
-          legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01,
-                 lty = c(rep(1,3),NA),col=c("black","blue", "green", "firebrick"),
-                 bty="n")
-          
-          par(font = 1) #back to default
-          
-          dev.off()
-        }
-      }
-      
-      # Loop for all chromosomes
-      chr=as.character(unique(IP[,1]))
-      chr = c(chr, "ALL")
-      for (c in chr){
-        Lorenz(chr = c,fileIP = IP, fileC = CO,c_chr = 1,c_reads = 3,
-               window = input$numWs, step = input$numWo)
-      }
-      
-      setwd("..")
-      
-      #=========================================================================
-      # Read repartitions
-      #=========================================================================
-      
-      incProgress(1/n, detail = "Read repartitions")
-      
-      setwd("Repartition")
-      
-      Barpo=function(chr,fileIP,fileCO,c_chr,c_read){
-        
-        if(chr != "ALL"){
-          
-          fileIP= subset(fileIP,fileIP[,c_chr]==chr)
-        }
-        testIP=table(fileIP[,c_read])
-        
-        x=testIP[-1]
-        
-        tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
-        
-        write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
-        
-        
-        
-        if(as.factor(input$graphicalTF) == TRUE ){
-          if(input$graphicalType == "pdf"){
-            pdf(paste0("ReadRepartition_",chr,".pdf"))
-          }else if(input$graphicalType == "png"){
-            png(paste0("ReadRepartition_",chr,".png"))
-          } else if(input$graphicalType == "jpg"){
-            jpeg(paste0("ReadRepartition_",chr,".jpg"))
-          }
-          
-          plot(tab_inter$POS, tab_inter$LOG,ylim=c(0,12), type = "h",
-               xlim = c(1, 16000),
-               xlab = "Number of reads",
-               ylab = "log(number of positions)",
-               main = paste0("Repartition of reads quantity for ",chr))
-          
-          # Loess curve
-          loessMod <- loess(LOG ~ POS,
-                            data = tab_inter, span=0.1)
-          smoothed <- predict(loessMod)
-          lines( tab_inter$POS,smoothed, col= "red", lwd=2)
-          
-          # Legende
-          legend('topright', "Loess curve", lty = 1, col = "red", lwd = 3,
-                 inset = 0.01, box.lty = 0)
-          
-          dev.off()
-        }
-        
-      }
-      
-      chr=as.character(unique(IP[,1]))
-      chr = c(chr, "ALL")
-      for (c in chr){
-        Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
-      }
-      
-      setwd("../..")
-      
-      incProgress(1/n, detail = "Zip folder")
-      rv$folder_name_final = folder_name_final
-      zip(folder_name_final, folder_name_final)
-      unlink(folder_name_final, recursive = T)
-      setwd("..")
-      
-    })
-    
-    shinyjs::show(id = "Hidebox")
-    
-  })
-  
-  output$downloadData <- downloadHandler(
-    filename <- function() {
-      paste(rv$folder_name_final, "zip", sep=".")
-    },
-    
-    content <- function(file) {
-      file.copy(paste0("./Outputs/",rv$folder_name_final, ".zip"), file)
-      unlink(paste0("./Outputs/",rv$folder_name_final, ".zip"), recursive = T)
-    },
-    contentType = "application/zip"
-  )
-  
-  output$folderName <- renderText({
-    paste0("Folder name : ", rv$folder_name_final)
-  })
-  
-  output$bPeakDetected <- renderText({
-    paste0("Peaks detected : ", rv$SummaryRun[1,"bPeaksNumber"])
-  })
-  
-  output$SummaryRun <- renderDataTable(
-    {if(!is.null(rv$SummaryRun)){
-      rv$SummaryRun
-    }else{
-      return()
-    }},
-    options = list(scrollX = TRUE, dom = 't')
-  )
-  
   
 }
 
