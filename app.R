@@ -750,10 +750,10 @@ server <- function(input, output, session) {
   
   observeEvent(input$Change, {
     REQUEST_CHANGE = paste0("UPDATE users SET password = crypt('",
-                     input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
+                            input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
                      or user_name = '",input$EMAIL_CPW,"') AND password =crypt('",
-                     input$PW_old,"', password);")
-   
+                            input$PW_old,"', password);")
+    
     dbGetQuery(con, REQUEST_CHANGE)
     
     REQUEST_CHECK = paste0("SELECT * 
@@ -870,9 +870,9 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   # Login
   #-----------------------------------------------------------------------------
-
-  observeEvent(input$login, {
   
+  observeEvent(input$login, {
+    
     REQUEST = paste0("SELECT * 
             FROM users
             WHERE ( email = '",input$EMAIL,"' or user_name = '",input$EMAIL,"') 
@@ -1641,6 +1641,10 @@ server <- function(input, output, session) {
     if(input$ChromRadio != "none"){
       SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+    } else {
+      SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
+      rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
+                          & rv$GFF$type == "gene")
     }
     
     
@@ -1774,7 +1778,7 @@ server <- function(input, output, session) {
       return()
     }
   )
-
+  
   #-----------------------------------------------------------------------------
   # Download buttons (data summary & bPeaks drawing)
   #-----------------------------------------------------------------------------
@@ -1812,43 +1816,52 @@ server <- function(input, output, session) {
                  x0 = rv$SubTableAll[i,2], x1 = rv$SubTableAll[i,3], xref = "x", name = paste("peak", i),
                  y0 = 0, y1 = (max(c(rv$SIGNAL_IP[,3], rv$SIGNAL_CO[,3])) * 1.1 ), yref = "y")
         }
-
+        
         p <- plot_ly(x = rv$SIGNAL_IP[,2]) %>%
-          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'royalblue')) %>%
-          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP',mode = 'lines', line = list(color = 'red'))%>%
+          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO', type="scatter", mode = 'lines',line = list(color = 'royalblue')) %>%
+          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP', type="scatter", mode = 'lines', line = list(color = 'red'))%>%
           layout(shapes = rect_list, 
                  yaxis = list(title = 'Number of reads', showgrid = F),
                  xaxis = list(title = 'Position' , range = c(rv$min, rv$max), showgrid = F))
         
         if(!is.null(rv$GFF_CHR)){
           for(i in 1:nrow(rv$GFF_CHR)){
-            position_inter = as.numeric(as.character(rv$GFF_CHR$start[i])):as.numeric(as.character(rv$GFF_CHR$end[i]))
+            
+            #position_inter = as.numeric(as.character(rv$GFF_CHR$start[i])):as.numeric(as.character(rv$GFF_CHR$end[i]))
+            position_inter = c(as.numeric(as.character(rv$GFF_CHR$start[i])),
+                               as.numeric(as.character(rv$GFF_CHR$end[i])))
+            
             if(rv$GFF_CHR$strand[i] == "+"){
-              p <- add_trace(p,
+              p <- add_trace(p,  
                              x = position_inter,
-                             y = rep(-100,length(position_inter)) ,mode = 'lines',line = list(color = 'pink'),
+                             y = rep(-100,2) ,
+                             type="scatter",
+                             mode = 'lines',line = list(color = 'pink'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
               )
+              
+              
+              
             } else {
-              p <- add_trace(p,
+              p <- add_trace(p, type="scatter", 
                              x = position_inter,
-                             y = rep(-200,length(position_inter)) ,mode = 'lines',line = list(color = 'purple'),
+                             y = rep(-200,2) ,
+                             mode = 'lines',line = list(color = 'blue'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
               )
             }
-            
           }
         }
         p
-
+        
       } else {
         plot_ly(x = rv$SIGNAL_IP[,2]) %>%
-          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO',mode = 'lines',line = list(color = 'red')) %>%
-          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP',mode = 'lines', line = list(color = 'royalblue'))%>%
+          add_trace(y = rv$SIGNAL_CO[,3], name = 'CO', type="scatter", mode = 'lines',line = list(color = 'red')) %>%
+          add_trace(y = rv$SIGNAL_IP[,3], name = 'IP', type="scatter", mode = 'lines', line = list(color = 'royalblue'))%>%
           layout(yaxis = list(title = 'Number of reads'),
                  xaxis = list(title = 'Position' , range = c(rv$min, rv$max)))
       }
@@ -1873,12 +1886,18 @@ server <- function(input, output, session) {
   
   output$peaks_barplot <- renderPlotly({
     if(!is.null(rv$allGenome)){
-      t = table(rv$allGenome[,1])
-      plot_ly(x = names(t), y = t,name = NULL, type = "bar",
+      t = sort(table(rv$allGenome[,1]))
+      table <- data.frame(x = names(t),
+                          y = as.vector(t))
+      table$x <- factor(table$x, levels = names(t))
+      
+      plot_ly(data=table, x = ~x, y = ~y,name = NULL, type = "bar",
               marker = list(color = 'firebrick'),
               line = list(color = 'firebrick') ) %>%
         layout(paper_bgcolor='rgba(0,0,0,0)',margin = list(b = 50),
-               plot_bgcolor='rgba(0,0,0,0)', yaxis = list(title = 'Number of detected peaks'))
+               plot_bgcolor='rgba(0,0,0,0)',
+               yaxis = list(title = 'Number of detected peaks'),
+               xaxis = list(title = ""))
     } else {
       return()
     }
@@ -1999,8 +2018,8 @@ server <- function(input, output, session) {
       
       plot_ly(x=rv$LORENZ[,3],y=rv$LORENZ[,1], name='IP',type = 'scatter',mode= 'lines',
               line = list(color = 'royalblue')) %>%
-        add_trace(y= rv$LORENZ[,2],name='Control', mode='lines',  line = list(color = 'red')) %>%
-        add_trace(x=c(0,100),y= c(0,100),name='Equality',
+        add_trace(y= rv$LORENZ[,2],name='Control',  type="scatter", mode='lines',  line = list(color = 'red')) %>%
+        add_trace(x=c(0,100),y= c(0,100),name='Equality', 
                   line = list(color = 'gray', width = 4, dash = 'dash'))%>%
         add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.',
                   line = list(color = 'black', width = 4), mode = 'lines')%>%
