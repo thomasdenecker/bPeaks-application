@@ -1836,7 +1836,7 @@ server <- function(input, output, session) {
                              x = position_inter,
                              y = rep(-100,2) ,
                              type="scatter",
-                             mode = 'lines',line = list(color = 'pink'),
+                             mode = 'lines',line = list(color = 'orange'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
@@ -1848,7 +1848,7 @@ server <- function(input, output, session) {
               p <- add_trace(p, type="scatter", 
                              x = position_inter,
                              y = rep(-200,2) ,
-                             mode = 'lines',line = list(color = 'blue'),
+                             mode = 'lines',line = list(color = 'purple'),
                              text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
                              hoverinfo = 'text',
                              showlegend = F
@@ -2017,12 +2017,18 @@ server <- function(input, output, session) {
       EM=which.max(abs(rv$LORENZ[,1]-rv$LORENZ[,2]))
       
       plot_ly(x=rv$LORENZ[,3],y=rv$LORENZ[,1], name='IP',type = 'scatter',mode= 'lines',
-              line = list(color = 'royalblue')) %>%
-        add_trace(y= rv$LORENZ[,2],name='Control',  type="scatter", mode='lines',  line = list(color = 'red')) %>%
+              line = list(color = 'red')) %>%
+        add_trace(y= rv$LORENZ[,2],name='Control',  type="scatter", mode='lines',  
+                  line = list(color = 'blue')) %>%
         add_trace(x=c(0,100),y= c(0,100),name='Equality', 
                   line = list(color = 'gray', width = 4, dash = 'dash'))%>%
         add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.',
                   line = list(color = 'black', width = 4), mode = 'lines')%>%
+        add_trace(x=10,y= 80,
+                  line = list(color = 'black', width = 4),type = 'scatter',
+                  mode = 'text', text = paste("Maximum difference :",round(max(abs(rv$LORENZ[,1]-rv$LORENZ[,2])),1),"%"),
+                  textposition = 'middle right',  showlegend = FALSE, 
+                  textfont = list(color = '#000000', size = 16))%>%
         layout(yaxis = list(title = "Sum of window averages in %"),
                xaxis = list(title = "Average reads per window in %"),
                title = "Lorenz curves")
