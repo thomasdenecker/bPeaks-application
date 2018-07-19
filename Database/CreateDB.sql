@@ -30,3 +30,17 @@ CREATE TABLE dashboard (
   type_use TEXT NOT NULL,
   Utilisation_date timestamp default current_timestamp
 );
+
+
+CREATE TABLE annotation (
+  Feature_name Text PRIMARY KEY,
+  Primary_ID_database TEXT,
+  Standard_name Text,
+  Start integer NOT NULL,
+  CHECK (Start >=0),
+  Stop integer NOT NULL,
+  CHECK (Stop >=0),
+  Chromosome TEXT NOT NULL,
+  Description TEXT NOT NULL,
+  Specie TEXT NOT NULL
+);

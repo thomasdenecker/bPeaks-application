@@ -100,6 +100,31 @@ div.authen {
   margin-top: 20px;
 }
 
+
+
+hr.hrStyle {
+  border-top: 1px solid #8c8b8b;
+}
+
+div.AnnotGFF{
+  overflow-y: auto;
+  height:300px;
+}
+
+div.AnnotDB{
+  overflow-y: auto;
+  height:300px;
+}
+
+
+.alert p{
+  text-align: left;
+}
+
+/*******************************************************************************
+Authentification
+*******************************************************************************/
+
 #EMAIL {
   background: url(Images/user.svg) no-repeat scroll 2px 2px;
   padding-left: 35px;
@@ -118,8 +143,8 @@ div.authen {
   color: white;
 }
 
-hr.hrStyle {
-  border-top: 1px solid #8c8b8b;
+#SignUp, #ChangePW, #AddUsers{
+  width: 300px;
 }
 
 /*******************************************************************************

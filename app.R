@@ -612,22 +612,29 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      fluidRow(
                                        
                                        column(2, class="SidePanel",
+                                              tags$hr(),
                                               h3("Input file"),
                                               tags$hr(),
-                                              h4("Select Zip folder"),
+                                              h4("1- Select Zip folder"),
                                               p("Select an output bPeaks analyzer folder"),
                                               # shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
                                               fileInput("InputZip",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
                                               
-                                              h4("GFF file (.gff or gff.gz) "),
+                                              h4("2- GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
                                               fileInput("GFF",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
                                               
+                                              h4("3- Import annotation"),
+                                              p("Read documentation to format annatation file."),
+                                              fileInput("importDB",label = NULL,
+                                                        buttonLabel = "Browse...",
+                                                        placeholder = "No file selected"),
                                               
+                                              tags$hr(),
                                               h3("Chromosome selection"),
                                               tags$hr(),
                                               radioButtons("ChromRadio",NULL, c("None"),inline=T),
@@ -637,6 +644,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               h4("Detected peaks"),
                                               plotlyOutput("peaks_barplot", height = "300px"),
                                               
+                                              tags$hr(),
                                               h3("Summary"),
                                               tags$hr(),
                                               tableOutput("Summary")
@@ -659,16 +667,41 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               
                                               fluidRow(
                                                 p("(Peaks are highlighted by gray rectangles)", class= 'center'),
-                                                column(1),
-                                                column(2,h5("Start of the viewing window")),
+                                                
+                                                column(1,h5("Start")),
                                                 column(2,numericInput("min", label = NA, value = NULL)),
-                                                column(2,h5("End of the viewing window")),
+                                                column(1,h5("End")),
                                                 column(2,numericInput("max", label = NA, value = NULL)),
                                                 column(2,actionButton("limite", label = "Change")),
-                                                column(1)
+                                                column(2,selectizeInput("SearchGeneList", NULL, choices=c(1:6000), 
+                                                                        selected = NULL, multiple = FALSE,
+                                                                        options = list(
+                                                                          placeholder = 'Search a gene',
+                                                                          maxOptions = 100,
+                                                                          onInitialize = I('function() { this.setValue(""); }')
+                                                                        )
+                                                )),
+                                                column(2, actionButton("SearchGene", label = "Search gene"))
                                               ),
                                               
+                                              #/////////////////////////////////
+                                              # Area with general plot
+                                              #/////////////////////////////////
+                                              
                                               fluidRow(
+                                                h3(class='center', "Annotations"),
+                                                p(class='center',"Click on extremity of genes (if a GFF is loaded)" ),
+                                                column(6,htmlOutput(class='AnnotDB',"AnnotDB")),
+                                                column(6,htmlOutput(class='AnnotGFF',"AnnotGFF"))
+                                                
+                                              ),
+                                              
+                                              #/////////////////////////////////
+                                              # Area with quality control plots
+                                              #/////////////////////////////////
+                                              
+                                              fluidRow(
+                                                h3(class='center', "Quality controls"),
                                                 column(4,
                                                        div(class="figure",plotlyOutput("IPCO_boxplot"))),
                                                 column(4,
@@ -729,6 +762,64 @@ server <- function(input, output, session) {
   # Show or hide advanced parameter
   shinyjs::onclick("toggleAdvanced",
                    shinyjs::toggle(id = "advanced", anim = TRUE))
+  
+  
+  #=============================================================================
+  # TEST 
+  #=============================================================================
+  output$AnnotDB <- renderText({
+    s <- event_data("plotly_click")
+    if (length(s) == 0) {
+      ""
+    } else {
+      if(s$curveNumber != 0 & s$curveNumber != 1){
+        nameInter = grep("^Name=",unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), value = T)
+        nameInter = gsub("Name=", "", nameInter)
+        REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",nameInter
+                               ,"' or feature_name ='",nameInter
+                               ,"' or standard_name = '",nameInter,"';")
+        
+        annotInter = dbGetQuery(con, REQUEST_ANNOT)
+        paste("<h4 class='center'> Annotation in DB</h4><br/>",
+              "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+              "<b>Primary ID</b> :", annotInter[1,2], '<br/>', 
+              "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
+              "<b>Start</b> :", annotInter[1,4], '<br/>' ,
+              "<b>Stop</b> :", annotInter[1,5], '<br/>' ,
+              "<b>Chromosome</b> :", annotInter[1,6], '<br/>' ,
+              "<b>Description</b> :", annotInter[1,7], '<br/>' ,
+              "<b>Specie</b> :", annotInter[1,8] )
+        
+      } else {
+        "Click on extremity of genes"
+      }
+    }
+  })
+  
+  output$AnnotGFF <- renderText({
+    s <- event_data("plotly_click")
+    if (length(s) == 0) {
+      ""
+    } else {
+      if(s$curveNumber != 0 & s$curveNumber != 1){
+        
+        paste("<h4 class='center'> Annotation in GFF</h4><br/>",
+              paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), 
+                    collapse = "<br/>")
+        )
+        
+      } else {
+        "Click on extremity of genes"
+      }
+    }
+  })
+  
+  
+  
+  #=============================================================================
+  # END TEST 
+  #=============================================================================
+  
   
   #=============================================================================
   # Authentification
@@ -1627,6 +1718,75 @@ server <- function(input, output, session) {
   #=============================================================================
   
   #-----------------------------------------------------------------------------
+  # Annotation import
+  #-----------------------------------------------------------------------------
+  
+  observeEvent(input$importDB,{
+    
+    database = read.csv2(input$importDB$datapath, sep = "\t", header = F, stringsAsFactors = F)
+    if(ncol(database) == 8){
+      
+      withProgress(message = 'Import in Database', value = 0, {
+        
+        n <- nrow(database)
+        rv$ERROR = F
+        for(i in 1:nrow(database)){
+          
+          incProgress(1/n, detail = paste("Doing part", i))
+          
+          REQUEST_INDB = paste0("SELECT * from annotation WHERE Feature_name = '",database[i,1],"'" );
+          if(nrow(dbGetQuery(con, REQUEST_INDB)) != 0){
+            REQUEST_ANNOT = paste0("UPDATE annotation SET Primary_ID_database = '",database[i,2],"', standard_name = '",database[i,3],
+                                   "', Start = '",database[i,4],"', Stop ='",database[i,5],"', Chromosome ='",database[i,6],
+                                   "',Description ='",database[i,7]
+                                   ,"' WHERE Feature_name = '",database[i,1],"'" );
+          } else {
+            REQUEST_ANNOT = paste0("INSERT INTO annotation (Feature_name , Primary_ID_database,  standard_name, Start, Stop,Chromosome, Description, Specie) VALUES ( ",paste(paste0("'",database[i,],"'"),collapse = ","),
+                                   ");")
+          }
+          
+          tryCatch(dbSendQuery(con, REQUEST_ANNOT)
+                                 , error = function(c) {
+                                   shinyalert("Error when importing", 
+                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                              className="alert",
+                                              type = "error")
+                                   rv$ERROR = T
+                                 },warning = function(c) {
+                                   shinyalert("Error when importing", 
+                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                              className="alert",
+                                              type = "error")
+                                   rv$ERROR = T
+                                 }
+          )
+          
+          if(rv$ERROR == T){
+            cat("here", file =  stderr())
+            break()
+          } 
+          
+        }
+        
+        if(rv$ERROR == F){
+          shinyalert("Congratulations!", 
+                     "The import was successful!",
+                     type = "success")
+        }
+      })
+      
+      
+    } else {
+      shinyalert(paste0("The table format is not correct. The number of columns is",ncol(database)," instead of 8."), type = "error")
+    }
+    
+    
+    
+  })
+  
+  
+  
+  #-----------------------------------------------------------------------------
   # GFF
   #-----------------------------------------------------------------------------
   
@@ -1646,6 +1806,20 @@ server <- function(input, output, session) {
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                           & rv$GFF$type == "gene")
     }
+    
+    Genes_Chromosome = NULL
+    tempGenes = subset(rv$GFF, rv$GFF$type == "gene")
+    for(i in 1:nrow(tempGenes)){
+      nameInter = grep("^Name=",unlist(strsplit(tempGenes[i,"attributes"], ";")), value = T)
+      nameInter = gsub("Name=", "", nameInter)
+      Genes_Chromosome = rbind(Genes_Chromosome,
+                               c(nameInter, tempGenes$seqid[i]))
+    }
+    
+    rv$Genes_Chromosome = Genes_Chromosome
+    updateSelectInput(session, "SearchGeneList",
+                      choices = Genes_Chromosome[,1]
+    )
     
     
   })
@@ -1842,8 +2016,6 @@ server <- function(input, output, session) {
                              showlegend = F
               )
               
-              
-              
             } else {
               p <- add_trace(p, type="scatter", 
                              x = position_inter,
@@ -1878,6 +2050,30 @@ server <- function(input, output, session) {
   observeEvent(input$limite, {
     rv$min <- input$min
     rv$max <- input$max
+  })
+  
+  #-----------------------------------------------------------------------------
+  # Search gene
+  #-----------------------------------------------------------------------------
+  
+  observeEvent(input$SearchGene, {
+    chrInter = rv$Genes_Chromosome[ which(rv$Genes_Chromosome[,1] == input$SearchGeneList),2]
+    
+    if(paste0("chr",chrInter) %in% rv$CHROMOSOME){
+      chrInter = paste0("chr",chrInter)
+      updateRadioButtons(session, "ChromRadio",
+                         selected = chrInter
+      )
+    } else if (paste0("chr",as.roman(chrInter)) %in% rv$CHROMOSOME ) {
+      chrInter = paste0("chr",as.roman(chrInter))
+      updateRadioButtons(session, "ChromRadio",
+                         selected = chrInter
+      )
+    } else {
+      shinyalert("No data was found for the chromosome of this gene.", type = "warning")
+    }
+    
+    
   })
   
   #-----------------------------------------------------------------------------
