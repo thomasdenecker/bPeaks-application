@@ -612,22 +612,29 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      fluidRow(
                                        
                                        column(2, class="SidePanel",
+                                              tags$hr(),
                                               h3("Input file"),
                                               tags$hr(),
-                                              h4("Select Zip folder"),
+                                              h4("1- Select Zip folder"),
                                               p("Select an output bPeaks analyzer folder"),
                                               # shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
                                               fileInput("InputZip",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
                                               
-                                              h4("GFF file (.gff or gff.gz) "),
+                                              h4("2- GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
                                               fileInput("GFF",label = NULL,
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected"),
                                               
+                                              h4("3- Import annotation"),
+                                              p("Read documentation to format annatation file."),
+                                              fileInput("importDB",label = NULL,
+                                                        buttonLabel = "Browse...",
+                                                        placeholder = "No file selected"),
                                               
+                                              tags$hr(),
                                               h3("Chromosome selection"),
                                               tags$hr(),
                                               radioButtons("ChromRadio",NULL, c("None"),inline=T),
@@ -637,6 +644,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               h4("Detected peaks"),
                                               plotlyOutput("peaks_barplot", height = "300px"),
                                               
+                                              tags$hr(),
                                               h3("Summary"),
                                               tags$hr(),
                                               tableOutput("Summary")
@@ -1710,6 +1718,75 @@ server <- function(input, output, session) {
   #=============================================================================
   
   #-----------------------------------------------------------------------------
+  # Annotation import
+  #-----------------------------------------------------------------------------
+  
+  observeEvent(input$importDB,{
+    
+    database = read.csv2(input$importDB$datapath, sep = "\t", header = F, stringsAsFactors = F)
+    if(ncol(database) == 8){
+      
+      withProgress(message = 'Import in Database', value = 0, {
+        
+        n <- nrow(database)
+        rv$ERROR = F
+        for(i in 1:nrow(database)){
+          
+          incProgress(1/n, detail = paste("Doing part", i))
+          
+          REQUEST_INDB = paste0("SELECT * from annotation WHERE Feature_name = '",database[i,1],"'" );
+          if(nrow(dbGetQuery(con, REQUEST_INDB)) != 0){
+            REQUEST_ANNOT = paste0("UPDATE annotation SET Primary_ID_database = '",database[i,2],"', standard_name = '",database[i,3],
+                                   "', Start = '",database[i,4],"', Stop ='",database[i,5],"', Chromosome ='",database[i,6],
+                                   "',Description ='",database[i,7]
+                                   ,"' WHERE Feature_name = '",database[i,1],"'" );
+          } else {
+            REQUEST_ANNOT = paste0("INSERT INTO annotation (Feature_name , Primary_ID_database,  standard_name, Start, Stop,Chromosome, Description, Specie) VALUES ( ",paste(paste0("'",database[i,],"'"),collapse = ","),
+                                   ");")
+          }
+          
+          tryCatch(dbSendQuery(con, REQUEST_ANNOT)
+                                 , error = function(c) {
+                                   shinyalert("Error when importing", 
+                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                              className="alert",
+                                              type = "error")
+                                   rv$ERROR = T
+                                 },warning = function(c) {
+                                   shinyalert("Error when importing", 
+                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                              className="alert",
+                                              type = "error")
+                                   rv$ERROR = T
+                                 }
+          )
+          
+          if(rv$ERROR == T){
+            cat("here", file =  stderr())
+            break()
+          } 
+          
+        }
+        
+        if(rv$ERROR == F){
+          shinyalert("Congratulations!", 
+                     "The import was successful!",
+                     type = "success")
+        }
+      })
+      
+      
+    } else {
+      shinyalert(paste0("The table format is not correct. The number of columns is",ncol(database)," instead of 8."), type = "error")
+    }
+    
+    
+    
+  })
+  
+  
+  
+  #-----------------------------------------------------------------------------
   # GFF
   #-----------------------------------------------------------------------------
   
@@ -1729,7 +1806,7 @@ server <- function(input, output, session) {
       rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                           & rv$GFF$type == "gene")
     }
-
+    
     Genes_Chromosome = NULL
     tempGenes = subset(rv$GFF, rv$GFF$type == "gene")
     for(i in 1:nrow(tempGenes)){
@@ -1939,8 +2016,6 @@ server <- function(input, output, session) {
                              showlegend = F
               )
               
-              
-              
             } else {
               p <- add_trace(p, type="scatter", 
                              x = position_inter,
@@ -1997,7 +2072,7 @@ server <- function(input, output, session) {
     } else {
       shinyalert("No data was found for the chromosome of this gene.", type = "warning")
     }
-
+    
     
   })
   
