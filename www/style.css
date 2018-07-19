@@ -122,6 +122,16 @@ hr.hrStyle {
   border-top: 1px solid #8c8b8b;
 }
 
+div.AnnotGFF{
+  overflow-y: auto;
+  height:300px;
+}
+
+div.AnnotDB{
+  overflow-y: auto;
+  height:300px;
+}
+
 /*******************************************************************************
 Div style
 *******************************************************************************/
