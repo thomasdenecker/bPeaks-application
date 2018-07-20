@@ -668,12 +668,12 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               fluidRow(
                                                 p("(Peaks are highlighted by gray rectangles)", class= 'center'),
                                                 
-                                                column(1,h5("Start")),
+                                                column(1,h5(class="textRight","Start")),
                                                 column(2,numericInput("min", label = NA, value = NULL)),
-                                                column(1,h5("End")),
+                                                column(1,h5(class="textRight","End")),
                                                 column(2,numericInput("max", label = NA, value = NULL)),
                                                 column(2,actionButton("limite", label = "Change")),
-                                                column(2,selectizeInput("SearchGeneList", NULL, choices=c(1:6000), 
+                                                column(2,selectizeInput("SearchGeneList", NULL, choices = NULL, 
                                                                         selected = NULL, multiple = FALSE,
                                                                         options = list(
                                                                           placeholder = 'Search a gene',
@@ -755,6 +755,9 @@ server <- function(input, output, session) {
   
   # Creation reactive values to update plots
   rv <- reactiveValues()
+  rv$SearchGeneChange <- F
+  rv$SearchGeneChangeDB <- F
+  rv$SearchGeneChangeGFF <- F
   
   #Increase the size of files allowed by shiny
   options(shiny.maxRequestSize=1000*1024^2)
@@ -762,63 +765,6 @@ server <- function(input, output, session) {
   # Show or hide advanced parameter
   shinyjs::onclick("toggleAdvanced",
                    shinyjs::toggle(id = "advanced", anim = TRUE))
-  
-  
-  #=============================================================================
-  # TEST 
-  #=============================================================================
-  output$AnnotDB <- renderText({
-    s <- event_data("plotly_click")
-    if (length(s) == 0) {
-      ""
-    } else {
-      if(s$curveNumber != 0 & s$curveNumber != 1){
-        nameInter = grep("^Name=",unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), value = T)
-        nameInter = gsub("Name=", "", nameInter)
-        REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",nameInter
-                               ,"' or feature_name ='",nameInter
-                               ,"' or standard_name = '",nameInter,"';")
-        
-        annotInter = dbGetQuery(con, REQUEST_ANNOT)
-        paste("<h4 class='center'> Annotation in DB</h4><br/>",
-              "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
-              "<b>Primary ID</b> :", annotInter[1,2], '<br/>', 
-              "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
-              "<b>Start</b> :", annotInter[1,4], '<br/>' ,
-              "<b>Stop</b> :", annotInter[1,5], '<br/>' ,
-              "<b>Chromosome</b> :", annotInter[1,6], '<br/>' ,
-              "<b>Description</b> :", annotInter[1,7], '<br/>' ,
-              "<b>Specie</b> :", annotInter[1,8] )
-        
-      } else {
-        "Click on extremity of genes"
-      }
-    }
-  })
-  
-  output$AnnotGFF <- renderText({
-    s <- event_data("plotly_click")
-    if (length(s) == 0) {
-      ""
-    } else {
-      if(s$curveNumber != 0 & s$curveNumber != 1){
-        
-        paste("<h4 class='center'> Annotation in GFF</h4><br/>",
-              paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), 
-                    collapse = "<br/>")
-        )
-        
-      } else {
-        "Click on extremity of genes"
-      }
-    }
-  })
-  
-  
-  
-  #=============================================================================
-  # END TEST 
-  #=============================================================================
   
   
   #=============================================================================
@@ -1746,19 +1692,19 @@ server <- function(input, output, session) {
           }
           
           tryCatch(dbSendQuery(con, REQUEST_ANNOT)
-                                 , error = function(c) {
-                                   shinyalert("Error when importing", 
-                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
-                                              className="alert",
-                                              type = "error")
-                                   rv$ERROR = T
-                                 },warning = function(c) {
-                                   shinyalert("Error when importing", 
-                                              paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
-                                              className="alert",
-                                              type = "error")
-                                   rv$ERROR = T
-                                 }
+                   , error = function(c) {
+                     shinyalert("Error when importing", 
+                                paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                className="alert",
+                                type = "error")
+                     rv$ERROR = T
+                   },warning = function(c) {
+                     shinyalert("Error when importing", 
+                                paste0(c,"\n The error occurred on line ",i," of the table.The chevron shows you where the error is."), 
+                                className="alert",
+                                type = "error")
+                     rv$ERROR = T
+                   }
           )
           
           if(rv$ERROR == T){
@@ -1775,12 +1721,9 @@ server <- function(input, output, session) {
         }
       })
       
-      
     } else {
       shinyalert(paste0("The table format is not correct. The number of columns is",ncol(database)," instead of 8."), type = "error")
     }
-    
-    
     
   })
   
@@ -1813,10 +1756,13 @@ server <- function(input, output, session) {
       nameInter = grep("^Name=",unlist(strsplit(tempGenes[i,"attributes"], ";")), value = T)
       nameInter = gsub("Name=", "", nameInter)
       Genes_Chromosome = rbind(Genes_Chromosome,
-                               c(nameInter, tempGenes$seqid[i]))
+                               c(nameInter, tempGenes$seqid[i],
+                                 tempGenes[i,"start"],
+                                 tempGenes[i,"end"]))
     }
     
     rv$Genes_Chromosome = Genes_Chromosome
+    
     updateSelectInput(session, "SearchGeneList",
                       choices = Genes_Chromosome[,1]
     )
@@ -1929,8 +1875,14 @@ server <- function(input, output, session) {
       rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",input$ChromRadio,".txt"), sep = "\t", header = F)
       
       # add in reactive variable plot limits
-      rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
-      rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
+      if(rv$SearchGeneChange == F ){
+        rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
+        rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
+      } else {
+        rv$min <- rv$changeMin
+        rv$max <- rv$changeMax
+        rv$SearchGeneChange = F
+      }
       
       # Change plot limits in inputs
       updateNumericInput(session, "min", value = rv$min)
@@ -2056,25 +2008,150 @@ server <- function(input, output, session) {
   # Search gene
   #-----------------------------------------------------------------------------
   
-  observeEvent(input$SearchGene, {
-    chrInter = rv$Genes_Chromosome[ which(rv$Genes_Chromosome[,1] == input$SearchGeneList),2]
+  observeEvent(input$SearchGeneList, {
+    output$AnnotDB <- renderText({
+      if(input$SearchGeneList != "" ){
+        REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",input$SearchGeneList
+                               ,"' or feature_name ='",input$SearchGeneList
+                               ,"' or standard_name = '",input$SearchGeneList,"';")
+        
+        annotInter = dbGetQuery(con, REQUEST_ANNOT)
+        paste("<h4 class='center'> Annotation in DB</h4><br/>",
+              "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+              "<b>Primary ID</b> :", annotInter[1,2], '<br/>', 
+              "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
+              "<b>Start</b> :", annotInter[1,4], '<br/>' ,
+              "<b>Stop</b> :", annotInter[1,5], '<br/>' ,
+              "<b>Chromosome</b> :", annotInter[1,6], '<br/>' ,
+              "<b>Description</b> :", annotInter[1,7], '<br/>' ,
+              "<b>Specie</b> :", annotInter[1,8] )
+      }
+    })
     
-    if(paste0("chr",chrInter) %in% rv$CHROMOSOME){
-      chrInter = paste0("chr",chrInter)
-      updateRadioButtons(session, "ChromRadio",
-                         selected = chrInter
-      )
-    } else if (paste0("chr",as.roman(chrInter)) %in% rv$CHROMOSOME ) {
-      chrInter = paste0("chr",as.roman(chrInter))
-      updateRadioButtons(session, "ChromRadio",
-                         selected = chrInter
-      )
+    output$AnnotGFF <- renderText({
+      if(input$SearchGeneList != ""){
+        paste("<h4 class='center'> Annotation in GFF</h4><br/>",
+              paste(unlist(strsplit(rv$GFF_CHR[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),"attributes"], ";")), 
+                    collapse = "<br/>")
+        )
+      }
+    })
+    
+  })
+  
+  observeEvent(input$SearchGene, {
+    pos = which(rv$Genes_Chromosome[,1] == input$SearchGeneList)
+    chrInter = rv$Genes_Chromosome[ pos,2]
+    
+    if(paste0("chr",chrInter) %in% rv$CHROMOSOME |
+       paste0("chr",as.roman(chrInter)) %in% rv$CHROMOSOME ){
+      
+      if(paste0("chr",chrInter) %in% rv$CHROMOSOME ){
+        chrInter = paste0("chr",chrInter)
+      }else {
+        chrInter = paste0("chr",as.roman(chrInter))
+      }
+      
+      if(chrInter == input$ChromRadio ){
+        rv$min <-  as.numeric(as.character(rv$Genes_Chromosome[pos,3]))
+        rv$max <-  as.numeric(as.character(rv$Genes_Chromosome[pos,4]))
+        updateNumericInput(session, "min", value = rv$min)
+        updateNumericInput(session, "max", value = rv$max)
+      } else {
+        rv$changeMin <-  as.numeric(as.character(rv$Genes_Chromosome[pos,3]))
+        rv$changeMax <-  as.numeric(as.character(rv$Genes_Chromosome[pos,4]))
+        rv$SearchGeneChange <- T
+        rv$SearchGeneChangeDB <- T
+        rv$SearchGeneChangeGFF <- T
+        
+        updateNumericInput(session, "min", value = rv$changeMin)
+        updateNumericInput(session, "max", value = rv$changeMax)
+        updateRadioButtons(session, "ChromRadio",
+                           selected = chrInter)
+      }
+      
+      output$AnnotDB <- renderText({
+        REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",input$SearchGeneList
+                               ,"' or feature_name ='",input$SearchGeneList
+                               ,"' or standard_name = '",input$SearchGeneList,"';")
+        
+        annotInter = dbGetQuery(con, REQUEST_ANNOT)
+        paste("<h4 class='center'> Annotation in DB</h4><br/>",
+              "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+              "<b>Primary ID</b> :", annotInter[1,2], '<br/>', 
+              "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
+              "<b>Start</b> :", annotInter[1,4], '<br/>' ,
+              "<b>Stop</b> :", annotInter[1,5], '<br/>' ,
+              "<b>Chromosome</b> :", annotInter[1,6], '<br/>' ,
+              "<b>Description</b> :", annotInter[1,7], '<br/>' ,
+              "<b>Specie</b> :", annotInter[1,8] )
+      })
+      
+      output$AnnotGFF <- renderText({
+        paste("<h4 class='center'> Annotation in GFF</h4><br/>",
+              paste(unlist(strsplit(rv$GFF_CHR[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),"attributes"], ";")), 
+                    collapse = "<br/>")
+        )
+      })
+      
     } else {
       shinyalert("No data was found for the chromosome of this gene.", type = "warning")
     }
     
     
   })
+  
+  #-----------------------------------------------------------------------------
+  # Annotation area
+  #-----------------------------------------------------------------------------
+  
+  output$AnnotDB <- renderText({
+    s <- event_data("plotly_click")
+    if (length(s) == 0) {
+      ""
+    } else {
+      if(s$curveNumber != 0 & s$curveNumber != 1){
+        nameInter = grep("^Name=",unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), value = T)
+        nameInter = gsub("Name=", "", nameInter)
+        REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",nameInter
+                               ,"' or feature_name ='",nameInter
+                               ,"' or standard_name = '",nameInter,"';")
+        
+        annotInter = dbGetQuery(con, REQUEST_ANNOT)
+        paste("<h4 class='center'> Annotation in DB</h4><br/>",
+              "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+              "<b>Primary ID</b> :", annotInter[1,2], '<br/>', 
+              "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
+              "<b>Start</b> :", annotInter[1,4], '<br/>' ,
+              "<b>Stop</b> :", annotInter[1,5], '<br/>' ,
+              "<b>Chromosome</b> :", annotInter[1,6], '<br/>' ,
+              "<b>Description</b> :", annotInter[1,7], '<br/>' ,
+              "<b>Specie</b> :", annotInter[1,8] )
+        
+      } else {
+        "Click on extremity of genes"
+      }
+    }
+  })
+  
+  output$AnnotGFF <- renderText({
+    s <- event_data("plotly_click")
+    if (length(s) == 0) {
+      ""
+    } else {
+      if(s$curveNumber != 0 & s$curveNumber != 1){
+        
+        paste("<h4 class='center'> Annotation in GFF</h4><br/>",
+              paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), 
+                    collapse = "<br/>")
+        )
+        
+      } else {
+        "Click on extremity of genes"
+      }
+    }
+  })
+  
   
   #-----------------------------------------------------------------------------
   # Barplot : Number of detected peaks
