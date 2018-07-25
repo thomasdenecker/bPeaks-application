@@ -24,6 +24,7 @@ library(RPostgreSQL)
 library(shinyalert)
 library(googleVis)
 library(V8)
+library(tools)
 
 ################################################################################
 # Admin adress
@@ -44,16 +45,15 @@ names(COUNTRY) = sort(Population$Country)
 ################################################################################
 
 ipDB = read.table("Database/ipDB.txt", header = F, stringsAsFactors = F)[1,1]
-pg <- dbDriver("PostgreSQL")
-con <- dbConnect(pg, user="docker", password="docker",
-                 host=ipDB, port=5432)
 
 ################################################################################
 # UI
 ################################################################################
 
 ui <- fluidPage(useShinyjs(), useShinyalert(),
+                # options(shiny.fullstacktrace = TRUE),
                 extendShinyjs(text = "shinyjs.resetClick = function() { Shiny.onInputChange('.clientValue-plotly_click-A', 'null'); }"),
+                
                 ################################################################
                 # Head
                 ################################################################
@@ -314,16 +314,16 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        binding sites.',alin="center"),
                                      
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                                     # FILE SELECTION
+                                     # Experimental data
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      
-                                     fluidRow(class="div_TITLE", column(12,tags$h3(strong("File selection"),align = "center"))),
+                                     fluidRow(class="div_TITLE", column(12,tags$h3(strong("Experimental data (Mandatory)"),align = "center"))),
                                      
                                      #..........................................
                                      # IP file
                                      #..........................................
                                      
-                                     fluidRow(column(4,HTML('<h3>IPdata <a href="#" data-toggle="tooltip"
+                                     fluidRow(column(6,HTML('<h3>IPdata <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="A dataframe with sequencing results of the IP sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                      fileInput("fileIP",label = NULL,
@@ -361,7 +361,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      # CO file
                                      #..........................................
                                      
-                                     column(4,HTML('<h3>Control data <a href="#" data-toggle="tooltip"
+                                     column(6,HTML('<h3>Control data <a href="#" data-toggle="tooltip"
                                                    data-placement="bottom" title="A dataframe with sequencing results of the control sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                             fileInput("fileCO",
@@ -392,44 +392,72 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                             
                                             h3("Preview"),
                                             dataTableOutput(outputId = "contents_CO")
+                                     )
                                      ),
                                      
-                                     #..........................................
-                                     # CDS file
-                                     #..........................................
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                                     # Experimental data
+                                     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      
-                                     column(4,HTML('<h3>CDS position <a href="#" data-toggle="tooltip"
+                                     fluidRow(class="div_TITLE", column(12,tags$h3(strong("Data annotations"),align = "center"))),
+                                     
+                                     fluidRow(
+                                       
+                                       #..........................................
+                                       # CDS file
+                                       #..........................................
+                                       
+                                       column(6,HTML('<h3>CDS position <a href="#" data-toggle="tooltip"
                                                    data-placement="bottom" title="Not mandatory. A table (matrix) with positions of CDS (genes). Four columns are required (chromosome, starting position, ending position, strand (W or C), description). CDS positions for several yeast species are stored in bPeaks package (see the dataset yeastCDS and also peakLocation function)">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                            fileInput("fileCDS",
-                                                      NULL,
-                                                      buttonLabel = "Browse...",
-                                                      placeholder = "No file selected"),align = "center",
-                                            tags$hr(),
-                                            
-                                            # Input: Checkbox if file has header
-                                            radioButtons("header_CDS", "Header",
-                                                         choices = c("Yes" = TRUE,
-                                                                     "No" = FALSE),
-                                                         selected = TRUE, inline=T),
-                                            
-                                            # Input: Select separator ----
-                                            radioButtons("sep_CDS", "Separator",
-                                                         choices = c(Comma = ",",
-                                                                     Semicolon = ";",
-                                                                     Tab = "\t"),
-                                                         selected = "\t", inline=T),
-                                            
-                                            # Input: Select quotes ----
-                                            radioButtons("quote_CDS", "Quote",
-                                                         choices = c(None = "",
-                                                                     "Double Quote" = '"',
-                                                                     "Single Quote" = "'"),
-                                                         selected = "", inline=T),
-                                            
-                                            h3("Preview"),
-                                            dataTableOutput(outputId = "contents_CDS")
-                                     )),
+                                              fileInput("fileCDS",
+                                                        NULL,
+                                                        buttonLabel = "Browse...",
+                                                        placeholder = "No file selected"),align = "center",
+                                              tags$hr(),
+                                              
+                                              # Input: Checkbox if file has header
+                                              radioButtons("header_CDS", "Header",
+                                                           choices = c("Yes" = TRUE,
+                                                                       "No" = FALSE),
+                                                           selected = TRUE, inline=T),
+                                              
+                                              # Input: Select separator ----
+                                              radioButtons("sep_CDS", "Separator",
+                                                           choices = c(Comma = ",",
+                                                                       Semicolon = ";",
+                                                                       Tab = "\t"),
+                                                           selected = "\t", inline=T),
+                                              
+                                              # Input: Select quotes ----
+                                              radioButtons("quote_CDS", "Quote",
+                                                           choices = c(None = "",
+                                                                       "Double Quote" = '"',
+                                                                       "Single Quote" = "'"),
+                                                           selected = "", inline=T),
+                                              
+                                              h3("Preview"),
+                                              dataTableOutput(outputId = "contents_CDS")
+                                       ),
+                                       
+                                       #........................................
+                                       # Sequence fasta
+                                       #........................................
+                                       
+                                       column(6,HTML('<h3>Genome sequence<a href="#" data-toggle="tooltip"
+                                                   data-placement="bottom" title="Not mandatory. To get the peaks sequences. Format : .fasta">
+                                                     <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
+                                              fileInput("fileFasta",
+                                                        NULL,
+                                                        buttonLabel = "Browse...",
+                                                        placeholder = "No file selected"),align = "center",
+                                              tags$hr(),
+                                              
+                                              h3("Preview"),
+                                              htmlOutput(outputId = "contents_FASTA", class = "contents_FASTA")
+                                       )
+                                       
+                                     ),
                                      
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      # BPeaks parameters
@@ -487,53 +515,50 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      # Advanced parameters
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                      
-                                     a(id = "toggleAdvanced", "Show/hide advanced info", href = "#"),
-                                     shinyjs::hidden(
-                                       div(id = "advanced",
-                                           fluidRow(class="div_TITLE",column(12,tags$h3(strong("Advanced parameters"),align = "center"))),
-                                           fluidRow(
-                                             column(4,HTML('<h3>Result name <a href="#" data-toggle="tooltip"
+                                     div(id = "advanced",
+                                         fluidRow(class="div_TITLE",column(12,tags$h3(strong("Advanced parameters"),align = "center"))),
+                                         fluidRow(
+                                           column(4,HTML('<h3>Result name <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="Name for output files created during bPeaks procedure">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    textInput("resultName",
-                                                              NULL,
-                                                              value = "bPeaks",  width = "100%"),
-                                                    class = "center"),
-                                             
-                                             column(4,HTML('<h3>Peak drawing <a href="#" data-toggle="tooltip"
+                                                  textInput("resultName",
+                                                            NULL,
+                                                            value = "bPeaks",  width = "100%"),
+                                                  class = "center"),
+                                           
+                                           column(4,HTML('<h3>Peak drawing <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="TRUE or FLASE. If TRUE, the function peakDrawing is called and PDF files with graphical representations of detected peaks are created.">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    radioButtons("peakDrawing", NULL,
-                                                                 c("TRUE" = "TRUE",
-                                                                   "FALSE" = "FALSE"), width = "100%"),
-                                                    class = "center"),
-                                             
-                                             column(4,HTML('<h3>Prom Size <a href="#" data-toggle="tooltip"
+                                                  radioButtons("peakDrawing", NULL,
+                                                               c("TRUE" = "TRUE",
+                                                                 "FALSE" = "FALSE"), width = "100%"),
+                                                  class = "center"),
+                                           
+                                           column(4,HTML('<h3>Prom Size <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="Size of the genomic regions to be considered as "upstream" to the annotated genomic features (see documentation of the function peakLocation for more information).">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    numericInput("promSize",
-                                                                 NULL,
-                                                                 value = 800,  width = "100%"),
-                                                    class = "center")
-                                           ),
-                                           fluidRow(
-                                             column(4,HTML('<h3>Without overlap <a href="#" data-toggle="tooltip"
+                                                  numericInput("promSize",
+                                                               NULL,
+                                                               value = 800,  width = "100%"),
+                                                  class = "center")
+                                         ),
+                                         fluidRow(
+                                           column(4,HTML('<h3>Without overlap <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="If TRUE, this option allows to filter peak that are located in a promoter AND a CDS.">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    radioButtons("withoutOverlap", NULL,
-                                                                 c("TRUE" = "TRUE",
-                                                                   "FALSE" = "FALSE"), width = "100%"),
-                                                    class = "center"),
-                                             
-                                             column(4,HTML('<h3>Smoothing value <a href="#" data-toggle="tooltip"
+                                                  radioButtons("withoutOverlap", NULL,
+                                                               c("TRUE" = "TRUE",
+                                                                 "FALSE" = "FALSE"), width = "100%"),
+                                                  class = "center"),
+                                           
+                                           column(4,HTML('<h3>Smoothing value <a href="#" data-toggle="tooltip"
                                                            data-placement="bottom" title="The number (n/2) of surrounding positions to use for mean calculation in the dataSmoothing function">
                                                            <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
-                                                    numericInput("smoothingValue",
-                                                                 NULL,
-                                                                 value = 20,  width = "100%"),
-                                                    class = "center")
-                                           )
-                                       )
+                                                  numericInput("smoothingValue",
+                                                               NULL,
+                                                               value = 20,  width = "100%"),
+                                                  class = "center")
+                                         )
                                      ),
                                      
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -575,8 +600,9 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      
                                      fluidRow(
                                        HTML("<div id='Hidebox'>"),
-                                       column(6,  actionButton(inputId = "RUN", label = "RUN", class= "myBtn" )),
-                                       column(6, downloadButton("downloadData", label = "Download", class ="downloadData center")),
+                                       column(4,  actionButton(inputId = "RUN", label = "1- RUN", class= "myBtn" )),
+                                       column(4, downloadButton("downloadData", label = "2- Download", class ="downloadData center")),
+                                       column(4, actionButton("Toexplo", label = "3- Exploration", class ="myBtn")),
                                        HTML("</div>")
                                      ),
                                      
@@ -591,7 +617,8 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        textOutput("folderName"),
                                        textOutput("bPeakDetected"),
                                        dataTableOutput("SummaryRun"),
-                                       br(),
+                                       downloadButton("downloadTable", label = "Download table", class ="pull-right"),
+                                       br(),br(),
                                        
                                        HTML("</div>")
                                      ),
@@ -614,6 +641,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      fluidRow(
                                        
                                        column(2, class="SidePanel",
+                                              actionButton("BackAnalyzer", label = "< Back to analyzer", class ="BackAnalyzer"),
                                               tags$hr(),
                                               h3("Input file"),
                                               tags$hr(),
@@ -622,7 +650,8 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               # shinyDirButton('folder', class ="loadFolder" ,'Browse...', 'Please select a folder', FALSE),
                                               fileInput("InputZip",label = NULL,
                                                         buttonLabel = "Browse...",
-                                                        placeholder = "No file selected"),
+                                                        placeholder = "No file selected",
+                                                        accept = ".zip"),
                                               
                                               h4("2- GFF file (.gff or gff.gz) "),
                                               tags$i(HTML("<a href='https://www.ncbi.nlm.nih.gov/genome'  target='_blank'>Find your gff</a>")),
@@ -631,10 +660,11 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                         placeholder = "No file selected"),
                                               
                                               h4("3- Import annotation"),
-                                              p("Read documentation to format annatation file."),
+                                              p("Read documentation to format annotation file."),
                                               fileInput("importDB",label = NULL,
                                                         buttonLabel = "Browse...",
-                                                        placeholder = "No file selected"),
+                                                        placeholder = "No file selected",
+                                                        accept = ".tsv"),
                                               
                                               tags$hr(),
                                               h3("Chromosome selection"),
@@ -668,8 +698,6 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               #/////////////////////////////////
                                               
                                               fluidRow(
-                                                p("(Peaks are highlighted by gray rectangles)", class= 'center'),
-                                                
                                                 column(1,h5(class="textRight","Start")),
                                                 column(2,numericInput("min", label = NA, value = NULL)),
                                                 column(1,h5(class="textRight","End")),
@@ -692,11 +720,22 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               
                                               fluidRow(
                                                 h3(class='center', "Annotations"),
-                                                p(class='center',"Click on extremity of genes (if a GFF is loaded)" ),
-                                                column(6,htmlOutput(class='AnnotDB',"AnnotDB")),
-                                                column(6,htmlOutput(class='AnnotGFF',"AnnotGFF"))
+                                                column(4, class='Annot', h4(class='center',"Annotation in DB"),
+                                                       htmlOutput("AnnotDB")),
+                                                column(4,class='Annot', h4(class='center',"Annotation in GFF"),
+                                                       htmlOutput("AnnotGFF")),
+                                                column(4,class='Annot', h4(class='center',"Annotation of peak"),
+                                                       htmlOutput("AnnotPeak"))
                                                 
                                               ),
+                                              fluidRow(
+                                                h3(class='center', "Peak representations"),
+                                                column(6, uiOutput("pdfviewSummary")),
+                                                column(6, uiOutput("pdfviewDrawing"))
+                                                
+                                              ),
+                                              
+                                              
                                               
                                               #/////////////////////////////////
                                               # Area with quality control plots
@@ -743,10 +782,10 @@ server <- function(input, output, session) {
   
   session$onSessionEnded(function() {
     
-    dbDisconnect(con)
-    dbUnloadDriver(pg)
     if(length(isolate(rv$userTempFolder)) != 0){
       unlink(paste0(getwd(),"/Outputs/", isolate(rv$userTempFolder)), recursive = T)
+      unlink(paste0(getwd(),"/www/", isolate(rv$userTempFolder),"_Summary.pdf"), recursive = T)
+      unlink(paste0(getwd(),"/www/", isolate(rv$userTempFolder),"_Drawing.pdf"), recursive = T)
     }
     
   })
@@ -755,6 +794,12 @@ server <- function(input, output, session) {
   # General
   #=============================================================================
   
+  # db CONNECT
+  pg <- dbDriver("PostgreSQL")
+  con <- dbConnect(pg, user="docker", password="docker",
+                   host=ipDB, port=5432)
+  on.exit(dbDisconnect(con))
+  
   # Creation reactive values to update plots
   rv <- reactiveValues()
   rv$SearchGeneChange <- F
@@ -762,10 +807,7 @@ server <- function(input, output, session) {
   #Increase the size of files allowed by shiny
   options(shiny.maxRequestSize=1000*1024^2)
   
-  # Show or hide advanced parameter
-  shinyjs::onclick("toggleAdvanced",
-                   shinyjs::toggle(id = "advanced", anim = TRUE))
-  
+  disable("downloadData")
   
   #=============================================================================
   # Authentification
@@ -790,6 +832,12 @@ server <- function(input, output, session) {
                             input$PW_new,"', password) WHERE ( email = '",input$EMAIL_CPW,"' 
                      or user_name = '",input$EMAIL_CPW,"') AND password =crypt('",
                             input$PW_old,"', password);")
+    
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     dbGetQuery(con, REQUEST_CHANGE)
     
@@ -839,6 +887,10 @@ server <- function(input, output, session) {
                            AND password = crypt('",input$PW_ADMIN,"', password) 
                            AND usertype = 'Admin';")
     
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     if(nrow(dbGetQuery(con, REQUEST_ADMIN)) == 0 ){
       shinyalert("Oops!", "Something went wrong (Are you admin?).", type = "error")
@@ -875,6 +927,7 @@ server <- function(input, output, session) {
                           selected = "Authentification")
       }
     }
+    
     
   })
   
@@ -914,6 +967,11 @@ server <- function(input, output, session) {
             FROM users
             WHERE ( email = '",input$EMAIL,"' or user_name = '",input$EMAIL,"') 
             AND password = crypt('",input$PW,"', password);")
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     if(input$EMAIL != "" & input$PW != ""){
       RESULT_REQUEST = dbGetQuery(con, REQUEST)
@@ -967,23 +1025,52 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   
   output$peaks_detected <- renderText({
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
     REQUEST_PD = paste("SELECT sum(peaks_detected) FROM dashboard where type_use = 'analysis';")
-    dbGetQuery(con, REQUEST_PD)[1,1]
+    res <- dbGetQuery(con, REQUEST_PD)[1,1]
+    
+    print(res)
   })
   
   output$chromosome_studied <- renderText({
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
     REQUEST_CS = paste("SELECT sum(chromosome_studied) FROM dashboard where type_use = 'analysis';")
-    dbGetQuery(con, REQUEST_CS)[1,1]
+    res <- dbGetQuery(con, REQUEST_CS)[1,1]
+    
+    print(res)
   })
   
   output$nbr_analysis <- renderText({
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
     REQUEST_NA = paste("SELECT count(*) FROM dashboard where type_use = 'analysis';")
-    dbGetQuery(con, REQUEST_NA)[1,1]
+    res <- dbGetQuery(con, REQUEST_NA)[1,1]
+    
+    print(res)
   })
   
   output$nbr_exploration <- renderText({
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
     REQUEST_NA = paste("SELECT count(*) FROM dashboard where type_use = 'exploration';")
-    dbGetQuery(con, REQUEST_NA)[1,1]
+    res <- dbGetQuery(con, REQUEST_NA)[1,1]
+    
+    print(res)
   })
   
   #-----------------------------------------------------------------------------
@@ -997,7 +1084,16 @@ server <- function(input, output, session) {
                           'email as "Email",',
                           'to_char(creation_date,',formatDate,') as "Joined on"',
                           'FROM users;')
-    dbGetQuery(con, REQUEST_Table)
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
+    Table <- dbGetQuery(con, REQUEST_Table)
+    
+    print(Table)
+    
   },  options = list(scrollX = TRUE , dom = 't'))
   
   
@@ -1007,10 +1103,19 @@ server <- function(input, output, session) {
   
   output$UsersMap <- renderGvis({
     REQUEST_MAP = paste0("SELECT country, count(*) FROM users GROUP BY country ;")
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
+    
     MapTable = dbGetQuery(con, REQUEST_MAP)
+    
     gvisGeoChart(MapTable, locationvar="country", 
                  colorvar="count",
                  options=list(projection="kavrayskiy-vii"))
+    
+    
   })
   
   output$calendarAnalyzer <- renderGvis({
@@ -1018,6 +1123,11 @@ server <- function(input, output, session) {
     REQUEST_CA = "SELECT to_char(utilisation_date,'YYYY-MM-DD') as Date, count(*) 
     FROM dashboard
     WHERE type_use = 'analysis' GROUP BY to_char(utilisation_date,'YYYY-MM-DD');"
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     calendarA = dbGetQuery(con, REQUEST_CA)
     
@@ -1042,6 +1152,11 @@ server <- function(input, output, session) {
     REQUEST_CE = "SELECT to_char(utilisation_date,'YYYY-MM-DD') as Date, count(*) 
     FROM dashboard
     WHERE type_use = 'exploration' GROUP BY to_char(utilisation_date,'YYYY-MM-DD');"
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     calendarE = dbGetQuery(con, REQUEST_CE)
     
@@ -1122,6 +1237,25 @@ server <- function(input, output, session) {
     )
     
   },  options = list(scrollX = TRUE, dom = 't'))
+  
+  #*****************************************************************************
+  # FASTA preview
+  #*****************************************************************************
+  
+  output$contents_FASTA <-  renderText({
+    library(seqinr)
+    req(input$fileFasta)
+    
+    df <- read.fasta(input$fileFasta$datapath)
+    temp = NULL
+    for(i in 1:length(df)){
+      temp = c(temp, paste(attributes(df[[i]])$Annot,
+                           paste0(paste(df[[i]][1:20], collapse = ""), "..."), sep = "<br>"))
+    }
+    paste(temp, collapse = "<br>")
+    
+  })
+  
   
   #-----------------------------------------------------------------------------
   # Output
@@ -1352,267 +1486,308 @@ server <- function(input, output, session) {
                              withoutOverlap = as.logical(input$withoutOverlap))
       
       
-      rv$SummaryRun = read.table(paste0(input$resultName,"_bPeaks_parameterSummary.txt"), 
+      rv$SummaryRun = read.table(grep( "*_parameterSummary.txt",list.files(), value = T),
                                  sep = "\t", header = T)
       
-      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      # Add informations in database
-      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      
-      TEMP = read.table(paste0(input$resultName,"_bPeaks_allGenome.bed"), 
-                        sep = "\t", header = F)
-      REQUEST_Table = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
-                            nrow(TEMP), ",", length(unique(TEMP[,1])), ", 'analysis');")
-      
-      rm(TEMP)
-      
-      dbGetQuery(con, REQUEST_Table)
-      
-      
-      dir.create("Subdata")
-      for(chromosome in unique(IP[,1])){
-        write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
-        write.table(subset(CO, CO[,1] == chromosome), paste0("Subdata/SubCO_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
-      }
-      
       library(plotly)
-      setwd("..")
       
-      #*************************************************************************
-      # PBC
-      #*************************************************************************
       
-      incProgress(1/n, detail = "PBC")
-      
-      setwd("PBC")
-      
-      PBC=function(chr = "ALL", signal_data, c_chr , c_reads ){
+      if(nrow(rv$SummaryRun) != 1){
+        setwd("..")
+        disable("downloadData")
+      } else{
+        enable("downloadData")
         
-        # If ALL, complet table are analyzed else a subset are realized with chr
-        if(chr != "ALL"){
-          signal_data = subset(signal_data,signal_data[,c_chr] == chr)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # Add informations in database
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        
+        incProgress(1/n, detail = "Fasta sequence") 
+        TEMP = read.table(grep( "*_allGenome.bed",list.files(), value = T),
+                          sep = "\t", header = F, stringsAsFactors = F)
+        REQUEST_Table = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
+                              nrow(TEMP), ",", length(unique(TEMP[,1])), ", 'analysis');")
+        
+        incProgress(1/n, detail = "Fasta sequence")
+        tableAllGenomeFasta = NULL
+        
+        
+        if(! is.null(input$fileFasta)){
+          dfasta = read.fasta(input$fileFasta$datapath)
+        }
+        for(chr in unique(TEMP[,1])){
+          temp_chr = read.table(grep(paste0("*",chr,".bed"),list.files(), value = T),
+                                sep = "\t", header = F, stringsAsFactors = F)
+          
+          if(! is.null(input$fileFasta)){
+            tableAllGenomeFasta = rbind(tableAllGenomeFasta,
+                                        cbind(temp_chr,
+                                              apply(temp_chr,1, function(x) paste(dfasta[[chr]][x[2] : x[3]], collapse = ""))))
+          }else {
+            tableAllGenomeFasta = rbind(tableAllGenomeFasta,
+                                        cbind(temp_chr,
+                                              rep("",nrow(temp_chr)) ))
+          }
         }
         
-        pbc = length(which(signal_data[,c_reads]==1)) / length(which(signal_data[,c_reads]>=1))
+        write.table(tableAllGenomeFasta, "Sequence_allGenome.bed", sep ="\t", quote = F,
+                    col.names = F, row.names = F)
         
-        return(pbc)
-      }
-      
-      chr=as.character(unique(IP[,1]))
-      
-      # Add NA for total table : see function
-      chr = c(chr, "ALL")
-      
-      # Init PBC vector
-      PBC_IP = NULL
-      PBC_CO = NULL
-      
-      for (c in chr){
-        PBC_IP = c(PBC_IP,PBC(chr = c, signal_data = IP, c_chr = 1, c_reads = 3))
-        PBC_CO = c(PBC_CO,PBC(chr = c, signal_data = CO, c_chr = 1, c_reads = 3))
-      }
-      
-      # rename PBC_IP & PBC_CO
-      names(PBC_IP) = gsub("chr=chrmt", "chrM", chr)
-      names(PBC_CO) = gsub("chr=chrmt", "chrM", chr)
-      # sorti txt de nos données
-      
-      write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
-      
-      #*************************************************************************
-      # Figures
-      #*************************************************************************
-      
-      if(as.factor(input$graphicalTF) == TRUE ){
-        if(input$graphicalType == "pdf"){
-          pdf("pbc_final.pdf")
-        }else if(input$graphicalType == "png"){
-          png("pbc_final.png")
-        } else if(input$graphicalType == "jpg"){
-          jpeg("pbc_final.jpg")
+        
+        rm(TEMP)
+        
+        pg <- dbDriver("PostgreSQL")
+        con <- dbConnect(pg, user="docker", password="docker",
+                         host=ipDB, port=5432)
+        on.exit(dbDisconnect(con))
+        
+        dbGetQuery(con, REQUEST_Table)
+        
+        dir.create("Subdata")
+        for(chromosome in unique(IP[,1])){
+          write.table(subset(IP, IP[,1] == chromosome), paste0("Subdata/SubIP_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
+          write.table(subset(CO, CO[,1] == chromosome), paste0("Subdata/SubCO_", chromosome,".txt"), col.names = F, sep = "\t", quote = F, row.names = F)
         }
         
-        layout(matrix(c(1,2), 1, 2, byrow = TRUE),
-               widths = c(5,1))
+        setwd("..")
         
-        par(mar = c(5, 4, 0, 0) + 0.1)
-        plot(PBC_IP, pch = 19, col = "forestgreen",
-             ylim = c(0,max(PBC_IP)),
-             ylab = "PBC", xlab = "Chromosomes",las = 1, axes =FALSE)
-        lines(PBC_IP[-length(PBC_IP)], col = "forestgreen" )
+        #*************************************************************************
+        # PBC
+        #*************************************************************************
         
-        points(PBC_CO, col = "cornflowerblue", pch = 19)
-        lines(PBC_CO[-length(PBC_CO)], col = "cornflowerblue")
+        incProgress(1/n, detail = "PBC")
         
+        setwd("PBC")
         
-        text(1:length(chr), -0.014 ,
-             srt = 45, adj= 1, xpd = TRUE,
-             labels = gsub("chr=chrmt", "chrM", chr), cex=1)
-        
-        axis(1,at = 1:length(chr), labels = rep("", length(chr)) )
-        axis(2, at = seq(0, max(PBC_IP), 0.03), labels = seq(0,max(PBC_IP), 0.03), las = 1)
-        
-        # Legend
-        par(mar =  c(5, 0, 0, 0) + 0.1)
-        plot(1, type="n", axes = F, xlab ="", ylab = "")
-        legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1,
-               col = c("forestgreen", "cornflowerblue"))
-        dev.off()
-      }
-      
-      
-      setwd("..")
-      
-      #*************************************************************************
-      # Lorenz curve
-      #*************************************************************************
-      
-      incProgress(1/n, detail = "Lorenz curve")
-      
-      setwd("LorenzCurve")
-      
-      #fonction lorenz
-      Lorenz=function(chr, fileIP, fileC,c_chr, c_reads,
-                      window, step){
-        
-        if(chr != "ALL"){
-          fileIP = subset(fileIP,fileIP[,c_chr]== chr)
-          fileC = subset(fileC,fileC[,c_chr] == chr)
+        PBC=function(chr = "ALL", signal_data, c_chr , c_reads ){
+          
+          # If ALL, complet table are analyzed else a subset are realized with chr
+          if(chr != "ALL"){
+            signal_data = subset(signal_data,signal_data[,c_chr] == chr)
+          }
+          
+          pbc = length(which(signal_data[,c_reads]==1)) / length(which(signal_data[,c_reads]>=1))
+          
+          return(pbc)
         }
         
-        IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads],
-                            window=window, step=step)
-        IPLor=sort(IPLor, decreasing = FALSE)
+        chr=as.character(unique(IP[,1]))
         
-        ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads],
-                              window=window, step=step)
-        ContLor=sort(ContLor, decreasing = FALSE)
+        # Add NA for total table : see function
+        chr = c(chr, "ALL")
         
-        # Percent calculs
-        perlen=(1:length(IPLor))*100/length(IPLor)
-        perIP=cumsum(IPLor)*100/max(cumsum(IPLor))
-        perC=cumsum(ContLor)*100/max(cumsum(ContLor))
+        # Init PBC vector
+        PBC_IP = NULL
+        PBC_CO = NULL
         
-        EM=which.max(abs(perIP-perC))
+        for (c in chr){
+          PBC_IP = c(PBC_IP,PBC(chr = c, signal_data = IP, c_chr = 1, c_reads = 3))
+          PBC_CO = c(PBC_CO,PBC(chr = c, signal_data = CO, c_chr = 1, c_reads = 3))
+        }
         
+        # rename PBC_IP & PBC_CO
+        names(PBC_IP) = gsub("chr=chrmt", "chrM", chr)
+        names(PBC_CO) = gsub("chr=chrmt", "chrM", chr)
         # sorti txt de nos données
         
-        cbind(perIP,perC,perlen)
-        write.table(cbind(perIP,perC,perlen),file=paste0("LorenzCurve_data_",chr,".txt"),
-                    quote= FALSE,sep="\t",row.names = FALSE)
+        write.table(cbind(PBC_IP,PBC_CO,chr),file="PBC.txt",quote= FALSE,sep="\t",row.names = FALSE)
+        
+        #*************************************************************************
+        # Figures
+        #*************************************************************************
         
         if(as.factor(input$graphicalTF) == TRUE ){
           if(input$graphicalType == "pdf"){
-            pdf(paste0("LorenzCurve_",chr,".pdf"))
+            pdf("pbc_final.pdf")
           }else if(input$graphicalType == "png"){
-            png(paste0("LorenzCurve_",chr,".png"))
+            png("pbc_final.png")
           } else if(input$graphicalType == "jpg"){
-            jpeg(paste0("LorenzCurve_",chr,".jpg"))
+            jpeg("pbc_final.jpg")
           }
           
-          #curve
-          plot(x=perlen,y=perC, type="l", lwd = 2,
-               xlab= "average reads per window in %" ,ylab = "Cumulative
-               sum of window averages in %",
-               main = paste("Lorenz curve obtained for the PDR1 protein on ",chr),
-               col="blue")
+          layout(matrix(c(1,2), 1, 2, byrow = TRUE),
+                 widths = c(5,1))
           
-          lines(x=perlen,y=perIP,col="green", lwd = 2)
+          par(mar = c(5, 4, 0, 0) + 0.1)
+          plot(PBC_IP, pch = 19, col = "forestgreen",
+               ylim = c(0,max(PBC_IP)),
+               ylab = "PBC", xlab = "Chromosomes",las = 1, axes =FALSE)
+          lines(PBC_IP[-length(PBC_IP)], col = "forestgreen" )
           
-          lines(0:100,0:100,col="black", lwd = 2)
-          arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3,
-                 length = 0.1, col = "firebrick", lwd = 3)
-          text(perlen[EM], mean(c(perIP[EM],perC[EM])),
-               labels = paste(floor(abs(perIP[EM] - perC[EM])), "%"), cex = 0.7,
-               pos = 4)
+          points(PBC_CO, col = "cornflowerblue", pch = 19)
+          lines(PBC_CO[-length(PBC_CO)], col = "cornflowerblue")
           
-          legend("topleft", legend=c("line of equality",
-                                     "Control Lorenz curve",
-                                     "IP Lorenz curve",
-                                     "EM=ecart maximal"), inset = 0.01,
-                 col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA),
-                 bty="n") #added a legend of different curves
           
-          par(font = 5) #change font to get arrows
-          legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01,
-                 lty = c(rep(1,3),NA),col=c("black","blue", "green", "firebrick"),
-                 bty="n")
+          text(1:length(chr), -0.014 ,
+               srt = 45, adj= 1, xpd = TRUE,
+               labels = gsub("chr=chrmt", "chrM", chr), cex=1)
           
-          par(font = 1) #back to default
+          axis(1,at = 1:length(chr), labels = rep("", length(chr)) )
+          axis(2, at = seq(0, max(PBC_IP), 0.03), labels = seq(0,max(PBC_IP), 0.03), las = 1)
           
+          # Legend
+          par(mar =  c(5, 0, 0, 0) + 0.1)
+          plot(1, type="n", axes = F, xlab ="", ylab = "")
+          legend("left", legend = c("IP", "Control"), box.lty = 0, lty = 1,
+                 col = c("forestgreen", "cornflowerblue"))
           dev.off()
         }
-      }
-      
-      # Loop for all chromosomes
-      chr=as.character(unique(IP[,1]))
-      chr = c(chr, "ALL")
-      for (c in chr){
-        Lorenz(chr = c,fileIP = IP, fileC = CO,c_chr = 1,c_reads = 3,
-               window = input$numWs, step = input$numWo)
+        
+        
+        setwd("..")
+        
+        #*************************************************************************
+        # Lorenz curve
+        #*************************************************************************
+        
+        incProgress(1/n, detail = "Lorenz curve")
+        
+        setwd("LorenzCurve")
+        
+        #fonction lorenz
+        Lorenz=function(chr, fileIP, fileC,c_chr, c_reads,
+                        window, step){
+          
+          if(chr != "ALL"){
+            fileIP = subset(fileIP,fileIP[,c_chr]== chr)
+            fileC = subset(fileC,fileC[,c_chr] == chr)
+          }
+          
+          IPLor=SlidingWindow(FUN=mean, data=fileIP[,c_reads],
+                              window=window, step=step)
+          IPLor=sort(IPLor, decreasing = FALSE)
+          
+          ContLor=SlidingWindow(FUN=mean, data=fileC[,c_reads],
+                                window=window, step=step)
+          ContLor=sort(ContLor, decreasing = FALSE)
+          
+          # Percent calculs
+          perlen=(1:length(IPLor))*100/length(IPLor)
+          perIP=cumsum(IPLor)*100/max(cumsum(IPLor))
+          perC=cumsum(ContLor)*100/max(cumsum(ContLor))
+          
+          EM=which.max(abs(perIP-perC))
+          
+          # sorti txt de nos données
+          
+          cbind(perIP,perC,perlen)
+          write.table(cbind(perIP,perC,perlen),file=paste0("LorenzCurve_data_",chr,".txt"),
+                      quote= FALSE,sep="\t",row.names = FALSE)
+          
+          if(as.factor(input$graphicalTF) == TRUE ){
+            if(input$graphicalType == "pdf"){
+              pdf(paste0("LorenzCurve_",chr,".pdf"))
+            }else if(input$graphicalType == "png"){
+              png(paste0("LorenzCurve_",chr,".png"))
+            } else if(input$graphicalType == "jpg"){
+              jpeg(paste0("LorenzCurve_",chr,".jpg"))
+            }
+            
+            #curve
+            plot(x=perlen,y=perC, type="l", lwd = 2,
+                 xlab= "average reads per window in %" ,ylab = "Cumulative
+                 sum of window averages in %",
+                 main = paste("Lorenz curve obtained for the PDR1 protein on ",chr),
+                 col="blue")
+            
+            lines(x=perlen,y=perIP,col="green", lwd = 2)
+            
+            lines(0:100,0:100,col="black", lwd = 2)
+            arrows(perlen[EM], perIP[EM], perlen[EM], perC[EM], code = 3,
+                   length = 0.1, col = "firebrick", lwd = 3)
+            text(perlen[EM], mean(c(perIP[EM],perC[EM])),
+                 labels = paste(floor(abs(perIP[EM] - perC[EM])), "%"), cex = 0.7,
+                 pos = 4)
+            
+            legend("topleft", legend=c("line of equality",
+                                       "Control Lorenz curve",
+                                       "IP Lorenz curve",
+                                       "EM=ecart maximal"), inset = 0.01,
+                   col=c("black","blue", "green", "firebrick"), lty=c(rep(1,3), NA),
+                   bty="n") #added a legend of different curves
+            
+            par(font = 5) #change font to get arrows
+            legend("topleft", legend = rep(NA,4), pch=c(rep(NA,3),171),inset = 0.01,
+                   lty = c(rep(1,3),NA),col=c("black","blue", "green", "firebrick"),
+                   bty="n")
+            
+            par(font = 1) #back to default
+            
+            dev.off()
+          }
+        }
+        
+        # Loop for all chromosomes
+        chr=as.character(unique(IP[,1]))
+        chr = c(chr, "ALL")
+        for (c in chr){
+          Lorenz(chr = c,fileIP = IP, fileC = CO,c_chr = 1,c_reads = 3,
+                 window = input$numWs, step = input$numWo)
+        }
+        
+        setwd("..")
+        
+        #*************************************************************************
+        # Read repartitions
+        #*************************************************************************
+        
+        incProgress(1/n, detail = "Read repartitions")
+        
+        setwd("Repartition")
+        
+        Barpo=function(chr,fileIP,fileCO,c_chr,c_read){
+          
+          if(chr != "ALL"){
+            
+            fileIP= subset(fileIP,fileIP[,c_chr]==chr)
+          }
+          testIP=table(fileIP[,c_read])
+          
+          x=testIP[-1]
+          
+          tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
+          
+          write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
+          
+          if(as.factor(input$graphicalTF) == TRUE ){
+            if(input$graphicalType == "pdf"){
+              pdf(paste0("ReadRepartition_",chr,".pdf"))
+            }else if(input$graphicalType == "png"){
+              png(paste0("ReadRepartition_",chr,".png"))
+            } else if(input$graphicalType == "jpg"){
+              jpeg(paste0("ReadRepartition_",chr,".jpg"))
+            }
+            
+            plot(tab_inter$POS, tab_inter$LOG,ylim=c(0,12), type = "h",
+                 xlim = c(1, 16000),
+                 xlab = "Number of reads",
+                 ylab = "log(number of positions)",
+                 main = paste0("Repartition of reads quantity for ",chr))
+            
+            # Loess curve
+            loessMod <- loess(LOG ~ POS,
+                              data = tab_inter, span=0.1)
+            smoothed <- predict(loessMod)
+            lines( tab_inter$POS,smoothed, col= "red", lwd=2)
+            
+            # Legende
+            legend('topright', "Loess curve", lty = 1, col = "red", lwd = 3,
+                   inset = 0.01, box.lty = 0)
+            
+            dev.off()
+          }
+          
+        }
+        
+        chr=as.character(unique(IP[,1]))
+        chr = c(chr, "ALL")
+        for (c in chr){
+          Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
+        }
+        setwd("..")
       }
       
       setwd("..")
-      
-      #*************************************************************************
-      # Read repartitions
-      #*************************************************************************
-      
-      incProgress(1/n, detail = "Read repartitions")
-      
-      setwd("Repartition")
-      
-      Barpo=function(chr,fileIP,fileCO,c_chr,c_read){
-        
-        if(chr != "ALL"){
-          
-          fileIP= subset(fileIP,fileIP[,c_chr]==chr)
-        }
-        testIP=table(fileIP[,c_read])
-        
-        x=testIP[-1]
-        
-        tab_inter = as.data.frame(cbind(LOG = log(x), POS = as.numeric(names(x))))
-        
-        write.table(tab_inter,file=paste0("ReadRepartition_",chr,".txt"),quote= FALSE,sep="\t",row.names = FALSE)
-        
-        if(as.factor(input$graphicalTF) == TRUE ){
-          if(input$graphicalType == "pdf"){
-            pdf(paste0("ReadRepartition_",chr,".pdf"))
-          }else if(input$graphicalType == "png"){
-            png(paste0("ReadRepartition_",chr,".png"))
-          } else if(input$graphicalType == "jpg"){
-            jpeg(paste0("ReadRepartition_",chr,".jpg"))
-          }
-          
-          plot(tab_inter$POS, tab_inter$LOG,ylim=c(0,12), type = "h",
-               xlim = c(1, 16000),
-               xlab = "Number of reads",
-               ylab = "log(number of positions)",
-               main = paste0("Repartition of reads quantity for ",chr))
-          
-          # Loess curve
-          loessMod <- loess(LOG ~ POS,
-                            data = tab_inter, span=0.1)
-          smoothed <- predict(loessMod)
-          lines( tab_inter$POS,smoothed, col= "red", lwd=2)
-          
-          # Legende
-          legend('topright', "Loess curve", lty = 1, col = "red", lwd = 3,
-                 inset = 0.01, box.lty = 0)
-          
-          dev.off()
-        }
-        
-      }
-      
-      chr=as.character(unique(IP[,1]))
-      chr = c(chr, "ALL")
-      for (c in chr){
-        Barpo(chr = c,fileIP = IP, fileCO = CO,c_chr =1 ,c_read = 3)
-      }
-      
-      setwd("../..")
       
       incProgress(1/n, detail = "Zip folder")
       rv$folder_name_final = folder_name_final
@@ -1642,6 +1817,17 @@ server <- function(input, output, session) {
     contentType = "application/zip"
   )
   
+  
+  observeEvent(input$Toexplo, {
+    # Show bPeaks Analy
+    showTab(inputId = "application", target = "bPeaks_Explorer")
+    
+    # Move in this next page
+    updateTabsetPanel(session, "application",
+                      selected = "bPeaks_Explorer")
+    library(plotly)
+  })
+  
   output$folderName <- renderText({
     paste0("Folder name : ", rv$folder_name_final)
   })
@@ -1659,15 +1845,44 @@ server <- function(input, output, session) {
     options = list(scrollX = TRUE, dom = 't')
   )
   
+  output$downloadTable <- downloadHandler(
+    filename = function() {
+      paste(rv$folder_name_final, "txt", sep=".")
+    },
+    content = function(file) {
+      write.csv(rv$SummaryRun, file)
+    }
+  )
+  
+  
   #=============================================================================
   # bPeaks Explorer
   #=============================================================================
+  #-----------------------------------------------------------------------------
+  # Back to analyzer
+  #-----------------------------------------------------------------------------
+  
+  #Link action buttons to their respective pages
+  observeEvent(input$BackAnalyzer, {
+    # Show bPeaks Analy
+    showTab(inputId = "application", target = "bPeaks_analyzer")
+    
+    # Move in this next page
+    updateTabsetPanel(session, "application",
+                      selected = "bPeaks_analyzer")
+  })
+  
   
   #-----------------------------------------------------------------------------
   # Annotation import
   #-----------------------------------------------------------------------------
   
   observeEvent(input$importDB,{
+    
+    pg <- dbDriver("PostgreSQL")
+    con <- dbConnect(pg, user="docker", password="docker",
+                     host=ipDB, port=5432)
+    on.exit(dbDisconnect(con))
     
     database = read.csv2(input$importDB$datapath, sep = "\t", header = F, stringsAsFactors = F)
     if(ncol(database) == 8){
@@ -1733,40 +1948,40 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   
   observeEvent(input$GFF,{
-    rv$GFF = read.gff(input$GFF$datapath)
-    rv$Region = subset(rv$GFF, type == "region", select = c("seqid", "attributes"))
-    for(i in 1:nrow(rv$Region)){
-      inter = unlist(strsplit(rv$Region[i,2], ";"))
-      rv$Region[i,2] = paste0("chr",unlist(strsplit(inter[grep('Name=', inter)], "="))[2])
-    }
-    
-    if(input$ChromRadio != "none"){
-      SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
-      rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+    if(file_ext(input$GFF$name) == "gff" | file_ext(input$GFF$name) == "gz") {
+      
+      rv$GFF = read.gff(input$GFF$datapath)
+      rv$Region = subset(rv$GFF, type == "region", select = c("seqid", "attributes"))
+      for(i in 1:nrow(rv$Region)){
+        inter = unlist(strsplit(rv$Region[i,2], ";"))
+        rv$Region[i,2] = paste0("chr",unlist(strsplit(inter[grep('Name=', inter)], "="))[2])
+      }
+      
+      if(input$ChromRadio != "none"){
+        SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
+        rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+      } 
+      
+      Genes_Chromosome = NULL
+      tempGenes = subset(rv$GFF, rv$GFF$type == "gene")
+      for(i in 1:nrow(tempGenes)){
+        nameInter = grep("^Name=",unlist(strsplit(tempGenes[i,"attributes"], ";")), value = T)
+        nameInter = gsub("Name=", "", nameInter)
+        Genes_Chromosome = rbind(Genes_Chromosome,
+                                 c(nameInter, tempGenes$seqid[i],
+                                   tempGenes[i,"start"],
+                                   tempGenes[i,"end"],
+                                   tempGenes[i,"attributes"]))
+      }
+      
+      rv$Genes_Chromosome = Genes_Chromosome
+      
+      updateSelectInput(session, "SearchGeneList",
+                        choices = Genes_Chromosome[,1]
+      )
     } else {
-      SEQID = as.character(rv$Region[which(rv$Region[,2] == input$ChromRadio),1])
-      rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
-                          & rv$GFF$type == "gene")
+      shinyalert("Load gff or gff.zip file !", type = "error")
     }
-    
-    Genes_Chromosome = NULL
-    tempGenes = subset(rv$GFF, rv$GFF$type == "gene")
-    for(i in 1:nrow(tempGenes)){
-      nameInter = grep("^Name=",unlist(strsplit(tempGenes[i,"attributes"], ";")), value = T)
-      nameInter = gsub("Name=", "", nameInter)
-      Genes_Chromosome = rbind(Genes_Chromosome,
-                               c(nameInter, tempGenes$seqid[i],
-                                 tempGenes[i,"start"],
-                                 tempGenes[i,"end"],
-                                 tempGenes[i,"attributes"]))
-    }
-    
-    rv$Genes_Chromosome = Genes_Chromosome
-    
-    updateSelectInput(session, "SearchGeneList",
-                      choices = Genes_Chromosome[,1]
-    )
-    
     
   })
   
@@ -1775,97 +1990,111 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   
   observeEvent(input$InputZip,{
-    
-    # Get complet path to folder
-    unzip(input$InputZip$datapath, exdir = paste0("./Outputs/", rv$userTempFolder))
-    rv$PATH = paste0("./Outputs/",rv$userTempFolder,"/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
-    
-    # Get output name of bPeaks package
-    filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
-    rv$FILENAME = unlist(strsplit(filelist[grep(pattern = "*_bPeaks_allGenome.bed",filelist)], "_bPeaks_allGenome.bed"))
-    
-    #...........................................................................
-    # bPeaks package results
-    #...........................................................................
-    
-    id <- showNotification("Read summary", duration = NULL)
-    
-    # Peak informations
-    rv$allGenome = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_allGenome.bed"), sep = "\t", header = F)
-    
-    REQUEST_Explo = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
-                          nrow(rv$allGenome), ",", length(unique(rv$allGenome[,1])), ", 'exploration');")
-    
-    dbGetQuery(con, REQUEST_Explo)
-    
-    # Parameter informations
-    interSum = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_parameterSummary.txt"), sep = "\t", header = F)
-    interSum = t(interSum)
-    colnames(interSum) = c('Parameters', "Values")
-    rv$SUMMARY = interSum
-    
-    # Get chromosome names to generate radio button
-    rv$CHROMOSOME = sort(unique(rv$allGenome[,1]))
-    
-    updateRadioButtons(session, "ChromRadio",
-                       choices = rv$CHROMOSOME ,
-                       selected = rv$CHROMOSOME[1], inline = T
-    )
-    
-    rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == rv$CHROMOSOME[1] )
-    rv$ChrSelected = rv$CHROMOSOME[1]
-    removeNotification(id)
-    
-    #...........................................................................
-    # Signal data
-    #...........................................................................
-    
-    id <- showNotification("Read IP data", duration = NULL)
-    rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
-    removeNotification(id)
-    
-    id <- showNotification("Read CO data", duration = NULL)
-    rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
-    removeNotification(id)
-    
-    # add in reactive variable plot limits
-    rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
-    rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
-    
-    # Change plot limits in inputs
-    updateNumericInput(session, "min", value = rv$min)
-    updateNumericInput(session, "max", value = rv$max)
-    
-    #...........................................................................
-    # Quality results
-    #...........................................................................
-    
-    # Repartition
-    id <- showNotification("Read repartition data", duration = NULL)
-    rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
-    removeNotification(id)
-    
-    # Lorenz curve
-    id <- showNotification("Read Lorenz curve data", duration = NULL)
-    rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
-    removeNotification(id)
-    
-    # PBC
-    id <- showNotification("Read PBC data", duration = NULL)
-    rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
-    removeNotification(id)
-    
-    if(!is.null(rv$Region)){
-      SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
-      rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+    if(file_ext(input$InputZip$name) == "zip") {
       
+      # Get complet path to folder
+      unzip(input$InputZip$datapath, exdir = paste0("./Outputs/", rv$userTempFolder))
+      rv$PATH = paste0("./Outputs/",rv$userTempFolder,"/",unlist(strsplit(input$InputZip$name, ".zip"))[1])
+      
+      # Get output name of bPeaks package
+      filelist = list.files(paste0(rv$PATH,"/bPeaks/"))
+      rv$FILENAME = unlist(strsplit(filelist[grep(pattern = "*_bPeaks_allGenome.bed",filelist)], "_bPeaks_allGenome.bed"))
+      
+      #...........................................................................
+      # bPeaks package results
+      #...........................................................................
+      
+      id <- showNotification("Read summary", duration = NULL)
+      
+      # Peak informations
+      rv$allGenome = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_allGenome.bed"), sep = "\t", header = F)
+      rv$Sequence = read.table(paste0(rv$PATH,"/bPeaks/Sequence_allGenome.bed"), sep = "\t", header = F, stringsAsFactors = F)
+      
+      REQUEST_Explo = paste("INSERT INTO dashboard (Peaks_detected, Chromosome_studied, type_use) VALUES(",
+                            nrow(rv$allGenome), ",", length(unique(rv$allGenome[,1])), ", 'exploration');")
+      
+      pg <- dbDriver("PostgreSQL")
+      con <- dbConnect(pg, user="docker", password="docker",
+                       host=ipDB, port=5432)
+      on.exit(dbDisconnect(con))
+      
+      dbGetQuery(con, REQUEST_Explo)
+      
+      # Parameter informations
+      interSum = read.table(paste0(rv$PATH,"/bPeaks/",rv$FILENAME,"_bPeaks_parameterSummary.txt"), sep = "\t", header = F)
+      interSum = t(interSum)
+      colnames(interSum) = c('Parameters', "Values")
+      rv$SUMMARY = interSum
+      
+      # Get chromosome names to generate radio button
+      rv$CHROMOSOME = sort(unique(rv$allGenome[,1]))
+      
+      updateRadioButtons(session, "ChromRadio",
+                         choices = rv$CHROMOSOME ,
+                         selected = rv$CHROMOSOME[1], inline = T
+      )
+      
+      rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == rv$CHROMOSOME[1] )
+      rv$ChrSelected = rv$CHROMOSOME[1]
+      rv$SubSequence = subset(rv$Sequence, rv$Sequence[,1] == rv$ChrSelected)
+      removeNotification(id)
+      
+      #...........................................................................
+      # Signal data
+      #...........................................................................
+      
+      id <- showNotification("Read IP data", duration = NULL)
+      rv$SIGNAL_IP = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubIP_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
+      removeNotification(id)
+      
+      id <- showNotification("Read CO data", duration = NULL)
+      rv$SIGNAL_CO = read.table(paste0(rv$PATH,"/bPeaks/Subdata/SubCO_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = F)
+      removeNotification(id)
+      
+      # add in reactive variable plot limits
+      rv$min <- min(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
+      rv$max <- max(c(rv$SIGNAL_IP[,2], rv$SIGNAL_CO[,2]))
+      
+      # Change plot limits in inputs
+      updateNumericInput(session, "min", value = rv$min)
+      updateNumericInput(session, "max", value = rv$max)
+      
+      #...........................................................................
+      # Quality results
+      #...........................................................................
+      
+      # Repartition
+      id <- showNotification("Read repartition data", duration = NULL)
+      rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
+      removeNotification(id)
+      
+      # Lorenz curve
+      id <- showNotification("Read Lorenz curve data", duration = NULL)
+      rv$LORENZ = read.table(paste0(rv$PATH,"/LorenzCurve/LorenzCurve_data_",rv$CHROMOSOME[1],".txt"), sep = "\t", header = T)
+      removeNotification(id)
+      
+      # PBC
+      id <- showNotification("Read PBC data", duration = NULL)
+      rv$PBC =  as.matrix(read.table(paste0(rv$PATH,"/PBC/PBC.txt"), sep = "\t", header = T))
+      removeNotification(id)
+      
+      if(!is.null(rv$Region)){
+        SEQID = as.character(rv$Region[which(rv$Region[,2] == rv$CHROMOSOME[1]),1])
+        rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID & rv$GFF$type == "gene")
+        
+      }
+    } else {
+      shinyalert("Load zip file !", type = "error")
     }
+    
+    
     
   })
   
   observeEvent(input$ChromRadio,{
     if(!is.null(rv$REPARTITION)){
       rv$ChrSelected = input$ChromRadio
+      rv$SubSequence = subset(rv$Sequence, rv$Sequence[,1] == rv$ChrSelected)
       rv$SubTableAll = subset(rv$allGenome,rv$allGenome[,1] == input$ChromRadio )
       
       rv$REPARTITION = read.table(paste0(rv$PATH,"/Repartition/ReadRepartition_",input$ChromRadio,".txt"), sep = "\t", header = T)
@@ -1893,6 +2122,7 @@ server <- function(input, output, session) {
         rv$GFF_CHR = subset(rv$GFF, rv$GFF$seqid == SEQID
                             & rv$GFF$type == "gene")
       }
+      js$resetClick()
     }
   })
   
@@ -1946,9 +2176,45 @@ server <- function(input, output, session) {
         p <- plot_ly(x = rv$SIGNAL_IP[,2]) %>%
           add_trace(y = rv$SIGNAL_CO[,3], name = 'CO', type="scatter", mode = 'lines',line = list(color = 'royalblue')) %>%
           add_trace(y = rv$SIGNAL_IP[,3], name = 'IP', type="scatter", mode = 'lines', line = list(color = 'red'))%>%
-          layout(shapes = rect_list, 
-                 yaxis = list(title = 'Number of reads', showgrid = F),
-                 xaxis = list(title = 'Position' , range = c(rv$min, rv$max), showgrid = F))
+          
+          layout(yaxis = list(title = 'Number of reads', showgrid = F, fixedrange=T),
+                 xaxis = list(title = 'Position' , range = c(rv$min, rv$max), showgrid = F)) 
+        
+        
+        
+        p2 <- plot_ly() %>%
+          layout(yaxis = list(title = 'Annotation', 
+                              fixedrange=T,
+                              range = c(-1.5,1.5),
+                              zeroline = F,
+                              showline = F,
+                              showticklabels = F,
+                              showgrid = F),
+                 xaxis = list( range = c(rv$min, rv$max),
+                               title = "Position",
+                               zeroline = T,
+                               showline = T,
+                               showticklabels = T,
+                               showgrid = F)) 
+        
+        for(i in 1:nrow(rv$SubSequence )){
+          p2 <- add_trace(p2,
+                          x = c(rv$SubSequence [i,2],rv$SubSequence [i,3]),
+                          y = rep(1,2) ,
+                          type="scatter",
+                          mode = 'lines+markers',
+                          symbol = I(15),
+                          marker = list(
+                            color = 'gray',
+                            size = 10, opacity = 0.7
+                          ),
+                          line = list(color = 'gray',opacity = 0.7, width = 8),
+                          text = rv$SubSequence[i,4] ,
+                          hoverinfo = 'text',
+                          showlegend = F
+          )
+        }
+        
         
         if(!is.null(rv$GFF_CHR)){
           for(i in 1:nrow(rv$GFF_CHR)){
@@ -1957,30 +2223,55 @@ server <- function(input, output, session) {
             position_inter = c(as.numeric(as.character(rv$GFF_CHR$start[i])),
                                as.numeric(as.character(rv$GFF_CHR$end[i])))
             
+            texteinter = unlist(strsplit(unlist(strsplit(rv$GFF_CHR$attributes[i], ";")), '='))
+            texte = texteinter[seq(2,length(texteinter), 2)]
+            names(texte) = texteinter[seq(1,length(texteinter), 2)]
+            
+            texte = paste("ID : ",texte["ID"] , "<br>",
+                          "Dbxref : ",texte["Dbxref"] , "<br>",
+                          "Name : ",texte["Name"])
+            
             if(rv$GFF_CHR$strand[i] == "+"){
-              p <- add_trace(p,  
-                             x = position_inter,
-                             y = rep(-100,2) ,
-                             type="scatter",
-                             mode = 'lines',line = list(color = 'orange'),
-                             text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
-                             hoverinfo = 'text',
-                             showlegend = F
+              
+              p2 <- add_trace(p2,  
+                              x = position_inter,
+                              y = rep(0,2) ,
+                              type="scatter",
+                              mode = 'lines+markers',
+                              symbol = I(15),
+                              marker = list(
+                                color = 'orange',
+                                size = 10
+                              ),
+                              line = list(color = 'orange', width = 8),
+                              text = texte ,
+                              hoverinfo = 'text',
+                              showlegend = F
+                              
               )
               
             } else {
-              p <- add_trace(p, type="scatter", 
-                             x = position_inter,
-                             y = rep(-200,2) ,
-                             mode = 'lines',line = list(color = 'purple'),
-                             text = gsub(";", "<br>", rv$GFF_CHR$attributes[i]) ,
-                             hoverinfo = 'text',
-                             showlegend = F
+              p2 <- add_trace(p2, type="scatter", 
+                              x = position_inter,
+                              y = rep(-1,2) ,
+                              type="scatter",
+                              mode = 'lines+markers',
+                              symbol = I(15),
+                              marker = list(
+                                color = 'purple',
+                                size = 10
+                              ),
+                              line = list(color = 'purple', width = 8),
+                              text = texte ,
+                              hoverinfo = 'text',
+                              showlegend = F
               )
             }
           }
         }
-        p
+        
+        subplot(p, p2, shareX=TRUE,nrows = 2, heights = c(0.8, 0.2))%>%
+          layout(shapes = rect_list)
         
       } else {
         plot_ly(x = rv$SIGNAL_IP[,2]) %>%
@@ -2004,6 +2295,27 @@ server <- function(input, output, session) {
     rv$max <- input$max
   })
   
+  
+  
+  output$AnnotPeak <- renderText({
+    s <- event_data("plotly_click")
+    if (is.null(s)) "" else{
+      if(s$curveNumber > 1 & s$curveNumber <= (nrow(rv$SubSequence) + 1)){
+        # # - 1 because position 0 is IP curve and 1 is CO curve
+        inter = unlist(rv$SubSequence[s$curveNumber - 1,])
+        paste(
+          paste("Chromosome :", as.character(inter[1])),
+          paste("Start :", as.character(inter[2])),
+          paste("Stop :", as.character(inter[3])),
+          paste("Number :", as.character(inter[4])),
+          paste("Sequence :", as.character(inter[6])),
+          sep = "<br>"
+        )
+      }
+    }
+  })
+  
+  
   #-----------------------------------------------------------------------------
   # Search gene
   #-----------------------------------------------------------------------------
@@ -2015,6 +2327,12 @@ server <- function(input, output, session) {
     #***************************************************************************
     
     output$AnnotDB <- renderText({
+      
+      pg <- dbDriver("PostgreSQL")
+      con <- dbConnect(pg, user="docker", password="docker",
+                       host=ipDB, port=5432)
+      on.exit(dbDisconnect(con))
+      
       s <- event_data("plotly_click")
       if(is.null(s)) {
         if(input$SearchGeneList != "" ){
@@ -2023,8 +2341,7 @@ server <- function(input, output, session) {
                                  ,"' or standard_name = '",input$SearchGeneList,"';")
           
           annotInter = dbGetQuery(con, REQUEST_ANNOT)
-          paste("<h4 class='center'> Annotation in DB</h4><br/>",
-                "<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+          paste("<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
                 "<b>Primary ID</b> :", annotInter[1,2], '<br/>',
                 "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
                 "<b>Start</b> :", annotInter[1,4], '<br/>' ,
@@ -2034,8 +2351,8 @@ server <- function(input, output, session) {
                 "<b>Specie</b> :", annotInter[1,8] )
         }
       } else {
-        if(s$curveNumber != 0 & s$curveNumber != 1){
-          nameInter = grep("^Name=",unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")), value = T)
+        if(s$curveNumber >  (nrow(rv$SubSequence) +1)){
+          nameInter = grep("^Name=",unlist(strsplit(rv$GFF_CHR[s$curveNumber-1-nrow(rv$SubSequence),"attributes"], ";")), value = T)
           nameInter = gsub("Name=", "", nameInter)
           REQUEST_ANNOT = paste0("SELECT * from annotation where primary_id_database = '",nameInter
                                  ,"' or feature_name ='",nameInter
@@ -2055,35 +2372,35 @@ server <- function(input, output, session) {
                             selected = nameInter
           )
           js$resetClick()
-        } else {
-          "Click on extremity of genes"
-        }
+        } 
       }
     })
-
+    
     output$AnnotGFF <- renderText({
+      
+      pg <- dbDriver("PostgreSQL")
+      con <- dbConnect(pg, user="docker", password="docker",
+                       host=ipDB, port=5432)
+      on.exit(dbDisconnect(con))
+      
       s <- event_data("plotly_click")
       if(is.null(s)) {
         if(input$SearchGeneList != "" ){
-          paste("<h4 class='center'> Annotation in GFF</h4><br/>",
-                paste(unlist(strsplit(rv$Genes_Chromosome[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),5], ";")),
-                      collapse = "<br/>")
-          )
+          paste(unlist(strsplit(rv$Genes_Chromosome[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),5], ";")),
+                collapse = "<br/>")
         }
       } else {
-        if(s$curveNumber != 0 & s$curveNumber != 1){
-
-          paste("<h4 class='center'> Annotation in GFF</h4><br/>",
-                paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1,"attributes"], ";")),
-                      collapse = "<br/>")
-          )
+        if(s$curveNumber > (nrow(rv$SubSequence) +1) ){
+          
+          paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1 -nrow(rv$SubSequence) ,"attributes"], ";")),
+                collapse = "<br/>")
+          
           
           js$resetClick()
-        } else {
-          "Click on extremity of genes"
-        }
+        } 
       }
     })
+    
   })
   
   observeEvent(input$SearchGene, {
@@ -2121,7 +2438,40 @@ server <- function(input, output, session) {
     
     
   })
-
+  
+  output$pdfviewSummary <- renderUI({
+    s <- event_data("plotly_click")
+    if (is.null(s)) "" else{
+      if(s$curveNumber > 1 & s$curveNumber <= (nrow(rv$SubSequence) + 1)){
+        
+        file.copy(paste0(rv$PATH,"/bPeaks/", rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf"),
+                  paste0("www/",rv$userTempFolder,"_Summary.pdf"), overwrite=TRUE)
+        
+        if(file.exists(paste0("www/",rv$userTempFolder,"_Summary.pdf"))){
+          tags$iframe(style='height:600px; width:100%; overflow: hidden;', scrolling="no",
+                      src=paste0(rv$userTempFolder,"_Summary.pdf#view=fit&toolbar=0&scrollbar=0"))
+        }
+      }
+    }
+  })
+  
+  output$pdfviewDrawing <- renderUI({
+    s <- event_data("plotly_click")
+    if (is.null(s)) "" else{
+      if(s$curveNumber > 1 & s$curveNumber <= (nrow(rv$SubSequence) + 1)){
+        
+        file.copy(paste0(rv$PATH,"/bPeaks/", rv$FILENAME,"-",input$ChromRadio,"_bPeaksDrawing.pdf"),
+                  paste0("www/",rv$userTempFolder,"_Drawing.pdf"), overwrite=TRUE)
+        
+        if(file.exists(paste0("www/",rv$userTempFolder,"_Drawing.pdf"))){
+          tags$iframe(style='height:600px; width:100%; overflow: hidden;', scrolling="no",
+                      src=paste0(rv$userTempFolder,"_Drawing.pdf#page=",s$curveNumber-1,"&view=fit&toolbar=0&scrollbar=0"))
+        }
+        
+      }
+    }
+  })
+  
   #-----------------------------------------------------------------------------
   # Barplot : Number of detected peaks
   #-----------------------------------------------------------------------------
@@ -2264,13 +2614,9 @@ server <- function(input, output, session) {
                   line = list(color = 'blue')) %>%
         add_trace(x=c(0,100),y= c(0,100),name='Equality', 
                   line = list(color = 'gray', width = 4, dash = 'dash'))%>%
-        add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),name='Max. dif.',
+        add_trace(x=c(rv$LORENZ[EM,3],rv$LORENZ[EM,3]),y= c(rv$LORENZ[EM,1],rv$LORENZ[EM,2]),
+                  name=paste0('Max. dif.<br>',round(max(abs(rv$LORENZ[,1]-rv$LORENZ[,2])),1),"%"),
                   line = list(color = 'black', width = 4), mode = 'lines')%>%
-        add_trace(x=10,y= 80,
-                  line = list(color = 'black', width = 4),type = 'scatter',
-                  mode = 'text', text = paste("Maximum difference :",round(max(abs(rv$LORENZ[,1]-rv$LORENZ[,2])),1),"%"),
-                  textposition = 'middle right',  showlegend = FALSE, 
-                  textfont = list(color = '#000000', size = 16))%>%
         layout(yaxis = list(title = "Sum of window averages in %"),
                xaxis = list(title = "Average reads per window in %"),
                title = "Lorenz curves")

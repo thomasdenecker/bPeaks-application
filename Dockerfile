@@ -28,3 +28,6 @@ RUN Rscript -e "webdriver::install_phantomjs()"
 
 RUN Rscript -e "install.packages('V8', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
+
+RUN Rscript -e "install.packages('seqinr', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
