@@ -1,7 +1,5 @@
 /*******************************************************************************
 Style css - bPeaks application
-
-
 *******************************************************************************/
 
 /*******************************************************************************
@@ -104,22 +102,19 @@ div.authen {
   margin-top: 20px;
 }
 
-
+.contents_FASTA{
+  text-align: left;
+  font-family: "Courier New";
+}
 
 hr.hrStyle {
   border-top: 1px solid #8c8b8b;
 }
 
-div.AnnotGFF{
+div.Annot{
   overflow-y: auto;
   height:300px;
 }
-
-div.AnnotDB{
-  overflow-y: auto;
-  height:300px;
-}
-
 
 .alert p{
   text-align: left;
@@ -249,8 +244,10 @@ Button
 
 .downloadData{
   width: 200px;
+  color: white;
+  background: #ff3300;
   font-size: 24px;
-  padding: 14px 40px;
+  padding: 14px 10px;
   margin-top: 20px;
   margin-bottom: 40px;
   margin-left: auto;
@@ -260,13 +257,38 @@ Button
   border-radius: 12px;
 }
 
+.downloadData:hover {
+  color: white;
+  background: #cc2900;
+  border: 2px solid #cc2900;
+}
+
+button.BackAnalyzer{
+  color: white;
+  background: #ff3300;
+  border: 2px solid #cc2900;
+  border-radius: 12px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 200px;
+}
+
+button.BackAnalyzer:hover {
+  color: white;
+  background: #cc2900;
+  border: 2px solid #cc2900;
+}
+
 button.myBtn {
   color: white;
   background: #ff3300;
   border: 2px solid #cc2900;
   border-radius: 12px;
   font-size: 24px;
-  padding: 14px 40px;
+  padding: 14px 0px;
+  text-align: center;
   margin-top: 20px;
   margin-bottom: 40px;
   margin-left: auto;
