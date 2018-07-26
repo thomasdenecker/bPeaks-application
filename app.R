@@ -665,19 +665,26 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                                         buttonLabel = "Browse...",
                                                         placeholder = "No file selected",
                                                         accept = ".tsv"),
+                                              tags$hr(),
+                                              h3("Detected peaks"),
+                                              tags$hr(),
+                                              plotlyOutput("peaks_barplot", height = "300px"),
                                               
                                               tags$hr(),
                                               h3("Chromosome selection"),
                                               tags$hr(),
                                               radioButtons("ChromRadio",NULL, c("None"),inline=T),
+                                              
+                                              tags$hr(),
+                                              h3("Chromosome informations"),
+                                              tags$hr(),
+                                              uiOutput("pdfviewSummary"),
                                               h5("Supplementary data (by chromosome)"),
                                               downloadButton("DL_SUM", "Summary"),
                                               downloadButton("DL_DRAW", "Drawing"),
-                                              h4("Detected peaks"),
-                                              plotlyOutput("peaks_barplot", height = "300px"),
                                               
                                               tags$hr(),
-                                              h3("Summary"),
+                                              h3("Analysis summary"),
                                               tags$hr(),
                                               tableOutput("Summary")
                                        ),
@@ -690,7 +697,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               
                                               fluidRow(
                                                 plotlyOutput("GenomeBrowser",
-                                                             height = "541px")
+                                                             height = "700px")
                                               ),
                                               
                                               #/////////////////////////////////
@@ -715,27 +722,28 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               ),
                                               
                                               #/////////////////////////////////
-                                              # Area with general plot
+                                              # Area with gene annotations
+                                              #/////////////////////////////////
+                                              fluidRow(
+                                                h3(class='center', "Supplementary informations")),
+                                              
+                                              fluidRow(
+                                                column(6,class = "Annot",
+                                                    htmlOutput("AnnotDB")),
+                                                column(6,class = "Annot",
+                                                       htmlOutput("AnnotGFF"))
+                                              ),
+                                              
+                                              #/////////////////////////////////
+                                              # Area with peak information
                                               #/////////////////////////////////
                                               
                                               fluidRow(
-                                                h3(class='center', "Annotations"),
-                                                column(4, class='Annot', h4(class='center',"Annotation in DB"),
-                                                       htmlOutput("AnnotDB")),
-                                                column(4,class='Annot', h4(class='center',"Annotation in GFF"),
-                                                       htmlOutput("AnnotGFF")),
-                                                column(4,class='Annot', h4(class='center',"Annotation of peak"),
-                                                       htmlOutput("AnnotPeak"))
-                                                
+                                                column(6,class="Annot",
+                                                       htmlOutput("AnnotPeak")),
+                                                column(6,class="Annot",
+                                                       uiOutput("pdfviewDrawing")) 
                                               ),
-                                              fluidRow(
-                                                h3(class='center', "Peak representations"),
-                                                column(6, uiOutput("pdfviewSummary")),
-                                                column(6, uiOutput("pdfviewDrawing"))
-                                                
-                                              ),
-                                              
-                                              
                                               
                                               #/////////////////////////////////
                                               # Area with quality control plots
@@ -1113,7 +1121,8 @@ server <- function(input, output, session) {
     
     gvisGeoChart(MapTable, locationvar="country", 
                  colorvar="count",
-                 options=list(projection="kavrayskiy-vii"))
+                 options=list(projection="kavrayskiy-vii",
+                              colorAxis="{colors:['#ffe6e6','#b30000'], minValue:1}"))
     
     
   })
@@ -2303,7 +2312,7 @@ server <- function(input, output, session) {
       if(s$curveNumber > 1 & s$curveNumber <= (nrow(rv$SubSequence) + 1)){
         # # - 1 because position 0 is IP curve and 1 is CO curve
         inter = unlist(rv$SubSequence[s$curveNumber - 1,])
-        paste(
+        paste( "<h4 class='center'>Annotation of peak</h4>",
           paste("Chromosome :", as.character(inter[1])),
           paste("Start :", as.character(inter[2])),
           paste("Stop :", as.character(inter[3])),
@@ -2341,7 +2350,8 @@ server <- function(input, output, session) {
                                  ,"' or standard_name = '",input$SearchGeneList,"';")
           
           annotInter = dbGetQuery(con, REQUEST_ANNOT)
-          paste("<b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
+          paste("<h4 class='center'>Annotation in DB</h4>
+                <b>Feature_name</b> :", annotInter[1,1], '<br/>' ,
                 "<b>Primary ID</b> :", annotInter[1,2], '<br/>',
                 "<b>Standard_name</b> :", annotInter[1,3], '<br/>' ,
                 "<b>Start</b> :", annotInter[1,4], '<br/>' ,
@@ -2386,15 +2396,19 @@ server <- function(input, output, session) {
       s <- event_data("plotly_click")
       if(is.null(s)) {
         if(input$SearchGeneList != "" ){
-          paste(unlist(strsplit(rv$Genes_Chromosome[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),5], ";")),
-                collapse = "<br/>")
+          
+          paste("<h4 class='center'>Annotation in GFF</h4>",
+                paste(unlist(strsplit(rv$Genes_Chromosome[which(rv$Genes_Chromosome[,1] == input$SearchGeneList),5], ";")),
+                      collapse = "<br/>")
+          )
+          
         }
       } else {
         if(s$curveNumber > (nrow(rv$SubSequence) +1) ){
-          
-          paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1 -nrow(rv$SubSequence) ,"attributes"], ";")),
-                collapse = "<br/>")
-          
+          paste("<h4 class='center'>Annotation in GFF</h4>",
+                paste(unlist(strsplit(rv$GFF_CHR[s$curveNumber-1 -nrow(rv$SubSequence) ,"attributes"], ";")),
+                      collapse = "<br/>")
+          )
           
           js$resetClick()
         } 
@@ -2440,19 +2454,15 @@ server <- function(input, output, session) {
   })
   
   output$pdfviewSummary <- renderUI({
-    s <- event_data("plotly_click")
-    if (is.null(s)) "" else{
-      if(s$curveNumber > 1 & s$curveNumber <= (nrow(rv$SubSequence) + 1)){
-        
-        file.copy(paste0(rv$PATH,"/bPeaks/", rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf"),
-                  paste0("www/",rv$userTempFolder,"_Summary.pdf"), overwrite=TRUE)
-        
-        if(file.exists(paste0("www/",rv$userTempFolder,"_Summary.pdf"))){
-          tags$iframe(style='height:600px; width:100%; overflow: hidden;', scrolling="no",
-                      src=paste0(rv$userTempFolder,"_Summary.pdf#view=fit&toolbar=0&scrollbar=0"))
-        }
-      }
+    
+    file.copy(paste0(rv$PATH,"/bPeaks/", rv$FILENAME,"-",input$ChromRadio,"_dataSummary.pdf"),
+              paste0("www/",rv$userTempFolder,"_Summary.pdf"), overwrite=TRUE)
+    
+    if(file.exists(paste0("www/",rv$userTempFolder,"_Summary.pdf"))){
+      tags$iframe(style='height:340px; width:100%; overflow: hidden;', scrolling="no",
+                  src=paste0(rv$userTempFolder,"_Summary.pdf#view=fit&toolbar=0&scrollbar=0"))
     }
+    
   })
   
   output$pdfviewDrawing <- renderUI({
@@ -2464,7 +2474,7 @@ server <- function(input, output, session) {
                   paste0("www/",rv$userTempFolder,"_Drawing.pdf"), overwrite=TRUE)
         
         if(file.exists(paste0("www/",rv$userTempFolder,"_Drawing.pdf"))){
-          tags$iframe(style='height:600px; width:100%; overflow: hidden;', scrolling="no",
+          tags$iframe(style='height:500px; width:100%; overflow: hidden;', scrolling="no",
                       src=paste0(rv$userTempFolder,"_Drawing.pdf#page=",s$curveNumber-1,"&view=fit&toolbar=0&scrollbar=0"))
         }
         
