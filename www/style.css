@@ -11,6 +11,14 @@ html {
   padding-bottom: 20px;
 }
 
+#projectBorder{
+background-color:transparent!important;
+}
+
+element.style {
+background-color:transparent!important;
+}
+
 .center {
   text-align: center;
 }
@@ -113,12 +121,15 @@ hr.hrStyle {
 
 div.Annot{
   overflow-y: auto;
-  height:300px;
+  overflow-x: auto;
+  height:100%;
 }
 
 .alert p{
   text-align: left;
 }
+
+
 
 /*******************************************************************************
 Authentification
