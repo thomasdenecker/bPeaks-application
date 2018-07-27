@@ -14,6 +14,7 @@
   <link href="./assets/css/style.css" rel="stylesheet">
   <link href="./assets/img/logo/bPeaks_logo_mini.png" , rel="icon" , type="image/png" ) </head>
 
+
   <body>
 
     <!-- ========================================================================
@@ -80,87 +81,110 @@
       </div>
     </nav>
 
-
     <!-- ========================================================================
     CONTAIN
   ========================================================================= -->
 
-    <div class="container contain marge">
-      <div class="mt-3">
-        <h1 class="center">Our team</h1>
-      </div>
-      <h3>Project Investigators</h3> <br>
-
-      <div class="container">
-        <div class="row">
-          <!-- Vignette -->
-          <div class="col-lg-6 bottom">
-            <img src="./assets/img/Team/TD.JPG" alt="TD" class="team center" />
-            <p class="center name">Thomas Denecker</p>
-            <p class="center">PhD studient</p>
-
-            <div class="row center">
-              <div class="col-lg-3">
-                <a href="mailto:thomas.denecker@u-psud.fr" target="_blank"><img src="./assets/img/socials/mail.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://github.com/gaellelelandais" target="_blank"><img src="./assets/img/socials/Github-black.svg" alt="Github" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://twitter.com/glelandais" target="_blank"><img src="./assets/img/socials/twitter.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="http://thomas.denecker.free.fr/" target="_blank"><img src="./assets/img/socials/web.svg" alt="Web_site" class="socials_team"></a>
-              </div>
-            </div>
-            <br>
-
-            <p> I am a Php student in computational biology and bioinformatics. I realize my thesis under the direction of Gaëlle Lelandais in the BIM team of Institut de Biologie Intégrative de la Cellule (I2BC) directed by Olivier Lespinet.
-            </p>
-            <br>
-          </div>
-
-          <!-- Vignette -->
-          <div class="col-lg-6 bottom">
-            <img src="./assets/img/Team/GL.jpg" alt="GL" class="team center" />
-            <p class="center name">Gaëlle Lelandais</p>
-            <p class="center">Full professor</p>
-            <div class="row center">
-              <div class="col-lg-3">
-                <a href="mailto:gaelle.lelandais@u-psud.fr" target="_blank"><img src="./assets/img/socials/mail.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://github.com/thomasdenecker" target="_blank"><img src="./assets/img/socials/Github-black.svg" alt="Github" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://twitter.com/DeneckerThomas" target="_blank"><img src="./assets/img/socials/twitter.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="http://gaelle.lelandais.info/" target="_blank"><img src="./assets/img/socials/web.svg" alt="Web_site" class="socials_team"></a>
-              </div>
-            </div>
-            <br>
-            <p>
-              Full professor, Université Paris Sud / Paris-Saclay, life sciences department. Research topics: genetics, computational biology, high throughput experimental approaches (transcriptomics and proteomics) to decipher biological networks.
-            </p>
-          </div>
-
-
-        </div>
-
-        <h3>Collaborators</h3><br>
-        <p>This project has also grown thanks to our collaborators: </p>
-        <ul>
-          <li>Eleonore Pillot-Lucas : L2 student</li>
-          <li>Charles Hébert : server manager</li>
-        </ul>
+    <section class="content-section">
+      <div class="container contain marge">
         <br>
+        <h1>bPeaks explorer </h1>
+        <hr>
+        <p>bPeaks exmplorer allows the exploration of bPeaks analyzer results.The page is divided into 5 parts : </p>
+        <ul>
+          <li><a href="#Import">Import area</a></li>
+          <li><a href="#Summary">Summary area</a></li>
+          <li><a href="#GV">Genome viewer</a></li>
+          <li><a href="#SI">Supplementary informations</a></li>
+          <li><a href="#QC">Quality control area</a></li>
+        </ul>
+
+        <h2 id="Import">Import area</h2> 3 files can be imported:
+        <ul>
+          <li>a zipped file obtained with Bpeask (Data folder)</li>
+          <li>an annotation file in gff or gff.gz format. It is possible to find this type of file on NCBI genome. An example file is available on Github (Data folder) </li>
+          <li>An annotation file to fill the database. This file is composed of 8 columns: the feature name, the database name, the standard name, the beginning and end position of the gene, the chromosome, a description and the organism. The file is in TSV
+            format (separator : tabulation). A example is available in Github (Database folder)</li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/ExplorerInput.PNG" alt="Explorer input">
+          <figcaption>Screenshot of import area</figcaption>
+        </figure>
+        <br>
+
+        <h2 id="Summary">Summary area</h2> The summary area is divided into 4 parts:
+
+        <ul>
+          <li>A bar plot representing the number of peaks detected per chromosome</li>
+          <li>A chromosome selector to change the chromosome in the explorer</li>
+          <li>A pdf from bPeaks summarizing the analysis results for the selected chromosome</li>
+          <li>A table summarizing the parameters used in the analysis.</li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/ExplorerSummary.PNG" alt="Explorer summary">
+          <figcaption>Screenshot of import area</figcaption>
+        </figure>
+        <br>
+        <h2 id="GV">Genome viewer</h2> The genome viewer offers a dynamic exploration of the results. It is composeb by two graphs :
+        <ul>
+          <li>Number of read mapped according to genomic position</li>
+          <li>Annotations of peaks (gray) and genes (orange for strand + and purple for strand -). Click on extremity </li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/ExplorerGV.PNG" alt="Explorer Genome viewer" width="100%">
+          <figcaption>Screenshot of genome viewer with example data</figcaption>
+        </figure>
+
+        <br>
+        <h2 id="SI">Supplementary informations</h2>
+
+        <p>Two types of additional information can be displayed in this field:</p>
+        <ul>
+          <li> if you click on an extremity of gene (orange or purple segment) (if a gff is imported) :
+            <ul>
+              <li>The informations present for this gene in the database</li>
+              <li>The informations present for this gene in the gff</li>
+            </ul>
+          </li>
+          <li>if you click on an extremity of peak (gray segment) :
+            <ul>
+              <li>A set of information about the peak such as its position, chromosome and sequence if a fasta file with the reference genome was used in the analysis.</li>
+              <li>A pdf with for this peak a graph of T1, T2 T3 and T4</li>
+            </ul>
+          </li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/ExplorerSI.PNG" alt="Explorer Supplementary data" width="100%">
+          <figcaption>Screenshot of supplementary informations about a gene</figcaption>
+        </figure>
+        <br>
+        <h2 id="QC">Quality control area</h2>
+        <p>For each chromosome, you will find in this zone 6 graphs :</p>
+        <ul>
+          <li>A average number of reads in peak detected in comparison with all chromosomes (boxplots) </li>
+          <li>A average of logFC in comparison with all chromosomes (boxplots)</li>
+          <li>A average of quantile in comparison with all chromosomes (boxplots)</li>
+          <li>Lorenz curves</li>
+          <li>IP sample PBC according to Ip sample PBC</li>
+          <li>Number of positions (logged) with a given number of reads</li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/ExplorerQC.PNG" alt="Explorer quality control" width="100%">
+          <figcaption>Screenshot of quality controls obtained for chromosome 1 with example data</figcaption>
+        </figure>
+        <br>
+
       </div>
-    </div>
+    </section>
 
     <!-- ========================================================================
-          Footer
-        ========================================================================= -->
+    Footer
+  ========================================================================= -->
 
     <footer class="page-footer font-small pt-4 mt-4 footer">
 

@@ -14,6 +14,7 @@
   <link href="./assets/css/style.css" rel="stylesheet">
   <link href="./assets/img/logo/bPeaks_logo_mini.png" , rel="icon" , type="image/png" ) </head>
 
+
   <body>
 
     <!-- ========================================================================
@@ -80,87 +81,62 @@
       </div>
     </nav>
 
-
     <!-- ========================================================================
     CONTAIN
   ========================================================================= -->
 
-    <div class="container contain marge">
-      <div class="mt-3">
-        <h1 class="center">Our team</h1>
-      </div>
-      <h3>Project Investigators</h3> <br>
-
-      <div class="container">
-        <div class="row">
-          <!-- Vignette -->
-          <div class="col-lg-6 bottom">
-            <img src="./assets/img/Team/TD.JPG" alt="TD" class="team center" />
-            <p class="center name">Thomas Denecker</p>
-            <p class="center">PhD studient</p>
-
-            <div class="row center">
-              <div class="col-lg-3">
-                <a href="mailto:thomas.denecker@u-psud.fr" target="_blank"><img src="./assets/img/socials/mail.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://github.com/gaellelelandais" target="_blank"><img src="./assets/img/socials/Github-black.svg" alt="Github" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://twitter.com/glelandais" target="_blank"><img src="./assets/img/socials/twitter.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="http://thomas.denecker.free.fr/" target="_blank"><img src="./assets/img/socials/web.svg" alt="Web_site" class="socials_team"></a>
-              </div>
-            </div>
-            <br>
-
-            <p> I am a Php student in computational biology and bioinformatics. I realize my thesis under the direction of Gaëlle Lelandais in the BIM team of Institut de Biologie Intégrative de la Cellule (I2BC) directed by Olivier Lespinet.
-            </p>
-            <br>
-          </div>
-
-          <!-- Vignette -->
-          <div class="col-lg-6 bottom">
-            <img src="./assets/img/Team/GL.jpg" alt="GL" class="team center" />
-            <p class="center name">Gaëlle Lelandais</p>
-            <p class="center">Full professor</p>
-            <div class="row center">
-              <div class="col-lg-3">
-                <a href="mailto:gaelle.lelandais@u-psud.fr" target="_blank"><img src="./assets/img/socials/mail.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://github.com/thomasdenecker" target="_blank"><img src="./assets/img/socials/Github-black.svg" alt="Github" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="https://twitter.com/DeneckerThomas" target="_blank"><img src="./assets/img/socials/twitter.svg" alt="Twitter" class="socials_team"></a>
-              </div>
-              <div class="col-lg-3">
-                <a href="http://gaelle.lelandais.info/" target="_blank"><img src="./assets/img/socials/web.svg" alt="Web_site" class="socials_team"></a>
-              </div>
-            </div>
-            <br>
-            <p>
-              Full professor, Université Paris Sud / Paris-Saclay, life sciences department. Research topics: genetics, computational biology, high throughput experimental approaches (transcriptomics and proteomics) to decipher biological networks.
-            </p>
-          </div>
-
-
-        </div>
-
-        <h3>Collaborators</h3><br>
-        <p>This project has also grown thanks to our collaborators: </p>
-        <ul>
-          <li>Eleonore Pillot-Lucas : L2 student</li>
-          <li>Charles Hébert : server manager</li>
-        </ul>
+    <section class="content-section">
+      <div class="container contain marge">
         <br>
+        <h1>bPeaks application </h1>
+        <hr>
+
+        <p> bPeaks Application is a bioinformatics tool to perform and explore peak calling from ChIPseq data in small eukaryotic genomes</p>
+
+        <h5>Authentification </h5>
+        <p>To access the application, you must enter a user name and password. A default account is initially created: admin with admin password. 3 buttons are available to manage authentication: </p>
+        <dl>
+          <dt>- Sign up</dt>
+          <dd>A page with the administrator's email to request access to the database. For people setting up an instance, don't forget to change this mail!</dd>
+          <dt>- Change password</dt>
+          <dd>A page to change your password. A new user will have a temporary password. In this page he can put a new one.</dd>
+          <dt>- Add new user</dt>
+          <dd>A page for administrators. They can register new users. Attention administrator. Don't forget to transmit the temporary password. </dd>
+        </dl>
+        <br>
+
+        <figure>
+          <img src="./assets/img/Documentations/authentification.PNG" alt="Authentification">
+          <figcaption>Screenshot of authentification page</figcaption>
+        </figure>
+
+        <h5>Home page </h5>
+        <p>Once authenticated, you arrive at the home page. You will have the choice between going </p>
+        <ul>
+          <li>bPeaks Analyzer : a Web interface to run a peak calling analysis with the bPeaks R package. A documentation page is available <a href="DocumentationbPeaksAnalyzer.html">here</a>.</li>
+          <li>bPeaks explorer : a Web interface to explore and visualize the peak calling results, obtained with the bPeaks R package. A documentation page is available <a href="DocumentationbPeaksExplorer.html">here</a>.</li>
+        </ul>
+        <p>You will also find a set of information about your instance in the dashboard: </p>
+        <ul>
+          <li>Key values : numbre of peak detected,...</li>
+          <li>Table with email of instance members</li>
+          <li>A map with the origin country of the members</li>
+          <li>Two timelines displaying the number of bPeaks analyses or bPeaks explorations</li>
+        </ul>
+
+        <figure>
+          <img src="./assets/img/Documentations/homepage.PNG" alt="Authentification">
+          <figcaption>Screenshot of home page</figcaption>
+        </figure>
+
+        <br>
+
       </div>
-    </div>
+    </section>
 
     <!-- ========================================================================
-          Footer
-        ========================================================================= -->
+    Footer
+  ========================================================================= -->
 
     <footer class="page-footer font-small pt-4 mt-4 footer">
 

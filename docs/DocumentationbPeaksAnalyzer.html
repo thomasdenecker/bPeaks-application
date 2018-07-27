@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>bPeaks application</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+
+  <link href="./assets/css/style.css" rel="stylesheet">
+  <link href="./assets/img/logo/bPeaks_logo_mini.png" , rel="icon" , type="image/png" ) </head>
+
+
+  <body>
+
+    <!-- ========================================================================
+    Navbar
+  ========================================================================= -->
+    <nav class="navbar navbar-expand-lg navbar-light P100px nav-color">
+      <a class="navbar-brand" href="./index.html">
+      <img src="./assets/img/logo/bPeaks_logo_mini.svg" class="d-inline-block align-top logo" alt="">
+    </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="./index.html">Home <span class="sr-only">(current)</span></a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="./why.html">Why?</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tools
+          </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="Installation.html">Installation</a>
+              <a class="dropdown-item" href="DocumentationbPeaks.html">bPeaks</a>
+              <a class="dropdown-item" href="DocumentationbPeaksApplication.html">bPeaks application</a>
+              <a class="dropdown-item" href="DocumentationbPeaksAnalyzer.html">bPeaks analyzer</a>
+              <a class="dropdown-item" href="DocumentationbPeaksExplorer.html">bPeaks explorer</a>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="./team.html">Our team</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="./contact.html">Contact</a>
+          </li>
+
+        </ul>
+        <style media="screen">
+          .right_dec {
+            margin-right: 90px
+          }
+        </style>
+
+        <ul class="navbar-nav navbar-right">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <img src="./assets/img/header/Github-color.svg" alt="Github" class="git_head">
+         </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application">Visit us on Github</a>
+              <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application/archive/master.zip">Download zip   <img src="./assets/img/header/download.svg" alt="DL" class="DL"></a>
+              <a class="dropdown-item" href="https://github.com/thomasdenecker/bPeaks-application/archive/master.tar.gz">Download tar.gz  <img src="./assets/img/header/download.svg" alt="DL" class="DL"></a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- ========================================================================
+    CONTAIN
+  ========================================================================= -->
+
+    <section class="content-section">
+      <div class="container contain marge">
+        <br>
+        <h1>bPeaks analyzer</h1>
+        <hr>
+
+        <p>bPeaks is a simple approach to perform peak calling from ChIPseq data. Our general philosophy is to provide an easy-to-use tool, well-adapted for small eukaryotic genomes ( lower 20 Mb). bPeaks uses a combination of 4 cutoffs (T1, T2, T3 and T4)
+          to mimic "good peak" properties as described by biologists who visually inspect the ChIP-seq data on a genome browser. For yeast genomes, bPeaks calculates the proportion of peaks that fall in promoter sequences. These peaks are good candidates
+          as protein binding sites. Help is available throughout the analysis represented by blue question marks. Data is available on github (Data folder) to test the application. The launch of an analysis takes place in 5 steps in bPeaks analyzer :
+        </p>
+
+        <ul>
+          <li><a href="#Step1">Step 1 : Import experimental data (mandatory)</a></li>
+          <li><a href="#Step2">Step 2 : Import annotation data</a></li>
+          <li><a href="#Step3">Step 3 : bPeaks parameters</a></li>
+          <li><a href="#Step4">Step 4 : Advanced parameters</a></li>
+          <li><a href="#Step5">Step 5 : Output parameters</a></li>
+          <li><a href="#Run">Launching the analysis</a></li>
+        </ul>
+
+        <h2 id="Step1">Step 1 : Import experimental data (mandatory)</h2>
+        <p>Two types of ChIPseq data are mandatory:</p>
+        <dl>
+          <dt>- IP sample </dt>
+          <dd>A dataframe with sequencing results of the IP sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function </dd>
+          <dt>- Control sample</dt>
+          <dd>A dataframe with sequencing results of the control sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function</dd>
+        </dl>
+
+        A simplified import system has been set up as well as a previewer to check the correct settings for reading imported files.</p>
+
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerStep1.PNG" alt="Authentification">
+          <figcaption>Screenshot of Import experimental data step</figcaption>
+        </figure>
+
+        <br>
+        <h2 id="Step2">Step 2 : Import annotation data</h2>
+        <p>To enrich the exploration in bPeaks explorer, two types of annotations can be imported:</p>
+        <dl>
+          <dt>- CDS positions</dt>
+          <dd>Not mandatory. A table (matrix) with positions of CDS (genes). Four columns are required (chromosome, starting position, ending position, strand (W or C), description). CDS positions for several yeast species are stored in bPeaks package (see
+            the dataset yeastCDS and also peakLocation function)</dd>
+          <dt>- Genome sequence</dt>
+          <dd>Not mandatory. To get the peaks sequences. Format : .fasta. This file must be the same as the one used when aligning the reads in the reference genome.</dd>
+        </dl>
+
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerStep2.PNG" alt="Authentification">
+          <figcaption>Screenshot of Import annotation data step</figcaption>
+        </figure>
+
+
+        <br>
+        <h2 id="Step3">Step 3 : bPeaks parameters</h2>
+        <p>Many parameters can be changed before starting an analysis. In this stage, the most important ones are present.</p>
+
+        <dl>
+          <dt>- Windows size</dt>
+          <dd>Size of the sliding windows to scan chromosomes</dd>
+          <dt>- Windows overlap</dt>
+          <dd> Size of the overlap between two successive windows</dd>
+          <dt>- IP coeff</dt>
+          <dd>Threshold T1. Value for the multiplicative parameter that will be combined with the value of the mean genome-wide read depth (see baseLineCalc). As an illustration, if the IPcoeff = 6, it means that to be selected, the IP signal should be GREATER
+            than 6 * (the mean genome-wide read depth). Note that a vector with different values can be specified, the bPeaks analysis will be therefore repeated using successively each value for peak detection. For a list of values, separate them by
+            ; (i.e : 2;3 ).</dd>
+          <dt>- Control coeff</dt>
+          <dd>Threshold T2. Value for the multiplicative parameter that will be combined with the value of the mean genome-wide read depth (see baseLineCalc). As an illustration, if the controlCoeff = 2, it means that to be selected, the control signal should
+            be LOWER than 2 * (the mean genome-wide read depth). Note that a vector with different values can be specified, the bPeaks analysis will be therefore repeated using successively each value for peak detection. For a list of values, separate
+            them by ; (i.e : 2;3 ).</dd>
+          <dt>- Log2FC</dt>
+          <dd>Threshold T3. Threshold to consider log2(IP/control) values as sufficiently important to be interesting. Note that a vector with different values can be specified, the bPeaks analysis will be therefore repeated using successively each value
+            for peak detection. For a list of values, separate them by ; (i.e : 2;3 ).</dd>
+          <dt>- Average quantiles</dt>
+          <dd>Threshold T4. Threshold to consider (log2(IP) + log2(control)) / 2 as sufficiently important to be interesting. This parameter ensures that the analyzed genomic region has enough sequencing coverage to be reliable. These threshold should be
+            between [0, 1] and refers to the quantile value of the global distribution observed with the analyzed chromosome. For a list of values, separate them by ; (i.e : 2;3 ).</dd>
+        </dl>
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerStep3.PNG" alt="Authentification">
+          <figcaption>Screenshot of bPeaks parameters step</figcaption>
+        </figure>
+
+        <br>
+
+
+        <h2 id="Step4">Step 4 : Advanced parameters</h2>
+        <p>Additional parameters are also available to manage the results more finely: </p>
+        <dl>
+          <dt>- Result name</dt>
+          <dd>Name for output files created during bPeaks procedure</dd>
+          <dt>- Peak drawing</dt>
+          <dd>TRUE or FLASE. If TRUE, the function peakDrawing is called and PDF files with graphical representations of detected peaks are created.</dd>
+          <dt>- Prom Size</dt>
+          <dd>Size of the genomic regions to be considered as "upstream" to the annotated genomic features (see documentation of the function peakLocation for more information).</dd>
+          <dt>- Without overlap</dt>
+          <dd>If TRUE, this option allows to filter peak that are located in a promoter AND a CDS.</dd>
+          <dt>- Smoothing value</dt>
+          <dd>The number (n/2) of surrounding positions to use for mean calculation in the dataSmoothing function</dd>
+        </dl>
+
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerStep4.PNG" alt="Authentification">
+          <figcaption>Screenshot of Advanced parameters step</figcaption>
+        </figure>
+
+        <br>
+        <h2 id="Step5">Step 5 : Output parameters</h2>
+        <p>Last parameters used by bPeaks analyzer to organize results : </p>
+        <dl>
+          <dt>- Folder name</dt>
+          <dd>Folder name where results will be saved</dd>
+          <dt>- Graphical outputs</dt>
+          <dd>TRUE or FLASE. If TRUE, PBC, Lorenz curve and read repartition will be ploted.</dd>
+          <dt>- Graphical extention</dt>
+          <dd>Graphical extention of quality controls</dd>
+        </dl>
+
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerStep5.PNG" alt="Authentification">
+          <figcaption>Screenshot of output parameters step</figcaption>
+        </figure>
+        <br>
+
+
+        <h2 id="Run">Launching the analysis</h2>
+        <p>Once all parameters have been saved, the analysis can be started. When the RUN button reappears, bPeaks application is ready for a new analysis. Once the analysis is complete, a summary of the results can be read in the table at the bottom of
+          the page. If the results suit you, you just have to download the result (be careful: the data are deleted between each analysis!) and use bPeaks exmplorer to explore the results.</p>
+
+        <figure>
+          <img src="./assets/img/Documentations/AnalyzerRun.PNG" alt="Authentification">
+          <figcaption>Screenshot of Launching area and summary table of last analysis</figcaption>
+        </figure>
+        <br><br>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+    Footer
+  ========================================================================= -->
+
+    <footer class="page-footer font-small pt-4 mt-4 footer">
+
+      <div class="container text-center text-md-left">
+
+        <div class="row text-center text-md-left mt-3 pb-3">
+
+          <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+            <h6 class="text-uppercase mb-4 font-weight-bold">bPeaks application</h6>
+            <p>An intuitive peak-calling strategy to detect and visualize protein binding sites from ChIP-seq data in small eukaryotic genomes</p>
+          </div>
+
+          <hr class="w-100 clearfix d-md-none">
+
+          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+            <h6 class="text-uppercase mb-4 font-weight-bold">Partenaires</h6>
+            <p><a class="color_red" href="http://www.cnrs.fr/fr/page-daccueil">CNRS</a></p>
+            <p><a class="color_red" href="https://www.i2bc.paris-saclay.fr/?lang=en">I2BC</a></p>
+            <p><a class="color_red" href="http://www.cnrs.fr/index.html">Paris Sud</a></p>
+          </div>
+
+          <hr class="w-100 clearfix d-md-none">
+
+          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+            <h6 class="text-uppercase mb-4 font-weight-bold">Project</h6>
+            <p><a class="color_red" href="https://github.com/thomasdenecker/bPeaks-application">Github</a></p>
+            <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/index.html">CRAN</a></p>
+            <p><a class="color_red" href="https://cran.r-project.org/web/packages/bPeaks/bPeaks.pdf">Package documentation</a></p>
+          </div>
+
+          <hr class="w-100 clearfix d-md-none">
+
+          <div class="mx-auto mt-3">
+            <h6 class="text-uppercase mb-4 font-weight-bold">Contact</h6>
+            <div class="row">
+              <div class="col-lg-2 center">
+                <img src="./assets/img/footer/home.svg" alt="mail" height="20px">
+              </div>
+              <div class="col-md-10">
+                <p>I2BC - CNRS UMR 9198<br> Bâtiment 400 <br> Université Paris-Sud<br> 91405 Orsay cedex - France</p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+              </div>
+              <div class="col-sm-10">
+                <p><a class="color_red" href="mailto:gaelle.lelandais@u-psud.fr">gaelle.lelandais@u-psud.fr</a> </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-lg-2">
+                <img src="./assets/img/footer/mail.svg" alt="mail" height="20px">
+              </div>
+              <div class="col-lg-10">
+                <p><a class="color_red" href="mailto:thomas.denecker@u-psud.fr">thomas.denecker@u-psud.fr</a> </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <hr>
+        <!--/.Copyright-->
+        <p class="center">© 2018 Copyright: <a href="./index.html" class="color_red"><strong>bPeaks application</strong></a></p>
+        <!--/.Copyright-->
+
+      </div>
+    </footer>
+
+
+  </body>
+
+</html>
