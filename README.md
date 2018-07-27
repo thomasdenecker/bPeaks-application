@@ -11,7 +11,12 @@ We use Docker to develop and manage the bPeaks application. We invite you to ver
 * [Docker 1.12.6+](https://docs.docker.com/engine/installation/)
 
 > We recommend you to follow Docker's official documentations to install
-required docker tools (see links above).
+required docker tools (see links above).To help you, explanatory videos for each operating system are available [here](https://www.bretfisher.com/installdocker/)
+
+To increase the docker memory set to 2GB by default :
+- [Windows](https://docs.docker.com/docker-for-windows/#advanced)
+- [MacOS](https://docs.docker.com/docker-for-mac/#memory)
+- [Linux](https://docs.docker.com/config/containers/resource_constraints/)
 
 **Docker must be on for the duration of bPeaks application use.**
 
@@ -39,6 +44,31 @@ Check "Always Open With" and after clicking OK you should be able to execute you
 Double click on bPeaks-application file and open your internet browser, typing the following url: http://localhost:3838/ and it should work™. Default user is admin with password : admin. We recommend you to change this password the first time you use it.
 
 **NOTE** (MAC users) : You may need to repeat the same manipulation as for the installation file (only once).
+
+## Development
+
+### Launch in debug mode
+
+During development, you will probably need to have the R outputs in the terminal. Passing through a docker, to have these outputs, you have to access the log file. The following command launches the application and has a log file that will be in the application folder. To help you in the choice of path of the application, you can look in the launch of the application.
+
+```
+docker run -ti --rm --link bPeaksDB:postgres -p 3839:3838 -v YOUR_APPLICATION_PATH:/srv/shiny-server -v YOUR_APPLICATION_PATH:/var/log/shiny-server tdenecker/bpeaks_docker
+```
+
+### Connect to database with command line:  
+```
+docker run -it --rm --link bPeaksDB:postgres postgres psql -h postgres -U docker
+```
+The default password is docker. If you change this password, remember to make the change in the application code.
+
+### Connect to a R session
+
+```
+docker run -ti --rm --link bPeaksDB:postgres -p 3839:3838 -v YOUR_APPLICATION_PATH:/srv/shiny-server tdenecker/bpeaks_docker R
+```
+
+**Warning**: nothing is saved in this session (package installation, ...)
+
 
 ## Citation
 If you use bPeaks application, please cite the bPeaks R package:

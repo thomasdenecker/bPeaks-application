@@ -2,7 +2,6 @@
 Bpeaks-application style
 ///////////////////////////////////////////////////////////////////////////// */
 
-
 /*html, body{
  margin: 0px;
  padding: 0px;
@@ -11,6 +10,7 @@ Bpeaks-application style
  min-height: 675px;
 }
 */
+
 html {
   position: relative;
   min-height: 100%;
@@ -22,36 +22,33 @@ body {
   margin-bottom: 410px;
 }
 
-
 #map {
   height: 100%;
 }
 
-.marge{
-  height: 100%
-  margin-bottom: 400px;
+.marge {
+  height: 100% margin-bottom: 400px;
 }
 
 /* -----------------------------------------------------------------------------
 General
 ----------------------------------------------------------------------------- */
 
-.nav-color{
+.nav-color {
   background-color: #F8DEDE;
 }
 
-.space-container{
+.space-container {
   padding: 20px 0px;
 }
 
-.center{
+.center {
   text-align: center;
 }
 
-.marginauto{
+.marginauto {
   margin: auto;
 }
-
 
 .footer {
   position: absolute;
@@ -62,27 +59,22 @@ General
   background-color: #F8DEDE;
 }
 
-
-
 @media (max-width: 767px) {
   .footer {
-  height: 1100px;
+    height: 1100px;
   }
-
-  .contain{
+  .contain {
     margin-bottom: 1100px;
   }
 }
-
 
 /* -----------------------------------------------------------------------------
 Header
 ----------------------------------------------------------------------------- */
 
-img.DL{
+img.DL {
   height: 15px;
 }
-
 
 /* -----------------------------------------------------------------------------
 Home logo
@@ -94,10 +86,9 @@ img.logo_home {
   height: 200px;
 }
 
-img.logo{
+img.logo {
   height: 50px
 }
-
 
 /* -----------------------------------------------------------------------------
 Home button
@@ -105,7 +96,7 @@ Home button
 
 .button {
   border-radius: 4px;
-  background-color: rgb(204,0,0);
+  background-color: rgb(204, 0, 0);
   border: none;
   color: #FFFFFF;
   text-align: center;
@@ -145,44 +136,81 @@ Home button
 /* -----------------------------------------------------------------------------
 Team
 ----------------------------------------------------------------------------- */
-img.team{
+
+img.team {
   height: 200px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border: solid 2px white;
 }
 
-p.name{
+p.name {
   font-variant: small-caps;
   font-weight: bold;
   margin-top: 8px;
   margin-bottom: 0px;
 }
 
-p.summary{
+p.summary {
   text-align: justify;
-  color : #BDBDBD;
+  color: #BDBDBD;
 }
 
-img.socials_team{
+img.socials_team {
   height: 30px;
 }
 
-img.center{
+img.center {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 /* -----------------------------------------------------------------------------
+Documentation
+----------------------------------------------------------------------------- */
+
+dt {
+  font-weight: bold;
+}
+
+dd {
+  padding-left: 20px
+}
+
+dl {
+  padding-left: 20px
+}
+
+h5 {
+  text-decoration: underline;
+}
+
+figure {
+  text-align: center;
+  margin: 0 auto;
+  font-style: italic;
+}
+
+figcaption {
+  text-align: center;
+  margin: 0 auto;
+}
+
+figure img {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin: 10px 0px;
+}
+
+/* -----------------------------------------------------------------------------
 Why
 ----------------------------------------------------------------------------- */
 
-.why-div{
+.why-div {
   margin-top: 20px;
   margin-bottom: 100px;
 }
 
-h2.why{
+h2.why {
   margin-bottom: 40px;
 }
 
@@ -190,6 +218,6 @@ h2.why{
 Footer
 ----------------------------------------------------------------------------- */
 
-.color_red{
-  color: rgb(204,0,0);
+.color_red {
+  color: rgb(204, 0, 0);
 }

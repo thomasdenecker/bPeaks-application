@@ -310,7 +310,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        of 4 cutoffs (T1, T2, T3 and T4) to mimic "good peak" properties as described
                                        by biologists who visually inspect the ChIP-seq data on a genome browser.
                                        For yeast genomes, bPeaks calculates the proportion of peaks that fall in
-                                       promoter sequences. These peaks are good candidates as transcription factor
+                                       promoter sequences. These peaks are good candidates as protein
                                        binding sites.',alin="center"),
                                      
                                      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -323,7 +323,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                      # IP file
                                      #..........................................
                                      
-                                     fluidRow(column(6,HTML('<h3>IPdata <a href="#" data-toggle="tooltip"
+                                     fluidRow(column(6,HTML('<h3>IP data <a href="#" data-toggle="tooltip"
                                                             data-placement="bottom" title="A dataframe with sequencing results of the IP sample. This dataframe has three columns (chromosome, position, number of sequences) and should have been created with the dataReading function">
                                                             <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                                      fileInput("fileIP",label = NULL,
@@ -407,7 +407,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                        # CDS file
                                        #..........................................
                                        
-                                       column(6,HTML('<h3>CDS position <a href="#" data-toggle="tooltip"
+                                       column(6,HTML('<h3>CDS positions <a href="#" data-toggle="tooltip"
                                                    data-placement="bottom" title="Not mandatory. A table (matrix) with positions of CDS (genes). Four columns are required (chromosome, starting position, ending position, strand (W or C), description). CDS positions for several yeast species are stored in bPeaks package (see the dataset yeastCDS and also peakLocation function)">
                                                    <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                               fileInput("fileCDS",
@@ -585,7 +585,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               class = "center"),
                                        
                                        column(4,HTML('<h3>Graphical extention <a href="#" data-toggle="tooltip"
-                                                     data-placement="bottom" title="Graphical extention">
+                                                     data-placement="bottom" title="Graphical extention of quality controls">
                                                      <img src="Images/IntP.png" alt="" height="15px"></a></h3>'),
                                               radioButtons("graphicalType", NULL,
                                                            c("pdf" = "pdf",
@@ -729,7 +729,7 @@ ui <- fluidPage(useShinyjs(), useShinyalert(),
                                               
                                               fluidRow(
                                                 column(6,class = "Annot",
-                                                    htmlOutput("AnnotDB")),
+                                                       htmlOutput("AnnotDB")),
                                                 column(6,class = "Annot",
                                                        htmlOutput("AnnotGFF"))
                                               ),
@@ -1389,7 +1389,7 @@ server <- function(input, output, session) {
     
     withProgress(message = 'bPeaks analysis', value = 0, {
       
-      n = 12
+      n = 14
       #*************************************************************************
       # Folder creation
       #*************************************************************************
@@ -1542,6 +1542,14 @@ server <- function(input, output, session) {
         write.table(tableAllGenomeFasta, "Sequence_allGenome.bed", sep ="\t", quote = F,
                     col.names = F, row.names = F)
         
+        if(! is.null(input$fileFasta)){
+          write.fasta(strsplit(as.character(tableAllGenomeFasta[,6]),""), 
+                      paste0(as.character(tableAllGenomeFasta[,4]),
+                             " Chromosome:", as.character(tableAllGenomeFasta[,1]),
+                             " Start:",as.character(tableAllGenomeFasta[,2]),
+                             " Stop:",as.character(tableAllGenomeFasta[,3])),
+                      file.out = "Sequence_by_Peaks.fasta",nbchar = 80 )
+        }
         
         rm(TEMP)
         
@@ -2313,12 +2321,12 @@ server <- function(input, output, session) {
         # # - 1 because position 0 is IP curve and 1 is CO curve
         inter = unlist(rv$SubSequence[s$curveNumber - 1,])
         paste( "<h4 class='center'>Annotation of peak</h4>",
-          paste("Chromosome :", as.character(inter[1])),
-          paste("Start :", as.character(inter[2])),
-          paste("Stop :", as.character(inter[3])),
-          paste("Number :", as.character(inter[4])),
-          paste("Sequence :", as.character(inter[6])),
-          sep = "<br>"
+               paste("Chromosome :", as.character(inter[1])),
+               paste("Start :", as.character(inter[2])),
+               paste("Stop :", as.character(inter[3])),
+               paste("Number :", as.character(inter[4])),
+               paste("Sequence :", as.character(inter[6])),
+               sep = "<br>"
         )
       }
     }
