@@ -1,6 +1,7 @@
 # bPeaks-application
 
 [![Build Status](https://travis-ci.org/thomasdenecker/bPeaks-application.svg?branch=master)](https://travis-ci.org/thomasdenecker/bPeaks-application)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324933.svg)](https://doi.org/10.5281/zenodo.1324933)
 
 This is a Web Application developed to facilitate the use of the bPeaks R package. It helps 1) tu run a peak calling analysis with bPeaks and 2) to explore the obtained results. bPeaks application web site is available [here](https://thomasdenecker.github.io/bPeaks-application/)
 
