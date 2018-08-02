@@ -21,6 +21,11 @@ To increase the docker memory set to 2GB by default :
 
 **Docker must be on for the duration of bPeaks application use.**
 
+
+**Important** 
+
+Note that the size of the RAM that should be allocated to the Docker depends on the size of the studied organism genome. For example, the case study presented here requires 3GB of RAM, as the studied genome is the one of the yeast S. cerevisiae (12 Mb). A workstation or a laboratory server with 16GB of RAM is therefore well dimensioned. To increase the allocated memory, go here for [mac](https://docs.docker.com/docker-for-mac/#memory), for [windows](https://docs.docker.com/docker-for-windows/#advanced) and for [linux](https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory)
+
 ## Quick start
 
 Did you read the "Requirements" section above?
