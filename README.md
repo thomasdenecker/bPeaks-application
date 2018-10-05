@@ -83,6 +83,11 @@ Merhej J., Frigo A., Le Crom S. Camadro J.‐M. Devaux F. and Lelandais G. (2014
 bPeaks: a bioinformatics tool to detect transcription factor binding sites from ChIPseq data in yeasts and other organisms with small genomes,
 Yeast, 31, pages 375–391, doi: 10.1002/yea.3031
 
+Thomas Denecker and Gaëlle Lelandais (2018)
+Empowering the detection of ChIP-seq “basic peaks” (bPeaks) in small eukaryotic genomes with a web user-interactive interface
+BMC Research Notes201811:698
+https://doi.org/10.1186/s13104-018-3802-y
+
 ## Contributing
 
 Please, see the [CONTRIBUTING](CONTRIBUTING.md) file.
