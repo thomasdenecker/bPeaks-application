@@ -24,7 +24,8 @@ To increase the docker memory set to 2GB by default :
 
 **Important** 
 
-Note that the size of the RAM that should be allocated to the Docker depends on the size of the studied organism genome. For example, the case study presented here requires 3GB of RAM, as the studied genome is the one of the yeast S. cerevisiae (12 Mb). A workstation or a laboratory server with 16GB of RAM is therefore well dimensioned. To increase the allocated memory, go here for [mac](https://docs.docker.com/docker-for-mac/#memory), for [windows](https://docs.docker.com/docker-for-windows/#advanced) and for [linux](https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory)
+Note that the size of the RAM that should be allocated to the Docker depends on the size of the studied organism genome. For example, the case study presented here requires 3GB of RAM, as the studied genome is the one of the yeast S. cerevisiae (12 Mb).The proposed visualization tool for data mining requires RAM. The more peaks there are, the more RAM is needed.
+A workstation or a laboratory server with 16GB of RAM is therefore well dimensioned. To increase the allocated memory, go here for [mac](https://docs.docker.com/docker-for-mac/#memory), for [windows](https://docs.docker.com/docker-for-windows/#advanced) and for [linux](https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory)
 
 ## Quick start
 
@@ -34,9 +35,14 @@ Did you read the "Requirements" section above?
 
 Download the zip file ([here](https://github.com/thomasdenecker/bPeaks-application/archive/master.zip)), extract this file and copy the obtained folder where you want on your computer. Note that if you move the folder, the installation procedure will have to be redone.
 
-In this folder, you will find a file named INSTALLATION_MAC_LINUX.sh (for MAC and Linux users) and INSTALLATION_WINDOWS.bat (for Windows users). By double clicking on it, the installation will begin. This may take a little time depending on the quality of your internet connection. When the installation will be completed, two new files will appear. They allow to launch the bPeaks application.
+#### Windows installation
 
-**NOTE** (MAC users)
+In this folder, you will find a file named INSTALLATION_WINDOWS.bat. By double clicking on it, the installation will begin. This may take a little time depending on the quality of your internet connection. When the installation will be completed, a new file will appear. They allow to launch the bPeaks application.
+
+#### Mac OsX installation
+In this folder, you will find a file named INSTALLATION_MAC.sh. By double clicking on it, the installation will begin. This may take a little time depending on the quality of your internet connection. When the installation will be completed, a new file will appear. They allow to launch the bPeaks application.
+
+**NOTE**
 
 You can also doucle click the file INSTALLATION_MAC_LINUX.sh. In this situation a small manipulation is required (1 time only).
 In your Finder, right-click the file INSTALLATION_MAC_LINUX.sh and select "Open with" and then "Other...".
@@ -44,6 +50,18 @@ In your Finder, right-click the file INSTALLATION_MAC_LINUX.sh and select "Open 
 Here you can select the application you want the file to be execute with. In this case it should be the Terminal. To be able to select the Terminal, you have to switch from "Recommended Applications" to "All Applications"  (the Terminal.app application can be found in the Utilities folder).
 
 Check "Always Open With" and after clicking OK you should be able to execute you SHELL script by simply double-clicking it.
+
+#### Linux installation
+
+**In command line**
+```
+cd PATH/TO/bPeak-apps/folder
+./INSTALLATION_LINUX.sh
+```
+Once the installation is complete, use this command to launch the application: 
+``` 
+./bPeaks_application.sh
+```
 
 ### bPeaks application utilisation
 
