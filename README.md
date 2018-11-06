@@ -32,7 +32,7 @@ Did you read the "Requirements" section above?
 
 ### bPeaks application project installation
 
-Download the zip file, extract this file and copy the obtained folder where you want on your computer. Note that if you move the folder, the installation procedure will have to be redone.
+Download the zip file ([here](https://github.com/thomasdenecker/bPeaks-application/archive/master.zip)), extract this file and copy the obtained folder where you want on your computer. Note that if you move the folder, the installation procedure will have to be redone.
 
 In this folder, you will find a file named INSTALLATION_MAC_LINUX.sh (for MAC and Linux users) and INSTALLATION_WINDOWS.bat (for Windows users). By double clicking on it, the installation will begin. This may take a little time depending on the quality of your internet connection. When the installation will be completed, two new files will appear. They allow to launch the bPeaks application.
 
