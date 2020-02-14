@@ -14,3 +14,4 @@ echo docker start bPeaksDB >> $BASEDIR/bPeaks_application.sh
 echo 'docker run --rm --link bPeaksDB:postgres -p 3838:3838 -v' $BASEDIR':/srv/shiny-server tdenecker/bpeaks_docker' >> $BASEDIR/bPeaks_application.sh
 
 chmod +x $BASEDIR/bPeaks_application.sh
+chmod -R 777 $BASEDIR/Outputs/
